@@ -14,7 +14,7 @@ function CaremanualScreen(props){
     async function getData(){
         const token = await AsyncStorage.getItem('token');
         console.log(token);
-        axios.post('http://192.168.2.40:5000/userdata',{token:token})
+        axios.post('http://192.168.2.43:5000/userdata',{token:token})
         .then(res =>{
             console.log(res.data);
             setUserData(res.data.data);
@@ -29,7 +29,7 @@ function CaremanualScreen(props){
     useEffect(() => {
         const fetchData = async () => {
           try {
-            const response = await axios.get('http://192.168.2.40:5000/allcaremanual');
+            const response = await axios.get('http://192.168.2.43:5000/allcaremanual');
             setCareManualData(response.data.data);
           } catch (error) {
             console.error('Error fetching care manual data:', error);

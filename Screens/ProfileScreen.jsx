@@ -14,7 +14,7 @@ function ProfileScreen(props) {
     const token = await AsyncStorage.getItem('token');
     console.log(token);
     axios
-      .post('http://192.168.2.40:5000/userdata', {token: token})
+      .post('http://192.168.2.43:5000/userdata', {token: token})
       .then(res => {
         console.log(res.data);
         setUserData(res.data.data);
@@ -65,11 +65,10 @@ function ProfileScreen(props) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fff',
-    padding: 15,
+    padding: 20,
     borderRadius: 10,
-    margin: 10,
+    margin: 15,
     elevation: 2,
-    //   alignItems: 'center',
   },
   container1: {
     backgroundColor: '#fff',
@@ -84,6 +83,8 @@ const styles = StyleSheet.create({
     color: 'black',
     fontSize: 18,
     fontWeight: '500',
+    fontStyle: 'normal',
+    fontFamily: 'Open Sans',
     marginBottom: 10,
   },
   textex: {

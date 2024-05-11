@@ -1,6 +1,5 @@
 import { View,Text ,Image,TextInput,TouchableOpacity,ScrollView, Alert} from "react-native";
 import styles from "./style";
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {useEffect, useState} from 'react';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
@@ -18,7 +17,7 @@ function LoginPage(props){
       password,
     };
 
-    axios.post('http://192.168.2.40:5000/loginuser', userData)
+    axios.post('http://192.168.2.43:5000/loginuser', userData)
     .then(res => {
       console.log(res.data);
       if (res.data.status == 'ok') {

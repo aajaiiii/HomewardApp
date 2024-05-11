@@ -13,6 +13,7 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import CaremanualScreen from './Screens/CaremanualScreen';
 import UserEditScreen from './Screens/UserEditScreen';
 import Caremanualitem from './Screens/CaremanualItem';
+import CaregiverEdit from './Screens/CaregiverEdit';
 const HomeStack = () => {
   const Stack = createNativeStackNavigator();
   const navigation = useNavigation();
@@ -84,6 +85,14 @@ const ProfileStack = () => {
         }}
         name="UserEdit"
         component={UserEditScreen}
+      />
+            <Stack.Screen
+        options={{
+          title: 'แก้ไขข้อมูลผู้ดูแล',
+          tabBarStyle: {display: 'none'}, // ซ่อน bottom bar สำหรับหน้า "แก้ไขข้อมูลส่วนตัว"
+        }}
+        name="CaregiverEdit"
+        component={CaregiverEdit}
       />
     </Stack.Navigator>
   );

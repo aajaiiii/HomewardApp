@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text , Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import styles from './style';
 
 export default function Caremanualitem({ route }) {
     const [caremanual_name, setCaremanualName] = useState("");
@@ -14,7 +15,7 @@ export default function Caremanualitem({ route }) {
         const fetchData = async () => {
             try {
                 const token = await AsyncStorage.getItem('token');
-                const response = await axios.get(`http://192.168.2.40:5000/getcaremanual/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+                const response = await axios.get(`http://192.168.2.43:5000/getcaremanual/${id}`, { headers: { Authorization: `Bearer ${token}` } });
                 const data = response.data;
                 setCaremanualName(data.caremanual_name);
                 setImage(data.image);
@@ -29,9 +30,9 @@ export default function Caremanualitem({ route }) {
     }, []);
 
     return (
-        <View>
+        <View style={styles.container}>
             <Text>{caremanual_name}</Text>
-            <Image source={{ uri: image }} style={{ width: 100, height: 100 }} />
+            <Image source={{ uri: `data:image/jpeg;base64,${image}` }} style={{ width: 100, height: 100 }} />
             <Text>{file}</Text>
             <Text>{detail}</Text>
 

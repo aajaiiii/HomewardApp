@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import CaremanualScreen from './CaremanualScreen';
+import styless from './style';
 function HomeScreen(props) {
   const navigation = useNavigation();
   console.log(props);
@@ -13,7 +14,7 @@ function HomeScreen(props) {
     const token = await AsyncStorage.getItem('token');
     console.log(token);
     axios
-      .post('http://192.168.2.40:5000/userdata', {token: token})
+      .post('http://192.168.2.43:5000/userdata', {token: token})
       .then(res => {
         console.log(res.data);
         setUserData(res.data.data);
@@ -36,14 +37,14 @@ function HomeScreen(props) {
        />
         </View>
         <View style={styles.containerWrapper}>
-          
-      <TouchableOpacity style={styles.container} onPress={Caremanual}>
+
+      <TouchableOpacity style={styless.container} onPress={Caremanual}>
       <Image style={styles.buttonImage} source={require('../assets/training.png')} />
         <Text style={styles.text} title="Caremanual" onPress={Caremanual}>
           คู่มือดูแลผู้ป่วย
         </Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.container} >
+      <TouchableOpacity style={styless.container} >
       <Image style={styles.buttonImage} source={require('../assets/personal-information.png')} />
 
         <Text style={styles.text} title="Caremanual">

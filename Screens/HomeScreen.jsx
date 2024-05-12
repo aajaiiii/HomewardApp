@@ -38,13 +38,13 @@ function HomeScreen(props) {
         </View>
         <View style={styles.containerWrapper}>
 
-      <TouchableOpacity style={styless.container} onPress={Caremanual}>
+      <TouchableOpacity style={styles.container} onPress={Caremanual}>
       <Image style={styles.buttonImage} source={require('../assets/training.png')} />
         <Text style={styles.text} title="Caremanual" onPress={Caremanual}>
           คู่มือดูแลผู้ป่วย
         </Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styless.container} >
+      <TouchableOpacity style={styles.container} >
       <Image style={styles.buttonImage} source={require('../assets/personal-information.png')} />
 
         <Text style={styles.text} title="Caremanual">

@@ -100,9 +100,8 @@ export default function UserEditScreen(props) {
           type: 'success',
           text1: 'Updated',
         });
-        navigation.navigate('User', { refresh: true });
+        navigation.navigate('User', {refresh: true});
       }
-      
     });
   };
 
@@ -112,96 +111,87 @@ export default function UserEditScreen(props) {
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{paddingBottom: 40}}>
       <View style={style.container}>
-        <Text>ข้อมูลทั่วไป</Text>
-
         <View>
-          <View>
-            <Text>ชื่อผู้ใช้</Text>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Text style={style.text}>ชื่อผู้ใช้</Text>
             <TextInput
-              // placeholderTextColor={'#999797'}
+              style={[style.text]}
               onChangeText={text => setUsername(text)}
               value={username}
+              readOnly
             />
           </View>
-
-          <View>
-            <Text>ชื่อ</Text>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Text style={style.text}>อีเมล</Text>
             <TextInput
-              // placeholderTextColor={'#999797'}
+              style={[style.text]}
+              onChange={e => setEmail(e.nativeEvent.text)}
+              defaultValue={email}
+              readOnly
+            />
+          </View>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Text style={style.text}>ชื่อ</Text>
+            <TextInput
+              style={[style.textInputRead, style.text]}
               onChangeText={text => setName(text)}
               value={name}
             />
           </View>
-          <View>
-            <Text>นามสกุล</Text>
+
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Text style={style.text}>นามสกุล</Text>
             <TextInput
-              // placeholderTextColor={'#999797'}
+              style={[style.textInputRead, style.text]}
               onChange={e => setSurname(e.nativeEvent.text)}
               defaultValue={surname}
             />
           </View>
 
-          <View>
-            <Text>เพศ</Text>
-            <TouchableOpacity onPress={toggleRadio}>
-              <TextInput
-                // placeholderTextColor={'#999797'}
-                editable={false}
-                value={gender}
-              />
-            </TouchableOpacity>
-          </View>
-          <Modal
-            visible={showRadio}
-            animationType="slide"
-            transparent={true}
-            onRequestClose={() => setShowRadio(false)}>
-            <View style={styles.modalContainer}>
-              <View style={styles.modalContent}>
-                <TouchableOpacity onPress={() => handleGenderSelection('ชาย')}>
-                  <View style={styles.radioButton}>
-                    {gender === 'ชาย' && (
-                      <View style={styles.radioButtonInner} />
-                    )}
-                  </View>
-                  <Text style={styles.modalItem}>{'ชาย'}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => handleGenderSelection('หญิง')}>
-                  <View style={styles.radioButton}>
-                    {gender === 'หญิง' && (
-                      <View style={styles.radioButtonInner} />
-                    )}
-                  </View>
-                  <Text style={styles.modalItem}>{'หญิง'}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => handleGenderSelection('ไม่ระบุ')}>
-                  <View style={styles.radioButton}>
-                    {gender === 'ไม่ระบุ' && (
-                      <View style={styles.radioButtonInner} />
-                    )}
-                  </View>
-                  <Text style={styles.modalItem}>{'ไม่ระบุ'}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => setShowRadio(false)}>
-                  <Text style={styles.modalItemCancel}>{'ยกเลิก'}</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
+<View style={{flexDirection: 'row', alignItems: 'center'}}>
+  <Text style={style.text}>เพศ</Text>
+  <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+  <TouchableOpacity style={styles.radio} onPress={() => setGender('ชาย')}>
+    <View style={styles.radioButton}>
+      {gender === 'ชาย' && <View style={styles.radioButtonInner} />}
+    </View>
+    <Text style={styles.radioButtonText}>ชาย</Text>
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.radio}  onPress={() => setGender('หญิง')}>
+    <View style={styles.radioButton}>
+      {gender === 'หญิง' && <View style={styles.radioButtonInner} />}
+    </View>
+    <Text style={styles.radioButtonText}>หญิง</Text>
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.radio}   onPress={() => setGender('ไม่ระบุ')}>
+    <View style={styles.radioButton}>
+      {gender === 'ไม่ระบุ' && <View style={styles.radioButtonInner} />}
+    </View>
+    <Text style={styles.radioButtonText}>ไม่ระบุ</Text>
+  </TouchableOpacity>
+</View>
 
-          <View>
-            <Text>วันเกิด</Text>
+</View>
+
+
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Text style={style.text}>วันเกิด</Text>
 
             <TouchableOpacity
               onPress={() => !showDatePicker && setShowDatePicker(true)}>
-              <Text>
+              <Text style={[style.textInputRead, style.text]}>
                 {birthday &&
                   (showDatePicker
                     ? formatDate(new Date(birthday))
                     : formatDate(new Date(initialBirthday)))}
               </Text>
             </TouchableOpacity>
+            <Text style={style.text}>สัญชาติ</Text>
+            <TextInput
+              style={[style.textInputRead, style.text]}
+              onChange={e => setNationality(e.nativeEvent.text)}
+              defaultValue={nationality}
+            />
           </View>
           {showDatePicker && (
             <DateTimePicker
@@ -213,55 +203,36 @@ export default function UserEditScreen(props) {
           )}
 
           <View>
-            <Text>สัญชาติ</Text>
+            <Text style={style.text}>เลขประจำตัวบัตรประชาชน</Text>
             <TextInput
-              // placeholderTextColor={'#999797'}
-              onChange={e => setNationality(e.nativeEvent.text)}
-              defaultValue={nationality}
-            />
-          </View>
-
-          <View>
-            <Text>
-              เลขประจำตัวบัตรประชาชน
-            </Text>
-            <TextInput
-              // placeholderTextColor={'#999797'}
+              style={[style.textInputRead, style.text]}
               onChange={e => setIDCardNumber(e.nativeEvent.text)}
               defaultValue={ID_card_number}
             />
           </View>
 
-          <View>
-            <Text>ที่อยู่</Text>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Text style={style.text}>ที่อยู่</Text>
             <TextInput
-              // placeholderTextColor={'#999797'}
+              multiline={true}
+              numberOfLines={4}
+              style={[style.textInputAddress, style.text]}
               onChange={e => setAddress(e.nativeEvent.text)}
               defaultValue={Address}
             />
           </View>
-          <View>
-            <Text>เบอร์โทรศัพท์</Text>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Text style={style.text}>เบอร์โทรศัพท์</Text>
             <TextInput
-              // placeholderTextColor={'#999797'}
+              style={[style.textInputRead, style.text]}
               onChange={e => setTel(e.nativeEvent.text)}
               defaultValue={tel}
             />
           </View>
-          <View>
-            <Text>อีเมล</Text>
-            <TextInput
-              // placeholderTextColor={'#999797'}
-              onChange={e => setEmail(e.nativeEvent.text)}
-              defaultValue={email}
-              readOnly
-            />
-          </View>
-          <TouchableOpacity
-            onPress={() => updateProfile()}
-            style={styles.inBut}>
+
+          <TouchableOpacity onPress={() => updateProfile()} style={style.inBut}>
             <View>
-              <Text style={styles.textSign}>บันทึก</Text>
+              <Text style={style.textinBut}>บันทึก</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -270,78 +241,30 @@ export default function UserEditScreen(props) {
   );
 }
 const styles = StyleSheet.create({
-  // textStyle: {
-  //   color: 'black',
-  //   fontSize: 18,
-  //   fontWeight: '500',
-  //   marginBottom: 10,
-  // },
-  // textSign: {
-  //   fontSize: 18,
-  //   fontWeight: '600',
-  //   color: 'white',
-  // },
-  inBut: {
-    width: '70%',
-    backgroundColor: '#87CEFA',
+  radio:{
+    flexDirection: 'row', 
     alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 50,
-    marginLeft: 'auto',
-    marginRight: 'auto',
-  },
-
-  // nameText: {
-  //   color: 'white',
-  //   fontSize: 24,
-  //   fontStyle: 'normal',
-  //   fontFamily: 'Open Sans',
-  //   fontWeight: 'bold',
-  //   textAlign: 'center',
-  // },
-  infoEditView: {
-
-  },
-  infoEditFirst_text: {
-
-  },
-  infoEditSecond_text: {
-
-  },
-
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    width: 300,
-  },
-  modalItem: {
-    fontSize: 16,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    marginRight: 10
   },
   radioButton: {
     width: 20,
     height: 20,
     borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#000',
+    borderWidth: 2,
+    borderColor: 'black',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 8,
+    marginRight: 5,
   },
   radioButtonInner: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#000',
+    backgroundColor: 'black',
   },
+  radioButtonText: {
+    fontSize: 16,
+    color: 'black',
+  },
+
 });

@@ -13,6 +13,7 @@ import CaremanualScreen from './Screens/CaremanualScreen';
 import UserEditScreen from './Screens/UserEditScreen';
 import Caremanualitem from './Screens/CaremanualItem';
 import CaregiverEdit from './Screens/CaregiverEdit';
+import UpdatePassword from './Screens/Updatepassword';
 import Icon from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 const HomeStack = () => {
@@ -76,7 +77,7 @@ const ProfileStack = () => {
 
       <Stack.Screen
         options={{
-          title: 'แก้ไขข้อมูลส่วนตัว',
+          title: 'แก้ไขข้อมูลทั่วไป',
         }}
         name="UserEdit"
         component={UserEditScreen}
@@ -89,6 +90,15 @@ const ProfileStack = () => {
         tabBarOptions={{}}
         name="CaregiverEdit"
         component={CaregiverEdit}
+      />
+      <Stack.Screen
+        options={{
+          title: 'เปลี่ยนรหัสผ่าน',
+          tabBarVisible: false,
+        }}
+        tabBarOptions={{}}
+        name="Updatepassword"
+        component={UpdatePassword}
       />
     </Stack.Navigator>
   );
@@ -122,7 +132,7 @@ const DrawerNav = () => {
     screenOptions={{
         headerShown: false,
         headerStyle: {
-          backgroundColor: '#fff',
+          backgroundColor: '#87CEFA',
         },
         headerTintColor: '#000',
         headerTitleAlign: 'center',
@@ -130,7 +140,9 @@ const DrawerNav = () => {
       tabBarOptions={{
         activeTintColor: '#87CEFA',
         inactiveTintColor: 'black',
+        // tabStyle: {backgroundColor: '#fff'},
         tabStyle: {backgroundColor: '#fff'},
+
       }}>
         
       <Tab.Screen

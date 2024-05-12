@@ -5,6 +5,7 @@ import {
   Button,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useEffect, useState} from 'react';
@@ -35,78 +36,105 @@ function ProfileScreen(props) {
   useEffect(() => {
     getData();
   }, []);
+  
 
   async function logout() {
     try {
-      await AsyncStorage.removeItem('token');
-      navigation.navigate('Login');
+      Alert.alert(
+        'ออกจากระบบจากบัญชีของคุณใช่ไหม',
+        '',
+        [
+          {
+            text: 'ยกเลิก',
+            onPress: () => console.log('ยกเลิกการออกจากระบบ'),
+            style: 'cancel',
+          },
+          {
+            text: 'ออกจากระบบ',
+            onPress: async () => {
+              await AsyncStorage.removeItem('token');
+              navigation.navigate('Login');
+            },
+          },
+        ],
+        { cancelable: false }
+      );
     } catch (error) {
       console.error('Error while logging out:', error);
     }
   }
+
   return (
     <ScrollView
       keyboardShouldPersistTaps={'always'}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{paddingBottom: 40}}>
       <View style={style.container}>
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        <TouchableOpacity 
+         onPress={() => {
+          navigation.navigate('User', {data: userData});
+        }}
+        style={{flexDirection: 'row', alignItems: 'center'}
+      }>
           <Icon name="user" color="black" style={styles.smallIcon} />
           <Text
-            style={styles.textprofile}
-            onPress={() => {
-              navigation.navigate('User', {data: userData});
-            }}>
+            style={styless.textprofile}
+           >
             ข้อมูลส่วนตัว
           </Text>
-        </View>
-
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        </TouchableOpacity>
+        <TouchableOpacity 
+        onPress={() => {
+          navigation.navigate('Updatepassword', {data: userData});
+        }}
+        style={{flexDirection: 'row', alignItems: 'center'}}>
+          <Ionicons
+            name="key-outline"
+            color="black"
+            style={styles.smallIcon}
+          />
+          <Text style={styless.textprofile}>เปลี่ยนรหัสผ่าน</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center'}}>
           <Ionicons
             name="headset-outline"
             color="black"
             style={styles.smallIcon}
           />
-          <Text style={styles.textprofile}>ติดต่อเรา</Text>
-        </View>
-        
+          <Text style={styless.textprofile}>ติดต่อเรา</Text>
+        </TouchableOpacity>
       </View>
       <TouchableOpacity style={styless.containerlogout} onPress={logout}>
-          {/* <Ionicons
-            name="log-out-outline"
-            color="black"
-            style={styles.smallIcon}
-          /> */}
-          <Text style={styless.textex} onPress={logout}>
-            ออกจากระบบ
-          </Text>
-        </TouchableOpacity>
-
+   
+        <Text style={styless.textex} onPress={logout}>
+          ออกจากระบบ
+        </Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
 const styless = StyleSheet.create({
-//   text: {
-//     color: 'black',
-//     fontSize: 18,
-//     fontWeight: '500',
-//     fontStyle: 'normal',
-//     fontFamily: 'Open Sans',
-//     marginBottom: 10,
-//   },
-  textex: {
-    textAlign:'center',
+  textprofile: {
+    color: 'black',
     fontFamily: 'Arial',
     fontSize: 16,
     fontWeight: 'normal',
-    // color:'red',
+    padding: 10,
+  },
+  
+  textex: {
+    color: 'black',
+    textAlign: 'center',
+    fontFamily: 'Arial',
+    fontSize: 16,
+    fontWeight: 'normal',
   },
   containerlogout: {
     backgroundColor: '#DCDCDC',
     padding: 10,
     borderRadius: 10,
     margin: 15,
-    marginVertical:1,
+    marginVertical: 1,
     elevation: 2,
   },
 });

@@ -10,6 +10,7 @@ function LoginPage(props){
   const navigation = useNavigation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
 
   function handleSubmit() {
     console.log(username, password);
@@ -27,10 +28,12 @@ function LoginPage(props){
         AsyncStorage.setItem('isLoggedIn',JSON.stringify(true));
         navigation.navigate('Home')
       }
+      
     })
     .catch(error => {
       console.error('Error:', error);
       Alert.alert("Login failed", "Please try again");
+      setError("เข้าสู่ระบบล้มเหลว"); 
     });
   
   }
@@ -60,6 +63,10 @@ function LoginPage(props){
           secureTextEntry
           ></TextInput>
           </View>   
+          {error && ( // เช็คว่ามีข้อความผิดพลาดหรือไม่
+            <Text style={{ color: 'red', marginBottom: 10 }}>{error}</Text>
+          )}
+          
           <View
             style={{
               justifyContent: 'flex-end',

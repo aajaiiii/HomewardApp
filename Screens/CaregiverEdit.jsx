@@ -1,11 +1,17 @@
-import { Text, View, TouchableOpacity, ScrollView, TextInput } from 'react-native';
-import { useEffect, useState } from 'react';
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  ScrollView,
+  TextInput,
+} from 'react-native';
+import {useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import {useRoute, useNavigation} from '@react-navigation/native';
 import style from './style';
 import Toast from 'react-native-toast-message';
-import { Picker } from '@react-native-picker/picker'; // นำเข้า Picker ให้ถูกต้อง
+import {Picker} from '@react-native-picker/picker'; // นำเข้า Picker ให้ถูกต้อง
 
 export default function CaregiverEdit() {
   const [user, setUser] = useState('');
@@ -23,13 +29,13 @@ export default function CaregiverEdit() {
     setSurname(caregiverData.surname);
     setTel(caregiverData.tel);
     setRelationship(caregiverData.Relationship);
-    console.log("sss",user)
+    console.log('sss', user);
   }, []);
 
   const updateCaregiver = async () => {
     try {
       if (!user) {
-        console.error("User is null or undefined");
+        console.error('User is null or undefined');
         return;
       }
       const formdata = {
@@ -39,23 +45,24 @@ export default function CaregiverEdit() {
         tel,
         Relationship,
       };
-  
+
       console.log(formdata);
-  
-      const res = await axios.post('http://192.168.2.43:5000/updatecaregiver', formdata);
+
+      const res = await axios.post(
+        'http://192.168.2.43:5000/updatecaregiver',
+        formdata,
+      );
       console.log(res.data);
       if (res.data.status === 'Ok') {
         Toast.show({
           type: 'success',
           text1: 'Updated',
         });
-        navigation.navigate('User', { refresh: true });
+        navigation.navigate('User', {refresh: true});
       }
     } catch (error) {
-      console.error("Error updating caregiver:", error);
+      console.error('Error updating caregiver:', error);
     }
-
-  
   };
   return (
     <ScrollView
@@ -63,49 +70,54 @@ export default function CaregiverEdit() {
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{paddingBottom: 40}}>
       <View style={style.container}>
-        <Text>ข้อมูลผู้ดูแล</Text>
-        <View>
-          <Text>ชื่อ</Text>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <Text style={style.text}>ชื่อ</Text>
           <TextInput
-            // placeholderTextColor={'#999797'}
-            onChange={e => setName(e.nativeEvent.text)}
-            defaultValue={name}
-          />
+  style={[style.textInputRead, style.text]}
+  onChangeText={text => setName(text)}           
+  defaultValue={name}
+/>
+
         </View>
-        <View>
-          <Text>นามสกุล</Text>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <Text style={style.text}>นามสกุล</Text>
           <TextInput
-            // placeholderTextColor={'#999797'}
+            style={[style.textInputRead, style.text]}
             onChange={e => setSurname(e.nativeEvent.text)}
             defaultValue={surname}
           />
         </View>
-        <View>
-          <Text>เกี่ยวข้องเป็น</Text>
+        <View >
+          <Text style={style.text}>เกี่ยวข้องเป็น</Text>
+          <View style={style.pickerContainer}>
           <Picker
+            style={[style.textInputRead, style.text]}
             selectedValue={Relationship}
-            onValueChange={(itemValue) => setRelationship(itemValue)}
-          >
-            <Picker.Item label="เลือกความสัมพันธ์" value="" />
+            onValueChange={itemValue => setRelationship(itemValue)}>
+            {/* <Picker.Item label="เลือกความสัมพันธ์" value="" /> */}
             <Picker.Item label="พ่อ" value="พ่อ" />
             <Picker.Item label="แม่" value="แม่" />
             <Picker.Item label="สามี" value="สามี" />
             <Picker.Item label="ภรรยา" value="ภรรยา" />
             <Picker.Item label="ลูก" value="ลูก" />
-            <Picker.Item label="ไม่มีความเกี่ยวข้อง" value="ไม่มีความเกี่ยวข้อง"/>
+            <Picker.Item
+              label="ไม่มีความเกี่ยวข้อง"
+              value="ไม่มีความเกี่ยวข้อง"
+            />
           </Picker>
+          </View>
         </View>
-        <View>
-          <Text>เบอร์โทรศัพท์</Text>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <Text style={style.text}>เบอร์โทรศัพท์</Text>
           <TextInput
-            // placeholderTextColor={'#999797'}
+            style={[style.textInputRead, style.text]}
             onChange={e => setTel(e.nativeEvent.text)}
             defaultValue={tel}
           />
         </View>
-        <TouchableOpacity onPress={() => updateCaregiver()}>
+        <TouchableOpacity style={style.inBut} onPress={() => updateCaregiver()}>
           <View>
-            <Text>บันทึก</Text>
+            <Text style={style.textinBut}>บันทึก</Text>
           </View>
         </TouchableOpacity>
       </View>

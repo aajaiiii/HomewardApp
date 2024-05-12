@@ -1,5 +1,12 @@
-import {StyleSheet, Text, View, Button, TouchableOpacity,ScrollView} from 'react-native';
-import {useNavigation, useIsFocused } from '@react-navigation/native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Button,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
+import {useNavigation, useIsFocused} from '@react-navigation/native';
 import {useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -28,7 +35,6 @@ function UserScreen(props) {
         console.log(res.data);
         setUserData(res.data.data);
         console.log(userData);
-
       });
   }
 
@@ -36,80 +42,80 @@ function UserScreen(props) {
     getData();
   }, []);
 
-  useEffect(() => {
-    if (userData) {
-      fetchCaregiverInfo();
-    }
-  }, [userData],[isFocused]);
-  
+  useEffect(
+    () => {
+      if (userData) {
+        fetchCaregiverInfo();
+      }
+    },
+    [userData],
+    [isFocused],
+  );
+
   const fetchCaregiverInfo = async () => {
     try {
-      const response = await axios.get(`http://192.168.2.43:5000/getcaregiver/${userData._id}`);
-      setCaregiverInfo(response.data.data);
-
+      if (userData) {
+        const response = await axios.get(
+          `http://192.168.2.43:5000/getcaregiver/${userData._id}`,
+        );
+        setCaregiverInfo(response.data.data);
+      }
     } catch (error) {
-      console.error("Error fetching caregiver info:", error);
+      console.error('Error fetching caregiver info:', error);
     }
   };
+  
 
-  useEffect(()=> {
+  useEffect(() => {
     fetchCaregiverInfo();
   }, [userData]);
-  
 
+const currentDate = new Date();
 
-  const currentDate = new Date();
-
-  const userBirthday = new Date(userData.birthday);
-
-  const ageDiff = currentDate.getFullYear() - userBirthday.getFullYear();
-
-  const isBeforeBirthday =
-    currentDate.getMonth() < userBirthday.getMonth() ||
+const userBirthday = userData && userData.birthday ? new Date(userData.birthday) : null;
+const ageDiff = userBirthday ? currentDate.getFullYear() - userBirthday.getFullYear() : 0;
+const isBeforeBirthday =
+  userBirthday &&
+  (currentDate.getMonth() < userBirthday.getMonth() ||
     (currentDate.getMonth() === userBirthday.getMonth() &&
-      currentDate.getDate() < userBirthday.getDate());
+      currentDate.getDate() < userBirthday.getDate()));
+const userAge = isBeforeBirthday ? ageDiff - 1 : ageDiff;
 
-  const userAge = isBeforeBirthday ? ageDiff - 1 : ageDiff;
-
-  if (caregiverInfo && caregiverInfo.user) {
-    console.log('หน้า1', caregiverInfo.user);
-  } else {
-    console.log('ข้อมูล caregiver ยังไม่ถูกโหลด');
-  }
-  
   return (
     <ScrollView
-    keyboardShouldPersistTaps={'always'}
-    showsVerticalScrollIndicator={false}
-    contentContainerStyle={{paddingBottom: 40}}>
+      keyboardShouldPersistTaps={'always'}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{paddingBottom: 40}}>
       <View style={style.container}>
-      <Text style={styles.textStyle}>ข้อมูลทั่วไป</Text>
+      <View style={styles.container1}>
+        <Text style={styles.textheader}>ข้อมูลทั่วไป</Text>
+        </View>
 
         {userData && (
           <>
-            <Text style={styles.textStyle}>
+            <Text style={style.text}>
               ชื่อผู้ใช้ : {userData.username}
             </Text>
-            <Text style={styles.textStyle}>
+            <Text style={style.text}>อีเมล : {userData.email}</Text>
+            <Text style={style.text}>
               ชื่อ-นามสกุล : {userData.name} {userData.surname}
             </Text>
-            <Text style={styles.textStyle}>เพศ : {userData.gender}</Text>
+            <Text style={style.text}>เพศ : {userData.gender}</Text>
             {userData && userData.birthday && (
-  <Text style={styles.textStyle}>อายุ: {userAge} ปี</Text>
-)}
-            <Text style={styles.textStyle}>
+              <Text style={style.text}>อายุ: {userAge} ปี</Text>
+            )}
+            <Text style={style.text}>
               สัญชาติ : {userData.nationality}
             </Text>
-            <Text style={styles.textStyle}>
+            <Text style={style.text}>
               เลขประจำตัวบัตรประชาชน : {userData.ID_card_number}
             </Text>
-            <Text style={styles.textStyle}>ที่อยู่ : {userData.Address}</Text>
-            <Text style={styles.textStyle}>เบอร์โทรศัพท์ : {userData.tel}</Text>
-            <Text style={styles.textStyle}>อีเมล : {userData.email}</Text>
+            <Text style={style.text}>ที่อยู่ : {userData.Address}</Text>
+            <Text style={style.text}>เบอร์โทรศัพท์ : {userData.tel}</Text>
           </>
         )}
         <Text
-          style={styles.textStyle}
+          style={style.text}
           onPress={() => {
             navigation.navigate('UserEdit', {data: userData});
           }}>
@@ -118,34 +124,40 @@ function UserScreen(props) {
       </View>
 
       <View style={style.container}>
-      {caregiverInfo && (
-        <>
-        <Text style={styles.textStyle}>ข้อมูลผู้ดูแล</Text>
-        <Text style={styles.textStyle}>ชื่อ-นามสกุล :{caregiverInfo.name}{" "}{caregiverInfo.surname}</Text>
-        <Text style={styles.textStyle}>เกี่ยวข้องเป็น : {caregiverInfo.Relationship}</Text>
-        <Text style={styles.textStyle}>เบอร์โทรศัพท์ : {caregiverInfo.tel}</Text>
-        </>
-      )}
-      <Text
-          style={styles.textStyle}
+        {caregiverInfo && (
+          <>
+            <Text style={styles.textheader}>ข้อมูลผู้ดูแล</Text>
+            <Text style={style.text}>
+              ชื่อ-นามสกุล :{caregiverInfo.name} {caregiverInfo.surname}
+            </Text>
+            <Text style={style.text}>
+              เกี่ยวข้องเป็น : {caregiverInfo.Relationship}
+            </Text>
+            <Text style={style.text}>
+              เบอร์โทรศัพท์ : {caregiverInfo.tel}
+            </Text>
+          </>
+        )}
+        <Text
+          style={style.text}
           onPress={() => {
             navigation.navigate('CaregiverEdit', {data: caregiverInfo});
           }}>
           แก้ไขข้อมูลผู้ดูแล
         </Text>
       </View>
-      </ScrollView>
-
+    </ScrollView>
   );
 }
 const styles = StyleSheet.create({
-  // textStyle: {
-  //   color: 'black',
-  //   fontSize: 18,
-  //   fontWeight: '500',
-  //   marginBottom: 10,
-  //   fontFamily: 'Open Sans',
-  // },
+  textheader: {
+    color: 'black',
+    fontSize: 18,
+    padding: 7,
+    textAlign:'center',
+    fontFamily: 'Arial',
+    fontWeight:'700',
+  },
 
 });
 export default UserScreen;

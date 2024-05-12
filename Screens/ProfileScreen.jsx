@@ -1,10 +1,20 @@
-import {StyleSheet, Text, View, Button, TouchableOpacity} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Button,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import FeatherIcon from 'react-native-vector-icons/Feather';
-
+import style from './style';
+import styles from './Login/style';
+// import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/Feather';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 function ProfileScreen(props) {
   const navigation = useNavigation();
   console.log(props);
@@ -35,63 +45,69 @@ function ProfileScreen(props) {
     }
   }
   return (
-    <View>
-      {/* <TouchableOpacity style={styles.container}
-       onPress={() => {
-        navigation.navigate('User', {data: userData});
-      }}
-      >
-        <Text style={styles.text}>
-          {userData.name} {userData.surname}
-        </Text>  
-      </TouchableOpacity> */}
+    <ScrollView
+      keyboardShouldPersistTaps={'always'}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{paddingBottom: 40}}>
+      <View style={style.container}>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <Icon name="user" color="black" style={styles.smallIcon} />
+          <Text
+            style={styles.textprofile}
+            onPress={() => {
+              navigation.navigate('User', {data: userData});
+            }}>
+            ข้อมูลส่วนตัว
+          </Text>
+        </View>
 
-      <View style={styles.container}>
-        <Text
-          style={styles.text}
-          onPress={() => {
-            navigation.navigate('User', {data: userData});
-          }}>
-          ข้อมูลส่วนตัว
-        </Text>
-        <Text style={styles.text}>เกี่ยวกับเรา</Text>
-        <Text style={styles.textex} onPress={logout}>
-          ออกจากระบบ
-        </Text>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <Ionicons
+            name="headset-outline"
+            color="black"
+            style={styles.smallIcon}
+          />
+          <Text style={styles.textprofile}>ติดต่อเรา</Text>
+        </View>
+        
       </View>
-    </View>
+      <TouchableOpacity style={styless.containerlogout} onPress={logout}>
+          {/* <Ionicons
+            name="log-out-outline"
+            color="black"
+            style={styles.smallIcon}
+          /> */}
+          <Text style={styless.textex} onPress={logout}>
+            ออกจากระบบ
+          </Text>
+        </TouchableOpacity>
+
+    </ScrollView>
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#fff',
-    padding: 20,
+const styless = StyleSheet.create({
+//   text: {
+//     color: 'black',
+//     fontSize: 18,
+//     fontWeight: '500',
+//     fontStyle: 'normal',
+//     fontFamily: 'Open Sans',
+//     marginBottom: 10,
+//   },
+  textex: {
+    textAlign:'center',
+    fontFamily: 'Arial',
+    fontSize: 16,
+    fontWeight: 'normal',
+    // color:'red',
+  },
+  containerlogout: {
+    backgroundColor: '#DCDCDC',
+    padding: 10,
     borderRadius: 10,
     margin: 15,
+    marginVertical:1,
     elevation: 2,
-  },
-  container1: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 10,
-    marginTop: 1,
-    marginHorizontal: 10,
-    elevation: 2,
-    //   alignItems: 'center',
-  },
-  text: {
-    color: 'black',
-    fontSize: 18,
-    fontWeight: '500',
-    fontStyle: 'normal',
-    fontFamily: 'Open Sans',
-    marginBottom: 10,
-  },
-  textex: {
-    fontSize: 18,
-    color: 'red',
-    fontWeight: '500',
-    marginBottom: 10,
   },
 });
 export default ProfileScreen;

@@ -8,20 +8,19 @@ import UserScreen from './Screens/UserScreen';
 import ChatScreen from './Screens/ChatScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useEffect, useState} from 'react';
-import BottomTab from './navigations/BottomTab';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import CaremanualScreen from './Screens/CaremanualScreen';
 import UserEditScreen from './Screens/UserEditScreen';
 import Caremanualitem from './Screens/CaremanualItem';
 import CaregiverEdit from './Screens/CaregiverEdit';
+import Icon from 'react-native-vector-icons/Feather';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 const HomeStack = () => {
   const Stack = createNativeStackNavigator();
-  const navigation = useNavigation();
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: true,
-
         headerTintColor: '#000',
         headerTitleAlign: 'center',
       }}>
@@ -53,11 +52,9 @@ const HomeStack = () => {
 
 const ProfileStack = () => {
   const Stack = createNativeStackNavigator();
-  const navigation = useNavigation();
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: true,
         headerTintColor: '#000',
         headerTitleAlign: 'center',
       }}>
@@ -72,7 +69,6 @@ const ProfileStack = () => {
       <Stack.Screen
         options={{
           title: 'ข้อมูลส่วนตัว',
-          tabBarStyle: {display: 'none'}, // ซ่อน bottom bar สำหรับหน้า "ข้อมูลส่วนตัว"
         }}
         name="User"
         component={UserScreen}
@@ -81,16 +77,16 @@ const ProfileStack = () => {
       <Stack.Screen
         options={{
           title: 'แก้ไขข้อมูลส่วนตัว',
-          tabBarStyle: {display: 'none'}, // ซ่อน bottom bar สำหรับหน้า "แก้ไขข้อมูลส่วนตัว"
         }}
         name="UserEdit"
         component={UserEditScreen}
       />
-            <Stack.Screen
+      <Stack.Screen
         options={{
           title: 'แก้ไขข้อมูลผู้ดูแล',
-          tabBarStyle: {display: 'none'}, // ซ่อน bottom bar สำหรับหน้า "แก้ไขข้อมูลส่วนตัว"
+          tabBarVisible: false,
         }}
+        tabBarOptions={{}}
         name="CaregiverEdit"
         component={CaregiverEdit}
       />
@@ -100,7 +96,6 @@ const ProfileStack = () => {
 
 const ChatStack = () => {
   const Stack = createNativeStackNavigator();
-  const navigation = useNavigation();
   return (
     <Stack.Navigator
       screenOptions={{
@@ -123,8 +118,8 @@ const DrawerNav = () => {
   const Tab = createBottomTabNavigator();
   return (
     <Tab.Navigator
-      initialRouteName="Home"
-      screenOptions={{
+    initialRouteName="หน้าหลัก"
+    screenOptions={{
         headerShown: false,
         headerStyle: {
           backgroundColor: '#fff',
@@ -133,21 +128,51 @@ const DrawerNav = () => {
         headerTitleAlign: 'center',
       }}
       tabBarOptions={{
-        activeTintColor: 'black',
-        inactiveTintColor: 'gray',
-        style: {backgroundColor: '#87CEFA'},
-        tabStyle: {backgroundColor: '#87CEFA'},
+        activeTintColor: '#87CEFA',
+        inactiveTintColor: 'black',
+        tabStyle: {backgroundColor: '#fff'},
       }}>
-      <Tab.Screen name="Chat" component={ChatStack} />
+        
       <Tab.Screen
+        name="แช็ต"
+        component={ChatStack}
         options={{
-          headerShown: false,
+          tabBarIcon: ({color, size, focused}) => (
+            <Ionicons
+              name={focused ? 'chatbox-ellipses' : 'chatbox-ellipses-outline'}
+              size={22}
+              color={focused ? '#87CEFA' : 'black'}
+            />
+          ),
         }}
-        name="Home"
-        component={HomeStack}
       />
-      {/* <Tab.Screen name="Caremanualitem" component={CaremanualPage} /> */}
-      <Tab.Screen name="Setting" component={ProfileStack} />
+      <Tab.Screen
+        name="หน้าหลัก"
+        component={HomeStack}
+        options={{
+          tabBarIcon: ({color, size, focused}) => (
+            <Ionicons
+              name={focused ? 'home-sharp' : 'home-outline'}
+              size={22}
+              color={focused ? '#87CEFA' : 'black'}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="การตั้งค่า"
+        
+        component={ProfileStack}
+        options={{
+          tabBarIcon: ({color, size, focused}) => (
+            <Ionicons
+              name={focused ? 'settings-sharp' : 'settings-outline'}
+              size={22}
+              color={focused ? '#87CEFA' : 'black'}
+            />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 };

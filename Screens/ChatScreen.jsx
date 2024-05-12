@@ -3,7 +3,7 @@ import {StyleSheet, Text, View, Button} from 'react-native';
 function ChatScreen(){
     return(
         <View style= {styles.viewStyle}>
-            <Text style= {styles.headingStyle}> Chat</Text>
+            <Text style= {styles.headingStyle}> แช็ต</Text>
         </View>
     );
 }

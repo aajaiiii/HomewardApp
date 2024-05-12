@@ -4,6 +4,7 @@ import {useEffect, useState} from 'react';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from 'react-native-vector-icons/Feather'
 
 function LoginPage(props){
   const navigation = useNavigation();
@@ -45,12 +46,13 @@ function LoginPage(props){
         <View style={styles.loginContainer}>
           <Text style={styles.text_header}>เข้าสู่ระบบ</Text>    
           <View style={styles.action}>
+          <Icon name="user" color="#87CEFA" style={styles.smallIcon}/>
           <TextInput placeholder="เลขประจำตัวบัตรประชาชน"
           style={styles.textInput}
           onChange={e =>setUsername(e.nativeEvent.text)}></TextInput>
           </View>    
           <View style={styles.action}>
-          {/* <FontAwesome name="user" color="#87CEFA" style={styles.smallIcon}/> */}
+          <Icon name="lock" color="#87CEFA" style={styles.smallIcon}/>
           <TextInput placeholder="รหัสผ่าน" 
           style={styles.textInput}
           

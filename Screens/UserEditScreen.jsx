@@ -14,7 +14,7 @@ import {useRoute} from '@react-navigation/native';
 import {useNavigation} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import DateTimePicker from '@react-native-community/datetimepicker';
-
+import style from './style';
 export default function UserEditScreen(props) {
   const navigation = useNavigation();
   const [gender, setGender] = useState('');
@@ -111,52 +111,41 @@ export default function UserEditScreen(props) {
       keyboardShouldPersistTaps={'always'}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{paddingBottom: 40}}>
-      <View style={styles.container}>
-        <Text style={styles.infoEditFirst_text}>ข้อมูลทั่วไป</Text>
+      <View style={style.container}>
+        <Text>ข้อมูลทั่วไป</Text>
 
-        <View
-          style={{
-            // marginTop: 10,
-            marginHorizontal: 22,
-          }}>
-          <View style={styles.infoEditView}>
-            <Text style={styles.infoEditFirst_text}>ชื่อผู้ใช้</Text>
+        <View>
+          <View>
+            <Text>ชื่อผู้ใช้</Text>
             <TextInput
-              placeholderTextColor={'#999797'}
-              style={styles.infoEditSecond_text}
+              // placeholderTextColor={'#999797'}
               onChangeText={text => setUsername(text)}
               value={username}
             />
           </View>
 
-          <View style={styles.infoEditView}>
-            <Text style={styles.infoEditFirst_text}>ชื่อ</Text>
+          <View>
+            <Text>ชื่อ</Text>
             <TextInput
-              placeholderTextColor={'#999797'}
-              style={styles.infoEditSecond_text}
+              // placeholderTextColor={'#999797'}
               onChangeText={text => setName(text)}
               value={name}
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="default"
             />
           </View>
-          <View style={styles.infoEditView}>
-            <Text style={styles.infoEditFirst_text}>นามสกุล</Text>
+          <View>
+            <Text>นามสกุล</Text>
             <TextInput
-              placeholderTextColor={'#999797'}
-              style={styles.infoEditSecond_text}
+              // placeholderTextColor={'#999797'}
               onChange={e => setSurname(e.nativeEvent.text)}
               defaultValue={surname}
             />
           </View>
 
-          <View style={styles.infoEditView}>
-            <Text style={styles.infoEditFirst_text}>เพศ</Text>
+          <View>
+            <Text>เพศ</Text>
             <TouchableOpacity onPress={toggleRadio}>
               <TextInput
-                placeholderTextColor={'#999797'}
-                style={styles.infoEditSecond_text}
+                // placeholderTextColor={'#999797'}
                 editable={false}
                 value={gender}
               />
@@ -201,12 +190,12 @@ export default function UserEditScreen(props) {
             </View>
           </Modal>
 
-          <View style={styles.infoEditView}>
-            <Text style={styles.infoEditFirst_text}>วันเกิด</Text>
+          <View>
+            <Text>วันเกิด</Text>
 
             <TouchableOpacity
               onPress={() => !showDatePicker && setShowDatePicker(true)}>
-              <Text style={styles.infoEditSecond_text}>
+              <Text>
                 {birthday &&
                   (showDatePicker
                     ? formatDate(new Date(birthday))
@@ -223,51 +212,46 @@ export default function UserEditScreen(props) {
             />
           )}
 
-          <View style={styles.infoEditView}>
-            <Text style={styles.infoEditFirst_text}>สัญชาติ</Text>
+          <View>
+            <Text>สัญชาติ</Text>
             <TextInput
-              placeholderTextColor={'#999797'}
-              style={styles.infoEditSecond_text}
+              // placeholderTextColor={'#999797'}
               onChange={e => setNationality(e.nativeEvent.text)}
               defaultValue={nationality}
             />
           </View>
 
-          <View style={styles.infoEditView}>
-            <Text style={styles.infoEditFirst_text}>
+          <View>
+            <Text>
               เลขประจำตัวบัตรประชาชน
             </Text>
             <TextInput
-              placeholderTextColor={'#999797'}
-              style={styles.infoEditSecond_text}
+              // placeholderTextColor={'#999797'}
               onChange={e => setIDCardNumber(e.nativeEvent.text)}
               defaultValue={ID_card_number}
             />
           </View>
 
-          <View style={styles.infoEditView}>
-            <Text style={styles.infoEditFirst_text}>ที่อยู่</Text>
+          <View>
+            <Text>ที่อยู่</Text>
             <TextInput
-              placeholderTextColor={'#999797'}
-              style={styles.infoEditSecond_text}
+              // placeholderTextColor={'#999797'}
               onChange={e => setAddress(e.nativeEvent.text)}
               defaultValue={Address}
             />
           </View>
-          <View style={styles.infoEditView}>
-            <Text style={styles.infoEditFirst_text}>เบอร์โทรศัพท์</Text>
+          <View>
+            <Text>เบอร์โทรศัพท์</Text>
             <TextInput
-              placeholderTextColor={'#999797'}
-              style={styles.infoEditSecond_text}
+              // placeholderTextColor={'#999797'}
               onChange={e => setTel(e.nativeEvent.text)}
               defaultValue={tel}
             />
           </View>
-          <View style={styles.infoEditView}>
-            <Text style={styles.infoEditFirst_text}>อีเมล</Text>
+          <View>
+            <Text>อีเมล</Text>
             <TextInput
-              placeholderTextColor={'#999797'}
-              style={styles.infoEditSecond_text}
+              // placeholderTextColor={'#999797'}
               onChange={e => setEmail(e.nativeEvent.text)}
               defaultValue={email}
               readOnly
@@ -286,24 +270,17 @@ export default function UserEditScreen(props) {
   );
 }
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    margin: 15,
-    elevation: 2,
-  },
-  textStyle: {
-    color: 'black',
-    fontSize: 18,
-    fontWeight: '500',
-    marginBottom: 10,
-  },
-  textSign: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: 'white',
-  },
+  // textStyle: {
+  //   color: 'black',
+  //   fontSize: 18,
+  //   fontWeight: '500',
+  //   marginBottom: 10,
+  // },
+  // textSign: {
+  //   fontSize: 18,
+  //   fontWeight: '600',
+  //   color: 'white',
+  // },
   inBut: {
     width: '70%',
     backgroundColor: '#87CEFA',
@@ -314,41 +291,23 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
     marginRight: 'auto',
   },
-  textSign: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: 'white',
-  },
-  nameText: {
-    color: 'white',
-    fontSize: 24,
 
-    fontStyle: 'normal',
-    fontFamily: 'Open Sans',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
+  // nameText: {
+  //   color: 'white',
+  //   fontSize: 24,
+  //   fontStyle: 'normal',
+  //   fontFamily: 'Open Sans',
+  //   fontWeight: 'bold',
+  //   textAlign: 'center',
+  // },
   infoEditView: {
-    marginTop: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderColor: '#e6e6e6',
-    borderBottomWidth: 1,
-    paddingBottom: 5,
+
   },
   infoEditFirst_text: {
-    color: '#7d7c7c',
-    fontSize: 16,
-    fontWeight: '400',
+
   },
   infoEditSecond_text: {
-    color: 'black',
-    fontStyle: 'normal',
-    fontFamily: 'Open Sans',
-    fontSize: 15,
-    textAlignVertical: 'center',
-    textAlign: 'right',
+
   },
 
   modalContainer: {

@@ -1,11 +1,12 @@
-import {StyleSheet,Image, Text, View, Button, TouchableOpacity} from 'react-native';
+import {StyleSheet,Image, Text, View, Button, TouchableOpacity,ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import CaremanualScreen from './CaremanualScreen';
 import styless from './style';
+import Swiper from 'react-native-swiper';
+
 function HomeScreen(props) {
   const navigation = useNavigation();
   console.log(props);
@@ -31,11 +32,28 @@ function HomeScreen(props) {
   };
 
   return (
-    <View>
-        <View >
+    <ScrollView
+    keyboardShouldPersistTaps={'always'}
+    showsVerticalScrollIndicator={false}
+    contentContainerStyle={{paddingBottom: 40}}>
+        {/* <View >
         <Image style={styles.image} source={require('../assets/imagehome.png')}
        />
-        </View>
+        </View> */}
+         <Swiper style={styles.swiper}>
+        <Image
+          style={styles.image}
+          source={require('../assets/imagehome.png')}
+        />
+        <Image
+          style={styles.image}
+          source={require('../assets/imagehome.png')}
+        />
+        <Image
+          style={styles.image}
+          source={require('../assets/imagehome.png')}
+        />
+      </Swiper>
         <View style={styles.containerWrapper}>
 
       <TouchableOpacity style={styles.container} onPress={Caremanual}>
@@ -59,7 +77,8 @@ function HomeScreen(props) {
         ผลการประเมินอาการ
         </Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
+
   );
 }
 
@@ -70,8 +89,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginHorizontal: 'auto',
     marginVertical:25,
-    width: 170,
-    height: 100,
+    width: 165,
+    height: 110,
     elevation: 2,
     alignItems: 'center',
   },
@@ -80,8 +99,8 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     marginLeft:14,
-    width: 170,
-    height: 100,
+    width: 165,
+    height: 110,
     elevation: 2,
     alignItems: 'center',
   },
@@ -93,8 +112,12 @@ const styles = StyleSheet.create({
     marginTop:5,
     textAlign:'center',
   },
+  swiper: {
+    height: 210, // กำหนดความสูงตามที่ต้องการ
+    marginTop: 10,
+  },
   image:{
-    height: 200,
+    height: 210,
     width: 360,
     marginTop: 10,
     marginLeft: 'auto',

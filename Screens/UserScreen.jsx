@@ -1,8 +1,9 @@
-import {StyleSheet, Text, View, Button, TouchableOpacity} from 'react-native';
+import {StyleSheet, Text, View, Button, TouchableOpacity,ScrollView} from 'react-native';
 import {useNavigation, useIsFocused } from '@react-navigation/native';
 import {useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import style from './style';
 
 function UserScreen(props) {
   const navigation = useNavigation();
@@ -14,6 +15,7 @@ function UserScreen(props) {
   useEffect(() => {
     if (isFocused) {
       getData();
+      fetchCaregiverInfo();
     }
   }, [isFocused]);
 
@@ -33,39 +35,28 @@ function UserScreen(props) {
   useEffect(() => {
     getData();
   }, []);
+
+  useEffect(() => {
+    if (userData) {
+      fetchCaregiverInfo();
+    }
+  }, [userData],[isFocused]);
+  
   const fetchCaregiverInfo = async () => {
     try {
       const response = await axios.get(`http://192.168.2.43:5000/getcaregiver/${userData._id}`);
       setCaregiverInfo(response.data.data);
+
     } catch (error) {
       console.error("Error fetching caregiver info:", error);
     }
   };
 
-  useEffect(() => {
+  useEffect(()=> {
     fetchCaregiverInfo();
-  }, [userData, isFocused]);
+  }, [userData]);
   
-  const calculateAge = birthday => {
-    if (birthday) {
-      const birthDate = new Date(birthday);
-      const today = new Date();
 
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-
-      if (
-        monthDiff < 0 ||
-        (monthDiff === 0 && today.getDate() < birthDate.getDate())
-      ) {
-        age--;
-      }
-
-      return age;
-    } else {
-      return 0;
-    }
-  };
 
   const currentDate = new Date();
 
@@ -80,9 +71,18 @@ function UserScreen(props) {
 
   const userAge = isBeforeBirthday ? ageDiff - 1 : ageDiff;
 
+  if (caregiverInfo && caregiverInfo.user) {
+    console.log('หน้า1', caregiverInfo.user);
+  } else {
+    console.log('ข้อมูล caregiver ยังไม่ถูกโหลด');
+  }
+  
   return (
-    <View>
-      <View style={styles.container}>
+    <ScrollView
+    keyboardShouldPersistTaps={'always'}
+    showsVerticalScrollIndicator={false}
+    contentContainerStyle={{paddingBottom: 40}}>
+      <View style={style.container}>
       <Text style={styles.textStyle}>ข้อมูลทั่วไป</Text>
 
         {userData && (
@@ -117,7 +117,7 @@ function UserScreen(props) {
         </Text>
       </View>
 
-      <View style={styles.container}>
+      <View style={style.container}>
       {caregiverInfo && (
         <>
         <Text style={styles.textStyle}>ข้อมูลผู้ดูแล</Text>
@@ -134,24 +134,18 @@ function UserScreen(props) {
           แก้ไขข้อมูลผู้ดูแล
         </Text>
       </View>
-    </View>
+      </ScrollView>
+
   );
 }
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    margin: 15,
-    elevation: 2,
-    //   alignItems: 'center',
-  },
-  textStyle: {
-    color: 'black',
-    fontSize: 18,
-    fontWeight: '500',
-    marginBottom: 10,
-    fontFamily: 'Open Sans',
-  },
+  // textStyle: {
+  //   color: 'black',
+  //   fontSize: 18,
+  //   fontWeight: '500',
+  //   marginBottom: 10,
+  //   fontFamily: 'Open Sans',
+  // },
+
 });
 export default UserScreen;

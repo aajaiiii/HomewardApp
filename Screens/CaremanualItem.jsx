@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text , Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import styles from './style';
+import style from './style';
 
 export default function Caremanualitem({ route }) {
     const [caremanual_name, setCaremanualName] = useState("");
@@ -10,6 +10,7 @@ export default function Caremanualitem({ route }) {
     const [file, setFile] = useState(null);
     const [detail, setDetail] = useState("");
     const { id } = route.params;
+    const [imageUri, setImageUri] = useState(null); // เพิ่ม state เพื่อเก็บ URI ของรูปภาพ
 
     useEffect(() => {
         const fetchData = async () => {
@@ -18,7 +19,7 @@ export default function Caremanualitem({ route }) {
                 const response = await axios.get(`http://192.168.2.43:5000/getcaremanual/${id}`, { headers: { Authorization: `Bearer ${token}` } });
                 const data = response.data;
                 setCaremanualName(data.caremanual_name);
-                setImage(data.image);
+                setImageUri(data.image); // กำหนด URI ของรูปภาพ
                 setDetail(data.detail);
                 setFile(data.file);
             } catch (error) {
@@ -30,9 +31,9 @@ export default function Caremanualitem({ route }) {
     }, []);
 
     return (
-        <View style={styles.container}>
+        <View style={style.container}>
             <Text>{caremanual_name}</Text>
-            <Image source={{ uri: `data:image/jpeg;base64,${image}` }} style={{ width: 100, height: 100 }} />
+            {imageUri && <Image source={{ uri: imageUri }} style={{ width: 100, height: 100 }} />} 
             <Text>{file}</Text>
             <Text>{detail}</Text>
 

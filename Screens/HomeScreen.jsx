@@ -55,7 +55,6 @@ function HomeScreen(props) {
         />
       </Swiper>
         <View style={styles.containerWrapper}>
-
       <TouchableOpacity style={styles.container} onPress={Caremanual}>
       <Image style={styles.buttonImage} source={require('../assets/training.png')} />
         <Text style={styles.text} title="Caremanual" onPress={Caremanual}>
@@ -91,8 +90,16 @@ const styles = StyleSheet.create({
     marginVertical:25,
     width: 165,
     height: 110,
-    elevation: 2,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+    width: 0,
+    height: 4,
+      },
+      shadowOpacity: 0.5,
+      shadowRadius: 4.65,
+      elevation: 3,
+
   },
   container1: {
     backgroundColor: '#fff',
@@ -101,19 +108,28 @@ const styles = StyleSheet.create({
     marginLeft:14,
     width: 165,
     height: 110,
-    elevation: 2,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+    width: 0,
+    height: 4,
+      },
+      shadowOpacity: 0.5,
+      shadowRadius: 4.65,
+      elevation: 3,
+
   },
   text: {
-    color: 'black',
-    fontSize: 15,
-    fontWeight: '500',
     margin: 'auto',
     marginTop:5,
     textAlign:'center',
+    color: 'black',
+    fontFamily: 'Arial',
+    fontSize: 16,
+    fontWeight: 'normal',
   },
   swiper: {
-    height: 210, // กำหนดความสูงตามที่ต้องการ
+    height: 210,
     marginTop: 10,
   },
   image:{

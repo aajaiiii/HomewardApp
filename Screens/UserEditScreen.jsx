@@ -15,6 +15,7 @@ import {useNavigation} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import style from './style';
+
 export default function UserEditScreen(props) {
   const navigation = useNavigation();
   const [gender, setGender] = useState('');
@@ -131,6 +132,21 @@ export default function UserEditScreen(props) {
             />
           </View>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Text style={style.text}>เลขประจำตัวบัตรประชาชน</Text>
+             <TextInput
+              style={[style.text]}
+              onChange={e => setIDCardNumber(e.nativeEvent.text)}
+              defaultValue={ID_card_number}
+              readOnly
+
+            /> 
+            {/* <TextInput
+              style={[style.textInputRead, style.text]}
+              onChange={e => setIDCardNumber(e.nativeEvent.text)}
+              defaultValue={ID_card_number}
+            /> */}
+          </View>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Text style={style.text}>ชื่อ</Text>
             <TextInput
               style={[style.textInputRead, style.text]}
@@ -202,14 +218,7 @@ export default function UserEditScreen(props) {
             />
           )}
 
-          <View>
-            <Text style={style.text}>เลขประจำตัวบัตรประชาชน</Text>
-            <TextInput
-              style={[style.textInputRead, style.text]}
-              onChange={e => setIDCardNumber(e.nativeEvent.text)}
-              defaultValue={ID_card_number}
-            />
-          </View>
+     
 
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Text style={style.text}>ที่อยู่</Text>

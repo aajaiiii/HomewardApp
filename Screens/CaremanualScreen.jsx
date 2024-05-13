@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/FontAwesome';
-
+import style from './style';
 function CaremanualScreen(props){
     const navigation = useNavigation();
     console.log(props);
@@ -47,7 +47,7 @@ function CaremanualScreen(props){
             <TouchableOpacity key={index} style={styles.container} 
             onPress={() => navigation.navigate('Caremanualitem', { id: item._id })}
             >
-              <Text style={styles.text} onPress={() => navigation.navigate('Caremanualitem', { id: item._id })}>{item.caremanual_name}</Text>
+              <Text style={style.text} onPress={() => navigation.navigate('Caremanualitem', { id: item._id })}>{item.caremanual_name}</Text>
             </TouchableOpacity>
           ))
         ) : (
@@ -60,13 +60,21 @@ function CaremanualScreen(props){
 const styles = StyleSheet.create({
 container: {
     backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    margin: 10,
-    marginBottom:2,
-    // marginVertical:5,
     elevation: 2, 
-      alignItems: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
+    padding: 20,
+    margin: 10,
+    marginHorizontal:15,
+    shadowColor: '#000',
+    shadowOffset: {
+    width: 0,
+    height: 4,
+      },
+      shadowOpacity: 0.5,
+      shadowRadius: 4.65,
+      elevation: 3,
+
   },
   text: {
     color:'black',

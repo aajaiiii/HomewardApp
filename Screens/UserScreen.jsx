@@ -11,6 +11,8 @@ import {useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import style from './style';
+import Icon from 'react-native-vector-icons/Feather';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 function UserScreen(props) {
   const navigation = useNavigation();
@@ -98,6 +100,9 @@ const userAge = isBeforeBirthday ? ageDiff - 1 : ageDiff;
             </Text>
             <Text style={style.text}>อีเมล : {userData.email}</Text>
             <Text style={style.text}>
+              เลขประจำตัวบัตรประชาชน : {userData.ID_card_number}
+            </Text>
+            <Text style={style.text}>
               ชื่อ-นามสกุล : {userData.name} {userData.surname}
             </Text>
             <Text style={style.text}>เพศ : {userData.gender}</Text>
@@ -107,9 +112,7 @@ const userAge = isBeforeBirthday ? ageDiff - 1 : ageDiff;
             <Text style={style.text}>
               สัญชาติ : {userData.nationality}
             </Text>
-            <Text style={style.text}>
-              เลขประจำตัวบัตรประชาชน : {userData.ID_card_number}
-            </Text>
+       
             <Text style={style.text}>ที่อยู่ : {userData.Address}</Text>
             <Text style={style.text}>เบอร์โทรศัพท์ : {userData.tel}</Text>
           </>

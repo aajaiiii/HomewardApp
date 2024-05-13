@@ -114,7 +114,7 @@ export default function UserEditScreen(props) {
       <View style={style.container}>
         <View>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Text style={style.text}>ชื่อผู้ใช้</Text>
+            <Text style={style.texthead}>ชื่อผู้ใช้</Text>
             <TextInput
               style={[style.text]}
               onChangeText={text => setUsername(text)}
@@ -123,7 +123,7 @@ export default function UserEditScreen(props) {
             />
           </View>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Text style={style.text}>อีเมล</Text>
+            <Text style={style.texthead}>อีเมล</Text>
             <TextInput
               style={[style.text]}
               onChange={e => setEmail(e.nativeEvent.text)}
@@ -132,7 +132,7 @@ export default function UserEditScreen(props) {
             />
           </View>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Text style={style.text}>เลขประจำตัวบัตรประชาชน</Text>
+            <Text style={style.texthead}>เลขประจำตัวประชาชน</Text>
              <TextInput
               style={[style.text]}
               onChange={e => setIDCardNumber(e.nativeEvent.text)}
@@ -147,7 +147,7 @@ export default function UserEditScreen(props) {
             /> */}
           </View>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Text style={style.text}>ชื่อ</Text>
+            <Text style={style.texthead}>ชื่อ</Text>
             <TextInput
               style={[style.textInputRead, style.text]}
               onChangeText={text => setName(text)}
@@ -156,7 +156,7 @@ export default function UserEditScreen(props) {
           </View>
 
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Text style={style.text}>นามสกุล</Text>
+            <Text style={style.texthead}>นามสกุล</Text>
             <TextInput
               style={[style.textInputRead, style.text]}
               onChange={e => setSurname(e.nativeEvent.text)}
@@ -165,7 +165,7 @@ export default function UserEditScreen(props) {
           </View>
 
 <View style={{flexDirection: 'row', alignItems: 'center'}}>
-  <Text style={style.text}>เพศ</Text>
+  <Text style={style.texthead}>เพศ</Text>
   <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
   <TouchableOpacity style={styles.radio} onPress={() => setGender('ชาย')}>
     <View style={styles.radioButton}>
@@ -191,7 +191,7 @@ export default function UserEditScreen(props) {
 
 
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Text style={style.text}>วันเกิด</Text>
+            <Text style={style.texthead}>วันเกิด</Text>
 
             <TouchableOpacity
               onPress={() => !showDatePicker && setShowDatePicker(true)}>
@@ -202,7 +202,7 @@ export default function UserEditScreen(props) {
                     : formatDate(new Date(initialBirthday)))}
               </Text>
             </TouchableOpacity>
-            <Text style={style.text}>สัญชาติ</Text>
+            <Text style={style.texthead}>สัญชาติ</Text>
             <TextInput
               style={[style.textInputRead, style.text]}
               onChange={e => setNationality(e.nativeEvent.text)}
@@ -221,7 +221,7 @@ export default function UserEditScreen(props) {
      
 
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Text style={style.text}>ที่อยู่</Text>
+            <Text style={style.texthead}>ที่อยู่</Text>
             <TextInput
               multiline={true}
               numberOfLines={4}
@@ -231,7 +231,7 @@ export default function UserEditScreen(props) {
             />
           </View>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Text style={style.text}>เบอร์โทรศัพท์</Text>
+            <Text style={style.texthead}>เบอร์โทรศัพท์</Text>
             <TextInput
               style={[style.textInputRead, style.text]}
               onChange={e => setTel(e.nativeEvent.text)}

@@ -1,4 +1,4 @@
-import {Text} from 'react-native';
+import {Text,Image} from 'react-native';
 import HomeScreen from './Screens/HomeScreen';
 import {useNavigation, NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -16,6 +16,7 @@ import CaregiverEdit from './Screens/CaregiverEdit';
 import UpdatePassword from './Screens/Updatepassword';
 import Icon from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+
 const HomeStack = () => {
   const Stack = createNativeStackNavigator();
   return (
@@ -26,9 +27,14 @@ const HomeStack = () => {
         headerTitleAlign: 'center',
       }}>
       <Stack.Screen
-        options={{
-          title: 'หน้าหลัก',
-        }}
+           options={{
+            headerTitle: () => (
+              <Image
+                source={require('./assets/Logoblue.png')}
+                style={{ width: 200, height: 50 ,marginTop:8}} // ปรับขนาดตามที่คุณต้องการ
+              />
+            ),
+          }}
         name="Home"
         component={HomeScreen}
       />
@@ -43,6 +49,7 @@ const HomeStack = () => {
       <Stack.Screen
         options={{
           title: 'คู่มือ',
+          headerShown:'false'
         }}
         name="Caremanualitem"
         component={Caremanualitem}

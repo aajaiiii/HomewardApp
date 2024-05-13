@@ -63,9 +63,9 @@ function LoginPage(props){
           secureTextEntry
           ></TextInput>
           </View>   
-          {error && ( // เช็คว่ามีข้อความผิดพลาดหรือไม่
+          {/* {error && ( 
             <Text style={{ color: 'red', marginBottom: 10 }}>{error}</Text>
-          )}
+          )} */}
           
           <View
             style={{

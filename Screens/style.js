@@ -78,8 +78,16 @@ const style = StyleSheet.create({
         height:50,
         marginVertical:4,
         flex: 1,
-       
-
+      },
+      texthead: {
+        color: 'black',
+        fontSize: 16,
+        padding: 7,
+        fontFamily: 'Arial',
+        fontWeight: '700',
+      },
+      textWidth:{
+        flex:1,
       },
 })
 export default style;

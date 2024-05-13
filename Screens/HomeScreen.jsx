@@ -1,4 +1,4 @@
-import {StyleSheet,Image, Text, View, Button, TouchableOpacity,ScrollView} from 'react-native';
+import {StyleSheet,Image, Text, View, Button, TouchableOpacity,ScrollView, Linking } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -6,6 +6,8 @@ import axios from 'axios';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import styless from './style';
 import Swiper from 'react-native-swiper';
+
+const googleUrl = "https://bangkokpattayahospital.com/th/health-articles-th/neuroscience-th/nine-risk-factors-in-cerebrovascular-accidents-th/";
 
 function HomeScreen(props) {
   const navigation = useNavigation();
@@ -40,20 +42,26 @@ function HomeScreen(props) {
         <Image style={styles.image} source={require('../assets/imagehome.png')}
        />
         </View> */}
-         <Swiper style={styles.swiper}>
-        <Image
-          style={styles.image}
-          source={require('../assets/imagehome.png')}
-        />
-        <Image
-          style={styles.image}
-          source={require('../assets/imagehome.png')}
-        />
-        <Image
-          style={styles.image}
-          source={require('../assets/imagehome.png')}
-        />
-      </Swiper>
+        <Swiper style={styles.swiper}>
+  <TouchableOpacity onPress={() => Linking.openURL(googleUrl)}>
+    <Image
+      style={styles.image}
+      source={require('../assets/imagehome.png')}
+    />
+  </TouchableOpacity>
+  <TouchableOpacity onPress={() => Linking.openURL(googleUrl)}>
+    <Image
+      style={styles.image}
+      source={require('../assets/imagehome.png')}
+    />
+  </TouchableOpacity>
+  <TouchableOpacity onPress={() => Linking.openURL(googleUrl)}>
+    <Image
+      style={styles.image}
+      source={require('../assets/imagehome.png')}
+    />
+  </TouchableOpacity>
+  </Swiper>
         <View style={styles.containerWrapper}>
       <TouchableOpacity style={styles.container} onPress={Caremanual}>
       <Image style={styles.buttonImage} source={require('../assets/training.png')} />
@@ -129,7 +137,7 @@ const styles = StyleSheet.create({
     fontWeight: 'normal',
   },
   swiper: {
-    height: 210,
+    height: 220,
     marginTop: 10,
   },
   image:{
@@ -138,7 +146,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginLeft: 'auto',
     marginRight: 'auto',
-
+    borderRadius: 10,
   },
   containerWrapper: {
     flexDirection: 'row',

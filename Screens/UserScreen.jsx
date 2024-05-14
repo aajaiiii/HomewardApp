@@ -97,7 +97,7 @@ function UserScreen(props) {
             justifyContent: 'center',
             alignItems: 'center',
           }}>
-          <Text style={styles.textheader}>ข้อมูลทั่วไป </Text>
+          <Text style={styles.texter}>ข้อมูลทั่วไป </Text>
           <Icon
             onPress={() => {
               navigation.navigate('UserEdit', {data: userData});
@@ -111,38 +111,38 @@ function UserScreen(props) {
         {userData && (
           <>
             <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
-              <Text style={style.texthead}>ชื่อผู้ใช้ :</Text>
+              <Text style={style.text}>ชื่อผู้ใช้ :</Text>
               <Text style={[style.text, style.textWidth]}>
                 {userData.username}
               </Text>
             </View>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Text style={style.texthead}>อีเมล :</Text>
+              <Text style={style.text}>อีเมล :</Text>
               <Text style={[style.text, style.textWidth]}>
                 {userData.email}
               </Text>
             </View>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Text style={style.texthead}>เลขประจำตัวประชาชน :</Text>
+              <Text style={style.text}>เลขประจำตัวประชาชน :</Text>
               <Text style={[style.text, style.textWidth]}>
                 {userData.ID_card_number}
               </Text>
             </View>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Text style={style.texthead}>ชื่อ-นามสกุล :</Text>
+              <Text style={style.text}>ชื่อ-นามสกุล :</Text>
               <Text style={[style.text, style.textWidth]}>
                 {userData.name} {userData.surname}
               </Text>
             </View>
 
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Text style={style.texthead}>เพศ :</Text>
+              <Text style={style.text}>เพศ :</Text>
               <Text style={[style.text, style.textWidth]}>
                 {userData.gender}
               </Text>
             </View>
             <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
-              <Text style={style.texthead}>อายุ:</Text>
+              <Text style={style.text}>อายุ:</Text>
               {userData && userData.birthday ? (
                 <Text style={[style.text]}>
                   {userAge} ปี{' '}
@@ -155,19 +155,19 @@ function UserScreen(props) {
             </View>
 
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Text style={style.texthead}>สัญชาติ :</Text>
+              <Text style={style.text}>สัญชาติ :</Text>
               <Text style={[style.text, style.textWidth]}>
                 {userData.nationality}
               </Text>
             </View>
             <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
-              <Text style={[style.texthead]}>ที่อยู่ :</Text>
+              <Text style={[style.text]}>ที่อยู่ :</Text>
               <Text style={[style.text, style.textWidth]}>
                 {userData.Address}
               </Text>
             </View>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Text style={style.texthead}>เบอร์โทรศัพท์ :</Text>
+              <Text style={style.text}>เบอร์โทรศัพท์ :</Text>
               <Text style={[style.text, style.textWidth]}>{userData.tel}</Text>
             </View>
           </>
@@ -183,7 +183,7 @@ function UserScreen(props) {
                 justifyContent: 'center',
                 alignItems: 'center',
               }}>
-              <Text style={styles.textheader}>ข้อมูลผู้ดูแล</Text>
+              <Text style={styles.texter}>ข้อมูลผู้ดูแล</Text>
 
               <Icon
                 onPress={() => {
@@ -195,19 +195,19 @@ function UserScreen(props) {
               />
             </View>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Text style={style.texthead}>ชื่อ-นามสกุล :</Text>
+              <Text style={style.text}>ชื่อ-นามสกุล :</Text>
               <Text style={[style.text, style.textWidth]}>
                 {caregiverInfo.name} {caregiverInfo.surname}
               </Text>
             </View>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Text style={style.texthead}>เกี่ยวข้องเป็น :</Text>
+              <Text style={style.text}>เกี่ยวข้องเป็น :</Text>
               <Text style={[style.text, style.textWidth]}>
                 {caregiverInfo.Relationship}
               </Text>
             </View>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Text style={style.texthead}>เบอร์โทรศัพท์ :</Text>
+              <Text style={style.text}>เบอร์โทรศัพท์ :</Text>
               <Text style={[style.text, style.textWidth]}>
                 {caregiverInfo.tel}
               </Text>
@@ -219,7 +219,7 @@ function UserScreen(props) {
   );
 }
 const styles = StyleSheet.create({
-  textheader: {
+  texter: {
     color: 'black',
     fontSize: 18,
     padding: 7,

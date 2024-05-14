@@ -78,6 +78,12 @@ const style = StyleSheet.create({
         height:50,
         marginVertical:4,
         flex: 1,
+      
+      },
+      Picker:{
+        padding:20,
+        borderRadius: 20, 
+
       },
       texthead: {
         color: 'black',

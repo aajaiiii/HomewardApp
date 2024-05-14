@@ -1,73 +1,209 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text , Image, StyleSheet,ScrollView } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import style from './style';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import Material from 'react-native-vector-icons/MaterialCommunityIcons';
+import { PDFView } from 'react-native-pdf';
+import styles from './Login/style';
+import moment from 'moment'; 
+export default function Caremanualitem({ route, navigation }) {
+  const [caremanual_name, setCaremanualName] = useState('');
+  const [image, setImage] = useState(null);
+  const [file, setFile] = useState(null);
+  const [detail, setDetail] = useState('');
+  const { id } = route.params;
+  const [modalVisible, setModalVisible] = useState(false); // State สำหรับควบคุมการแสดง Modal
+  const [updatedAt, setUpdatedAt] = useState('');
 
-export default function Caremanualitem({ route }) {
-    const [caremanual_name, setCaremanualName] = useState("");
-    const [image, setImage] = useState(null);
-    const [file, setFile] = useState(null);
-    const [detail, setDetail] = useState("");
-    const { id } = route.params;
-    const [imageUri, setImageUri] = useState(null); // เพิ่ม state เพื่อเก็บ URI ของรูปภาพ
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        const response = await axios.get(
+          `http://192.168.2.43:5000/getcaremanual/${id}`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        const data = response.data;
+        setCaremanualName(data.caremanual_name);
+        setImage(data.image);
+        setDetail(data.detail);
+        setFile(data.file);
+        setUpdatedAt(formatThaiDate(data.updatedAt)); 
+      } catch (error) {
+        console.error('Error fetching care manual item data:', error);
+      }
+    };
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const token = await AsyncStorage.getItem('token');
-                const response = await axios.get(`http://192.168.2.43:5000/getcaremanual/${id}`, { headers: { Authorization: `Bearer ${token}` } });
-                const data = response.data;
-                setCaremanualName(data.caremanual_name);
-                setImageUri(data.image); // กำหนด URI ของรูปภาพ
-                setDetail(data.detail);
-                setFile(data.file);
-            } catch (error) {
-                console.error('Error fetching care manual item data:', error);
-            }
-        };
+    fetchData();
+  }, []);
 
-        fetchData();
-    }, []);
-
-    return (
-        <ScrollView
+  const goBack = () => {
+    navigation.goBack();
+  };
+  const formatThaiDate = (dateString) => {
+    const date = moment(dateString, 'YYYY-MM-DD').locale('th').format('DD MMMM YYYY', 'th');
+    return date;
+  };
+  
+  
+  
+  return (
+   
+    <ScrollView
       keyboardShouldPersistTaps={'always'}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{paddingBottom: 40}}>
-        <View style={styles.containerCare}>
-            <Text style={styles.heardCare}>{caremanual_name}</Text>
-            {imageUri && <Image source={{ uri: imageUri }} style={{ width: 100, height: 100 }} />} 
-            <Text>{file}</Text>
-            <Text>{detail}</Text>
+      contentContainerStyle={{ paddingBottom: 40 }}>
+          
+        <View style={stylei.pagelogin}>
+        <TouchableOpacity style={stylei.iconback}  onPress={goBack}>
+          <Ionicons name={'arrow-back-outline'} size={22} color={'#fff'} />
+        </TouchableOpacity>
+        <Text style={stylei.heardCare}>{caremanual_name}</Text>
+        <Text style={stylei.textCare}>อัปเดตล่าสุดเมื่อ: {updatedAt}</Text>
+        <View style={stylei.loginContainer}>
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
+          <Image
+            source={require('../assets/17990674_1507541979265251_8984399877746883192_n.jpg')}
+            style={{ width: 300, height: 400,marginLeft:'auto',marginRight:'auto' }}
+          />
+        </TouchableOpacity>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(false);
+          }}
+        >
+          <View style={stylei.modalContainer}>
+            <TouchableOpacity style={stylei.closeButton} onPress={() => setModalVisible(false)}>
+              <Ionicons name="close" size={32} color="#fff" />
+            </TouchableOpacity>
+            <Image
+              source={require('../assets/17990674_1507541979265251_8984399877746883192_n.jpg')}
+              style={stylei.modalImage}
+            />
+          </View>
+        </Modal>
 
+        <TouchableOpacity style={stylei.containerCarefile} onPress={() => {
+        }}>
+          <Material name={'file-pdf-box'} color={'red'} size={24} />
+          <Text style={stylei.fileText}>{file}</Text>
+        </TouchableOpacity>
+        <View>
+        <Text style={stylei.text}>รายละเอียด : {detail}</Text>
         </View>
-        </ScrollView>
-    );
-   
+
+      </View>
+      </View>
+      {/* <View style={stylei.containerCare}> */}
+        
+       
+      {/* </View> */}
+    </ScrollView>
+  );
 }
 
-const styles = StyleSheet.create({
-    heardCare:{
-        color: 'black',
-        fontFamily: 'Arial',
-        fontSize: 18,
-        textAlign:'center',
-        fontWeight: 'normal',
-        padding: 10,
+const stylei = StyleSheet.create({
+  heardCare: {
+    color: 'black',
+    fontFamily: 'Arial',
+    fontSize: 30,
+    fontWeight: '700',
+    padding: 5,
+    textAlign:'center',
+    color:'#fff',
+  },
+  textCare:{
+    color: 'black',
+    fontFamily: 'Arial',
+    fontSize: 16,
+    fontWeight: 'normal',
+    paddingTop:1,
+    padding: 10,
+    textAlign:'center',
+    color:'#fff',
+    
+  },
+  containerCare: {
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 10,
+    margin: 15,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
     },
-    containerCare: {
-        backgroundColor: '#fff',
-        padding: 20,
-        borderRadius: 10,
-        margin: 15,
-        shadowColor: '#000',
-        shadowOffset: {
-          width: 0,
-          height: 4,
-        },
-        shadowOpacity: 0.5,
-        shadowRadius: 4.65,
-        elevation: 3,
-      },
+    shadowOpacity: 0.5,
+    shadowRadius: 4.65,
+    elevation: 3,
+
+  },
+  image: {
+    width: '100%',
+    height: 400,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  containerCarefile: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    // borderWidth: 1,
+    // borderColor: '#ccc',
+    // borderRadius: 5, 
+    padding:5,
+  },
+  fileText: {
+    marginLeft: 10,
+    fontSize: 16,
+    // color: 'black',
+    fontFamily: 'Arial',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  },
+  modalImage: {
+    width: '90%',
+    height: '90%',
+    resizeMode: 'contain',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+  },
+  text:{
+    color: 'black',
+    fontFamily: 'Arial',
+    fontSize: 16,
+    fontWeight: 'normal',
+    padding: 10,
+    
+  },
+  iconback: {
+    paddingHorizontal: 16,
+    paddingTop:16,
+    
+  },
+  loginContainer: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 50,
+    paddingHorizontal: 20,
+    paddingVertical: 30,
+    height: '100%',
+    flexDirection: 'column',
+  },
+  pagelogin:{
+    // backgroundColor: '#19A7CE',
+    // backgroundColor: '#4691D3',
+        backgroundColor: '#87CEFA',
+  },
 });

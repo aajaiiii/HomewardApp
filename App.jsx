@@ -1,4 +1,4 @@
-import {Text,Image} from 'react-native';
+import { Text, Image, TouchableOpacity } from 'react-native';
 import HomeScreen from './Screens/HomeScreen';
 import {useNavigation, NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -46,14 +46,13 @@ const HomeStack = () => {
         name="Caremanual"
         component={CaremanualScreen}
       />
+
       <Stack.Screen
-        options={{
-          title: 'คู่มือ',
-          headerShown:'false'
-        }}
-        name="Caremanualitem"
-        component={Caremanualitem}
-      />
+  name="Caremanualitem"
+  component={Caremanualitem}
+  options={{ headerShown: false }}
+/>
+
     </Stack.Navigator>
   );
 };

@@ -46,6 +46,7 @@ function LoginPage(props){
         <View style={styles.logoContainer}>
           <Image style={styles.logo} source={require('../../assets/Logo.png')}/>
         </View>
+        
         <View style={styles.loginContainer}>
           <Text style={styles.text_header}>เข้าสู่ระบบ</Text>    
           <View style={styles.action}>

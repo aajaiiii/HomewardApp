@@ -14,8 +14,9 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   pagelogin:{
-    backgroundColor: '#87CEFA',
-
+    // backgroundColor: '#19A7CE',
+    // backgroundColor: '#4691D3',
+        backgroundColor: '#87CEFA',
   },
   logoContainer: {
     justifyContent: 'center',

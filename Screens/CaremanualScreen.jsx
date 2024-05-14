@@ -47,7 +47,7 @@ function CaremanualScreen(props){
             <TouchableOpacity key={index} style={styles.container} 
             onPress={() => navigation.navigate('Caremanualitem', { id: item._id })}
             >
-              <Text style={style.text} onPress={() => navigation.navigate('Caremanualitem', { id: item._id })}>{item.caremanual_name}</Text>
+              <Text style={style.text} onPress={() => navigation.navigate('Caremanualitem', { itemName: item.caremanual_name, id: item._id })}>{item.caremanual_name}</Text>
             </TouchableOpacity>
           ))
         ) : (

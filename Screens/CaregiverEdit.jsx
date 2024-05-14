@@ -71,7 +71,7 @@ export default function CaregiverEdit() {
       contentContainerStyle={{paddingBottom: 40}}>
       <View style={style.container}>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <Text style={style.texthead}>ชื่อ</Text>
+          <Text style={style.text}>ชื่อ</Text>
           <TextInput
   style={[style.textInputRead, style.text]}
   onChangeText={text => setName(text)}           
@@ -80,7 +80,7 @@ export default function CaregiverEdit() {
 
         </View>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <Text style={style.texthead}>นามสกุล</Text>
+          <Text style={style.text}>นามสกุล</Text>
           <TextInput
             style={[style.textInputRead, style.text]}
             onChange={e => setSurname(e.nativeEvent.text)}
@@ -88,10 +88,10 @@ export default function CaregiverEdit() {
           />
         </View>
         <View >
-          <Text style={style.texthead}>เกี่ยวข้องเป็น</Text>
+          <Text style={style.text}>เกี่ยวข้องเป็น</Text>
           <View style={style.pickerContainer}>
           <Picker
-            style={[style.textInputRead, style.text]}
+            style={[style.Picker, style.text]}
             selectedValue={Relationship}
             onValueChange={itemValue => setRelationship(itemValue)}>
             {/* <Picker.Item label="เลือกความสัมพันธ์" value="" /> */}
@@ -108,7 +108,7 @@ export default function CaregiverEdit() {
           </View>
         </View>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <Text style={style.texthead}>เบอร์โทรศัพท์</Text>
+          <Text style={style.text}>เบอร์โทรศัพท์</Text>
           <TextInput
             style={[style.textInputRead, style.text]}
             onChange={e => setTel(e.nativeEvent.text)}

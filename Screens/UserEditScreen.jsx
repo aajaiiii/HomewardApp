@@ -31,38 +31,36 @@ export default function UserEditScreen(props) {
   const route = useRoute();
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [initialBirthday, setInitialBirthday] = useState('');
-  const [showRadio, setShowRadio] = useState(false);
+  const [inputHeight, setInputHeight] = useState(40); // ความสูงเริ่มต้นของ TextInput
 
-  const toggleRadio = () => {
-    setShowRadio(!showRadio);
+  const handleContentSizeChange = event => {
+    setInputHeight(event.nativeEvent.contentSize.height);
   };
 
-  const handleGenderSelection = selectedGender => {
-    setGender(selectedGender);
-    setShowRadio(false);
-  };
+
   const handleDateChange = (event, selectedDate) => {
-    setShowDatePicker(false);
-    if (selectedDate) {
-      const formattedDate = selectedDate.toLocaleDateString();
-      setBirthday(formattedDate);
-    } else {
-      setBirthday(initialBirthday);
-    }
+    const currentDate = selectedDate || birthday;
+    setBirthday(currentDate);
+    setShowDatePicker(Platform.OS === 'ios');
   };
 
-  const formatDate = date => {
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear() % 100;
+  async function getData() {
+    const token = await AsyncStorage.getItem('token');
+    console.log(token);
+    axios
+      .post('http://192.168.2.38:5000/userdata', {token: token})
+      .then(res => {
+        console.log(res.data);
+        setUserData(res.data.data);
+        
+        console.log(userData);
+      });
+  }
 
-    const formattedDay = day < 10 ? `0${day}` : `${day}`;
-    const formattedMonth = month < 10 ? `0${month}` : `${month}`;
-    const formattedYear = year < 10 ? `0${year}` : `${year}`;
-
-    return `${formattedDay}/${formattedMonth}/${formattedYear}`;
-  };
-
+  useEffect(() => {
+    getData();
+  }, []);
+  
   useEffect(() => {
     const userData = route.params.data;
     setUsername(userData.username);
@@ -94,12 +92,13 @@ export default function UserEditScreen(props) {
     };
 
     console.log(formdata);
-    axios.post('http://192.168.2.43:5000/updateuser', formdata).then(res => {
+    axios.post('http://192.168.2.38:5000/updateuser', formdata).then(res => {
       console.log(res.data);
       if (res.data.status == 'Ok') {
         Toast.show({
           type: 'success',
           text1: 'Updated',
+          text2: 'แก้ไขข้อมูลทั่วไปแล้ว',
         });
         navigation.navigate('User', {refresh: true});
       }
@@ -110,7 +109,8 @@ export default function UserEditScreen(props) {
     <ScrollView
       keyboardShouldPersistTaps={'always'}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{paddingBottom: 40}}>
+      contentContainerStyle={{paddingBottom: 40}}
+      style={{ backgroundColor: '#F7F7F7'}}>
       <View style={style.container}>
         <View>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -191,17 +191,13 @@ export default function UserEditScreen(props) {
 
 
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Text style={style.text}>วันเกิด</Text>
-
-            <TouchableOpacity
-              onPress={() => !showDatePicker && setShowDatePicker(true)}>
+          <Text style={style.text}>วันเกิด</Text>
+            <TouchableOpacity onPress={() => setShowDatePicker(true)}>
               <Text style={[style.textInputRead, style.text]}>
-                {birthday &&
-                  (showDatePicker
-                    ? formatDate(new Date(birthday))
-                    : formatDate(new Date(initialBirthday)))}
+                {birthday ? new Date(birthday).toLocaleDateString('en-GB') : 'Select Birthday'}
               </Text>
             </TouchableOpacity>
+
             <Text style={style.text}>สัญชาติ</Text>
             <TextInput
               style={[style.textInputRead, style.text]}
@@ -218,16 +214,17 @@ export default function UserEditScreen(props) {
             />
           )}
 
-     
+
 
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Text style={style.text}>ที่อยู่</Text>
             <TextInput
               multiline={true}
-              numberOfLines={4}
-              style={[style.textInputAddress, style.text]}
+              style={[style.textInputAddress, style.text, { height: Math.max(40, inputHeight) }]}
               onChange={e => setAddress(e.nativeEvent.text)}
               defaultValue={Address}
+              textAlignVertical="top"
+              onContentSizeChange={handleContentSizeChange}
             />
           </View>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>

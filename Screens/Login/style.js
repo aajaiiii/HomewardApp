@@ -46,7 +46,6 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     marginTop: -12,
-
     color: '#05375a',
   },
   loginContainer: {
@@ -68,7 +67,6 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   button: {
-    alignItems: 'center',
     marginTop: 20,
     alignItems: 'center',
     textAlign: 'center',

@@ -1,6 +1,10 @@
-import { Text, Image, TouchableOpacity } from 'react-native';
+import {Text, Image, TouchableOpacity} from 'react-native';
 import HomeScreen from './Screens/HomeScreen';
-import {useNavigation, NavigationContainer} from '@react-navigation/native';
+import {
+  useNavigation,
+  useRoute,
+  NavigationContainer,
+} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import ProfileScreen from './Screens/ProfileScreen';
 import LoginPage from './Screens/Login/Login';
@@ -9,17 +13,76 @@ import ChatScreen from './Screens/ChatScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useEffect, useState} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import SplashScreen from 'react-native-splash-screen';
+
+import Toast, {BaseToast, ErrorToast} from 'react-native-toast-message';
 import CaremanualScreen from './Screens/CaremanualScreen';
 import UserEditScreen from './Screens/UserEditScreen';
 import Caremanualitem from './Screens/CaremanualItem';
 import CaregiverEdit from './Screens/CaregiverEdit';
 import UpdatePassword from './Screens/Updatepassword';
-import Icon from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import PatientForm from './Screens/PatientForm';
+import PatientForm2 from './Screens/PatientForm2';
+import Assessment from './Screens/Assessment';
+import Assessmentitem from './Screens/Assessmentitem';
+import ForgotPassword from './Screens/Login/ForgotPassword';
+import VerifyOtp from './Screens/Login/VerifyOtp';
+import ResetPassword from './Screens/Login/ResetPassword';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+
+const toastConfig = {
+  success: props => (
+    <BaseToast
+      {...props}
+      style={{
+        borderLeftColor: 'green',
+        borderLeftWidth: 7,
+        width: '90%',
+        height: 70,
+        borderRightColor: 'green',
+        borderRightWidth: 7,
+      }}
+      contentContainerStyle={{paddingHorizontal: 15}}
+      text1Style={{
+        fontSize: 17,
+        fontWeight: '700',
+      }}
+      text2Style={{
+        fontSize: 14,
+      }}
+    />
+  ),
+
+  error: props => (
+    <ErrorToast
+      {...props}
+      text2NumberOfLines={3}
+      style={{
+        borderLeftColor: 'red',
+        borderLeftWidth: 7,
+        width: '90%',
+        height: 70,
+        borderRightColor: 'red',
+        borderRightWidth: 7,
+      }}
+      contentContainerStyle={{paddingHorizontal: 15}}
+      text1Style={{
+        fontSize: 17,
+        fontWeight: '700',
+      }}
+      text2Style={{
+        fontSize: 14,
+      }}
+    />
+  ),
+};
 
 const HomeStack = () => {
   const Stack = createNativeStackNavigator();
+  
   return (
+    
     <Stack.Navigator
       screenOptions={{
         headerShown: true,
@@ -27,14 +90,14 @@ const HomeStack = () => {
         headerTitleAlign: 'center',
       }}>
       <Stack.Screen
-           options={{
-            headerTitle: () => (
-              <Image
-                source={require('./assets/Logoblue.png')}
-                style={{ width: 200, height: 50 ,marginTop:8}} // ปรับขนาดตามที่คุณต้องการ
-              />
-            ),
-          }}
+        options={{
+          headerTitle: () => (
+            <Image
+              source={require('./assets/Logoblue.png')}
+              style={{width: 200, height: 50, marginTop: 8}} // ปรับขนาดตามที่คุณต้องการ
+            />
+          ),
+        }}
         name="Home"
         component={HomeScreen}
       />
@@ -48,17 +111,50 @@ const HomeStack = () => {
       />
 
       <Stack.Screen
-  name="Caremanualitem"
-  component={Caremanualitem}
-  options={{ headerShown: false }}
-/>
+        name="Caremanualitem"
+        component={Caremanualitem}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        options={{
+          title: 'บันทึกอาการผู้ป่วย',
+        }}
+        name="PatientForm"
+        component={PatientForm}
+      />
 
+      <Stack.Screen
+        name="PatientForm2"
+        component={PatientForm2}
+        options={{
+          title: 'บันทึกอาการผู้ป่วย',
+          // headerLeft: null,
+        }}
+      />
+      <Stack.Screen
+        name="Assessment"
+        component={Assessment}
+        options={{
+          title: 'ผลการประเมินอาการ',
+        }}
+      />
+      <Stack.Screen
+        name="Assessmentitem"
+        component={Assessmentitem}
+        options={{
+          title: 'ผลการประเมินอาการ',
+        }}
+      />
     </Stack.Navigator>
   );
 };
 
+
+
 const ProfileStack = () => {
   const Stack = createNativeStackNavigator();
+  const route = useRoute();
+
   return (
     <Stack.Navigator
       screenOptions={{
@@ -80,7 +176,6 @@ const ProfileStack = () => {
         name="User"
         component={UserScreen}
       />
-
       <Stack.Screen
         options={{
           title: 'แก้ไขข้อมูลทั่วไป',
@@ -91,24 +186,50 @@ const ProfileStack = () => {
       <Stack.Screen
         options={{
           title: 'แก้ไขข้อมูลผู้ดูแล',
-          tabBarVisible: false,
         }}
-        tabBarOptions={{}}
         name="CaregiverEdit"
         component={CaregiverEdit}
       />
       <Stack.Screen
         options={{
           title: 'เปลี่ยนรหัสผ่าน',
-          tabBarVisible: false,
         }}
-        tabBarOptions={{}}
         name="Updatepassword"
         component={UpdatePassword}
       />
+      {/* <Stack.Screen name="Login" component={LoginNav} /> */}
     </Stack.Navigator>
   );
 };
+
+// const UserEditNavigation = () => {
+//   const Stack = createNativeStackNavigator();
+//   return (
+//     <Stack.Navigator>
+//       <Stack.Screen
+//         options={{
+//           title: 'แก้ไขข้อมูลทั่วไป',
+//         }}
+//         name="UserEdit"
+//         component={UserEditScreen}
+//       />
+//       <Stack.Screen
+//         options={{
+//           title: 'แก้ไขข้อมูลผู้ดูแล',
+//         }}
+//         name="CaregiverEdit"
+//         component={CaregiverEdit}
+//       />
+//       <Stack.Screen
+//         options={{
+//           title: 'เปลี่ยนรหัสผ่าน',
+//         }}
+//         name="Updatepassword"
+//         component={UpdatePassword}
+//       />
+//     </Stack.Navigator>
+//   );
+// };
 
 const ChatStack = () => {
   const Stack = createNativeStackNavigator();
@@ -130,27 +251,29 @@ const ChatStack = () => {
   );
 };
 
-const DrawerNav = () => {
+
+// const DrawerNav = () => {
+//   const Drawer = createDrawerNavigator();
+//   return (
+//     <Drawer.Navigator
+//       drawerContent={props => <DrawerContent {...props} />}
+//       screenOptions={{
+//         headerShown: false,
+//       }}>
+//       <Drawer.Screen name="Home" component={TabNav} />
+//     </Drawer.Navigator>
+//   );
+// };
+
+const TabNav = () => {
   const Tab = createBottomTabNavigator();
   return (
     <Tab.Navigator
-    initialRouteName="หน้าหลัก"
-    screenOptions={{
+      initialRouteName="หน้าหลัก"
+      screenOptions={{
         headerShown: false,
-        headerStyle: {
-          backgroundColor: '#87CEFA',
-        },
-        headerTintColor: '#000',
-        headerTitleAlign: 'center',
       }}
-      tabBarOptions={{
-        activeTintColor: '#87CEFA',
-        inactiveTintColor: 'black',
-        // tabStyle: {backgroundColor: '#fff'},
-        tabStyle: {backgroundColor: '#fff'},
-
-      }}>
-        
+      >
       <Tab.Screen
         name="แช็ต"
         component={ChatStack}
@@ -179,7 +302,6 @@ const DrawerNav = () => {
       />
       <Tab.Screen
         name="การตั้งค่า"
-        
         component={ProfileStack}
         options={{
           tabBarIcon: ({color, size, focused}) => (
@@ -198,15 +320,26 @@ const DrawerNav = () => {
 const LoginNav = () => {
   const Stack = createNativeStackNavigator();
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false,
-      }}>
+    <Stack.Navigator screenOptions={{headerShown: false}}>
       <Stack.Screen name="Login" component={LoginPage} />
-      <Stack.Screen name="Home" component={DrawerNav} />
+      <Stack.Screen name="Home" component={TabNav} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+      <Stack.Screen name="VerifyOtp" component={VerifyOtp} />
+      <Stack.Screen name="ResetPassword" component={ResetPassword} />
     </Stack.Navigator>
   );
 };
+
+// function App() {
+//   const [isLoggedIn, setIsLoggedIn] = useState(false);
+//   async function getData() {
+//     const data = await AsyncStorage.getItem('isLoggedIn');
+//     console.log(data, 'at app.jsx');
+//     setIsLoggedIn(data);
+//   }
+
+const Stack = createNativeStackNavigator();
+
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -216,9 +349,15 @@ function App() {
     setIsLoggedIn(data);
   }
 
+  useEffect(() => {
+    getData();
+  }, [isLoggedIn]); 
+
+
   return (
     <NavigationContainer>
-      {isLoggedIn ? <DrawerNav /> : <LoginNav />}
+      {isLoggedIn ? <TabNav /> : <LoginNav />}
+      <Toast config={toastConfig} />
     </NavigationContainer>
   );
 }

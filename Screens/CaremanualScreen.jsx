@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View, Button,TouchableOpacity } from 'react-native';
+import {StyleSheet, Text, View, Button,TouchableOpacity,ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,7 +14,7 @@ function CaremanualScreen(props){
     async function getData(){
         const token = await AsyncStorage.getItem('token');
         console.log(token);
-        axios.post('http://192.168.2.43:5000/userdata',{token:token})
+        axios.post('http://192.168.2.38:5000/userdata',{token:token})
         .then(res =>{
             console.log(res.data);
             setUserData(res.data.data);
@@ -29,7 +29,7 @@ function CaremanualScreen(props){
     useEffect(() => {
         const fetchData = async () => {
           try {
-            const response = await axios.get('http://192.168.2.43:5000/allcaremanual');
+            const response = await axios.get('http://192.168.2.38:5000/allcaremanual');
             setCareManualData(response.data.data);
           } catch (error) {
             console.error('Error fetching care manual data:', error);
@@ -41,7 +41,12 @@ function CaremanualScreen(props){
 
 
     return(
-        <View>
+      <ScrollView
+      keyboardShouldPersistTaps={'always'}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{paddingBottom: 40}}
+      style={{ backgroundColor: '#f8f9fa'}}>
+        <View >
         {careManualData ? (
           careManualData.map((item, index) => (
             <TouchableOpacity key={index} style={styles.container} 
@@ -54,6 +59,7 @@ function CaremanualScreen(props){
           <Text style={styles.loadingText}>Loading...</Text>
         )}
       </View>
+      </ScrollView>
     );
 }
 

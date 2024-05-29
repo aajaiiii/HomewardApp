@@ -21,7 +21,7 @@ export default function Caremanualitem({ route, navigation }) {
       try {
         const token = await AsyncStorage.getItem('token');
         const response = await axios.get(
-          `http://192.168.2.43:5000/getcaremanual/${id}`,
+          `http://192.168.2.38:5000/getcaremanual/${id}`,
           { headers: { Authorization: `Bearer ${token}` } },
         );
         const data = response.data;
@@ -29,7 +29,7 @@ export default function Caremanualitem({ route, navigation }) {
         setImage(data.image);
         setDetail(data.detail);
         setFile(data.file);
-        setUpdatedAt(formatThaiDate(data.updatedAt)); 
+        setUpdatedAt(formatDate(data.updatedAt)); 
       } catch (error) {
         console.error('Error fetching care manual item data:', error);
       }
@@ -41,9 +41,32 @@ export default function Caremanualitem({ route, navigation }) {
   const goBack = () => {
     navigation.goBack();
   };
-  const formatThaiDate = (dateString) => {
-    const date = moment(dateString, 'YYYY-MM-DD').locale('th').format('DD MMMM YYYY', 'th');
-    return date;
+  const formatDate = (dateTimeString) => {
+    const dateTime = new Date(dateTimeString); // สร้างวัตถุ Date จากสตริงวันที่และเวลา
+    const day = dateTime.getDate(); // รับวัน
+    const month = dateTime.getMonth() + 1; // รับเดือน (เริ่มต้นจาก 0)
+    const year = dateTime.getFullYear(); // รับปี
+    const hours = dateTime.getHours(); // รับชั่วโมง
+    const minutes = dateTime.getMinutes(); // รับนาที
+  
+    // ปรับเปลี่ยนเดือนเป็นภาษาไทย
+    const thaiMonths = [
+      'มกราคม',
+      'กุมภาพันธ์',
+      'มีนาคม',
+      'เมษายน',
+      'พฤษภาคม',
+      'มิถุนายน',
+      'กรกฎาคม',
+      'สิงหาคม',
+      'กันยายน',
+      'ตุลาคม',
+      'พฤศจิกายน',
+      'ธันวาคม'
+    ];
+  
+    // จัดรูปแบบให้อยู่ในรูปแบบ 'dd เดือน(ภาษาไทย) yyyy เวลา HH:MM น.'
+    return `${day < 10 ? '0' + day : day} ${thaiMonths[month - 1]} ${year + 543}`;
   };
   
   

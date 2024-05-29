@@ -17,7 +17,7 @@ function HomeScreen(props) {
     const token = await AsyncStorage.getItem('token');
     console.log(token);
     axios
-      .post('http://192.168.2.43:5000/userdata', {token: token})
+      .post('http://192.168.2.38:5000/userdata', {token: token})
       .then(res => {
         console.log(res.data);
         setUserData(res.data.data);
@@ -32,12 +32,20 @@ function HomeScreen(props) {
   const Caremanual = () => {
     navigation.navigate('Caremanual', {userData: 'userData'});
   };
+  const PatientForm = () => {
+    navigation.navigate('PatientForm', {userData: 'userData'});
+  };
+
+  const Assessment = () => {
+    navigation.navigate('Assessment', {userData: 'userData'});
+  };
 
   return (
     <ScrollView
     keyboardShouldPersistTaps={'always'}
     showsVerticalScrollIndicator={false}
-    contentContainerStyle={{paddingBottom: 40}}>
+    contentContainerStyle={{paddingBottom: 40}}
+    style={{ backgroundColor: '#F7F7F7'}}>
         {/* <View >
         <Image style={styles.image} source={require('../assets/imagehome.png')}
        />
@@ -69,16 +77,16 @@ function HomeScreen(props) {
           คู่มือดูแลผู้ป่วย
         </Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.container} >
+      <TouchableOpacity style={styles.container} onPress={PatientForm}>
       <Image style={styles.buttonImage} source={require('../assets/personal-information.png')} />
 
-        <Text style={styles.text} title="Caremanual">
+        <Text style={styles.text} title="PatientForm">
           บันทึกอาการผู้ป่วย
         </Text>
       </TouchableOpacity>
       
       </View>
-      <TouchableOpacity style={styles.container1}>
+      <TouchableOpacity style={styles.container1} onPress={Assessment}>
       <Image style={styles.buttonImage} source={require('../assets/calendar.png')} />
         <Text style={styles.text} title="Caremanual">
         ผลการประเมินอาการ

@@ -49,7 +49,7 @@ export default function CaregiverEdit() {
       console.log(formdata);
 
       const res = await axios.post(
-        'http://192.168.2.43:5000/updatecaregiver',
+        'http://192.168.2.38:5000/updatecaregiver',
         formdata,
       );
       console.log(res.data);
@@ -57,6 +57,7 @@ export default function CaregiverEdit() {
         Toast.show({
           type: 'success',
           text1: 'Updated',
+          text2: 'แก้ไขรหัสผ่านแล้ว',
         });
         navigation.navigate('User', {refresh: true});
       }
@@ -68,7 +69,8 @@ export default function CaregiverEdit() {
     <ScrollView
       keyboardShouldPersistTaps={'always'}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{paddingBottom: 40}}>
+      contentContainerStyle={{paddingBottom: 40}}
+      style={{ backgroundColor: '#F7F7F7'}}>
       <View style={style.container}>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <Text style={style.text}>ชื่อ</Text>

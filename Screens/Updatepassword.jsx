@@ -27,6 +27,15 @@ export default function UpdatePassword(props) {
     const [username, setUsername] = useState('');
     const route = useRoute();
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+      const unsubscribe = navigation.addListener('focus', () => {
+        setError(null);
+      });
+  
+      return unsubscribe;
+    }, [navigation]);
 
     useEffect(() => {
         const userData = route.params.data;
@@ -36,32 +45,54 @@ export default function UpdatePassword(props) {
 
 
     const UpdatePassword = () => {
-        const formdata = {
-         username: username,
-         password:password,
-         newPassword,
-         confirmNewPassword,
-        };
-    
-        axios.post('http://192.168.2.43:5000/updatepassuser', formdata).then(res => {
-          console.log(res.data);
-          if (res.data.status == 'Ok') {
-            Toast.show({
-              type: 'success',
-              text1: 'Updated',
-            });
-            navigation.navigate('Profile', { refresh: true });
-          }else{
-            setError(data.error);
-          }
-          
-        });
+
+      // if (newPassword !== confirmNewPassword) {
+      //   setConfirmNewPasswordError("รหัสผ่านใหม่ไม่ตรงกัน");
+      //   valid = false;
+      // }
+ 
+      const formData = {
+        username: username,
+        password: password,
+        newPassword: newPassword,
+        confirmNewPassword: confirmNewPassword,
       };
+  
+      setLoading(true);
+      axios.post('http://192.168.2.38:5000/updatepassuser', formData).then(res => {
+        setLoading(false);
+        if (res.data.status === 'Ok') {
+          Toast.show({
+            type: 'success',
+            text1: 'Updated',
+            text2: 'แก้ไขรหัสผ่านแล้ว',
+          });
+          navigation.navigate('Profile', { refresh: true });
+        } else {
+          setError(res.data.error);
+          // Toast.show({
+          //   type: 'error',
+          //   text1: 'Error',
+          //   text2: res.data.error,
+          // });
+        }
+      }).catch(err => {
+        setLoading(false);
+        if (err.response && err.response.data && err.response.data.error) {
+          setError(err.response.data.error);
+        } else {
+          setError("เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน โปรดลองใหม่อีกครั้ง");
+        }
+      });
+    };
+  
+
       return (
       <ScrollView
       keyboardShouldPersistTaps={'always'}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{paddingBottom: 40}}>
+      contentContainerStyle={{paddingBottom: 40}}
+      style={{ backgroundColor: '#F7F7F7'}}>
       <View style={style.container}>
 
         <View>
@@ -73,6 +104,7 @@ export default function UpdatePassword(props) {
               secureTextEntry
             />
             </View>
+
           </View>
 
           <View>
@@ -84,6 +116,7 @@ export default function UpdatePassword(props) {
               secureTextEntry
             />
             </View>
+
           </View>
           
           <View>
@@ -95,8 +128,10 @@ export default function UpdatePassword(props) {
               secureTextEntry
             />
             </View>
+
           </View>
-      
+          {error ? <Text style={stylespass.errorText}>{error}</Text> : null}
+
           <TouchableOpacity
             onPress={() => UpdatePassword()}
             style={style.inBut}>
@@ -104,8 +139,15 @@ export default function UpdatePassword(props) {
               <Text style={style.textinBut}>บันทึก</Text>
             </View>
           </TouchableOpacity>
+
         </View>
       </View>
     </ScrollView>
   );
-}
+}const stylespass = StyleSheet.create({
+  errorText: {
+    color: 'red',
+    marginTop: 5,
+    marginLeft: 5,
+  },
+});

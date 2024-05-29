@@ -20,6 +20,8 @@ function UserScreen(props) {
   const [userData, setUserData] = useState('');
   const isFocused = useIsFocused();
   const [caregiverInfo, setCaregiverInfo] = useState(null);
+  const [userAge, setUserAge] = useState(0);
+  const [userAgeInMonths, setUserAgeInMonths] = useState(0);
 
   useEffect(() => {
     if (isFocused) {
@@ -32,7 +34,7 @@ function UserScreen(props) {
     const token = await AsyncStorage.getItem('token');
     console.log(token);
     axios
-      .post('http://192.168.2.43:5000/userdata', {token: token})
+      .post('http://192.168.2.38:5000/userdata', {token: token})
       .then(res => {
         console.log(res.data);
         setUserData(res.data.data);
@@ -58,7 +60,7 @@ function UserScreen(props) {
     try {
       if (userData) {
         const response = await axios.get(
-          `http://192.168.2.43:5000/getcaregiver/${userData._id}`,
+          `http://192.168.2.38:5000/getcaregiver/${userData._id}`,
         );
         setCaregiverInfo(response.data.data);
       }
@@ -73,23 +75,41 @@ function UserScreen(props) {
 
   const currentDate = new Date();
 
-  const userBirthday =
-    userData && userData.birthday ? new Date(userData.birthday) : null;
-  const ageDiff = userBirthday
-    ? currentDate.getFullYear() - userBirthday.getFullYear()
-    : 0;
-  const isBeforeBirthday =
-    userBirthday &&
-    (currentDate.getMonth() < userBirthday.getMonth() ||
-      (currentDate.getMonth() === userBirthday.getMonth() &&
-        currentDate.getDate() < userBirthday.getDate()));
-  const userAge = isBeforeBirthday ? ageDiff - 1 : ageDiff;
+  // const userBirthday =
+  //   userData && userData.birthday ? new Date(userData.birthday) : null;
+  // const ageDiff = userBirthday
+  //   ? currentDate.getFullYear() - userBirthday.getFullYear()
+  //   : 0;
+  // const isBeforeBirthday =
+  //   userBirthday &&
+  //   (currentDate.getMonth() < userBirthday.getMonth() ||
+  //     (currentDate.getMonth() === userBirthday.getMonth() &&
+  //       currentDate.getDate() < userBirthday.getDate()));
+  // const userAge = isBeforeBirthday ? ageDiff - 1 : ageDiff;
+  // const userAgeInMonths = (ageDiff * 12) + (currentDate.getMonth() - userBirthday.getMonth());
 
+useEffect(() => {
+    if (userData && userData.birthday) {
+      const userBirthday = new Date(userData.birthday);
+      const ageDiff = currentDate.getFullYear() - userBirthday.getFullYear();
+      const monthDiff = currentDate.getMonth() - userBirthday.getMonth();
+      setUserAgeInMonths(monthDiff >= 0 ? monthDiff : 12 + monthDiff);
+
+      if (monthDiff < 0 || (monthDiff === 0 && currentDate.getDate() < userBirthday.getDate())) {
+        setUserAge(ageDiff - 1);
+      } else {
+        setUserAge(ageDiff);
+      }
+    }
+  }, [userData, currentDate]);
+
+  
   return (
     <ScrollView
       keyboardShouldPersistTaps={'always'}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{paddingBottom: 40}}>
+      contentContainerStyle={{paddingBottom: 40}}
+      style={{ backgroundColor: '#F7F7F7'}}>
       <View style={[style.container, {flex: 1}]}>
         <View
           style={{
@@ -142,17 +162,18 @@ function UserScreen(props) {
               </Text>
             </View>
             <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
-              <Text style={style.text}>อายุ:</Text>
-              {userData && userData.birthday ? (
-                <Text style={[style.text]}>
-                  {userAge} ปี{' '}
-                  {currentDate.getMonth() - userBirthday.getMonth()} เดือน
-                </Text>
-              ) : (
-                <Text style={[style.text]}>0 ปี 0 เดือน</Text>
-              )}
-              {/* <Text style={[style.text,style.textWidth]}></Text> */}
-            </View>
+            <Text style={style.text}>อายุ:</Text>
+{userData && userData.birthday ? (
+  <Text style={[style.text]}>
+    {userAge} ปี {userAgeInMonths} เดือน
+  </Text>
+) : (
+  <Text style={[style.text]}>0 ปี 0 เดือน</Text>
+)}
+
+</View>
+
+
 
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <Text style={style.text}>สัญชาติ :</Text>
@@ -160,7 +181,7 @@ function UserScreen(props) {
                 {userData.nationality}
               </Text>
             </View>
-            <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
+            <View style={{flexDirection: 'row',  flex: 1}}>
               <Text style={[style.text]}>ที่อยู่ :</Text>
               <Text style={[style.text, style.textWidth]}>
                 {userData.Address}

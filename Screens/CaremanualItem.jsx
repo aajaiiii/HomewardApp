@@ -7,7 +7,8 @@ import Material from 'react-native-vector-icons/MaterialCommunityIcons';
 import { PDFView } from 'react-native-pdf';
 import styles from './Login/style';
 import moment from 'moment'; 
-export default function Caremanualitem({ route, navigation }) {
+export default function Caremanualitem({ route, navigation,props }) {
+  console.log(props);
   const [caremanual_name, setCaremanualName] = useState('');
   const [image, setImage] = useState(null);
   const [file, setFile] = useState(null);

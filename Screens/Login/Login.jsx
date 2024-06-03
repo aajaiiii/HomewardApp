@@ -17,7 +17,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import Icon1 from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-function LoginPage(props) {
+function LoginPage({ setIsLoggedIn }) {
   const navigation = useNavigation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -46,27 +46,14 @@ function LoginPage(props) {
         if (res.data.status == 'ok') {
           // Alert.alert('Login success');
           AsyncStorage.setItem('token', res.data.data);
-          AsyncStorage.setItem('isLoggedIn', JSON.stringify(true));
+          AsyncStorage.setItem('isLoggedIn', JSON.stringify(true));          
           navigation.navigate('Home');
         }
       })
       .catch(error => {
-        // console.error('Error:', error.response?.data?.error || error.message);
-        // Alert.alert("Login failed", error.response?.data?.error || "Please try again");
         setError(error.response?.data?.error);
       });
   }
-
-  async function getData() {
-    const data = await AsyncStorage.getItem('isLoggedIn');
-    
-    console.log(data, 'at app.jsx');
-  
-  }
-  useEffect(()=>{
-    getData();
-    console.log("Hii");
-  },[])
 
   const forgot = () => {
     navigation.navigate('ForgotPassword');

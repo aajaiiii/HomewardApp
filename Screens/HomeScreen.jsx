@@ -1,4 +1,4 @@
-import {StyleSheet,Image, Text, View, Button, TouchableOpacity,ScrollView, Linking } from 'react-native';
+import {StyleSheet,Image, Text, View, Button, TouchableOpacity,ScrollView, Linking ,BackHandler,Alert} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -6,6 +6,8 @@ import axios from 'axios';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import styless from './style';
 import Swiper from 'react-native-swiper';
+import {useFocusEffect} from '@react-navigation/native';
+import React from 'react';
 
 const googleUrl = "https://bangkokpattayahospital.com/th/health-articles-th/neuroscience-th/nine-risk-factors-in-cerebrovascular-accidents-th/";
 
@@ -24,9 +26,35 @@ function HomeScreen(props) {
         console.log(userData);
       });
   }
+  const handleBackPress = () => {
+    Alert.alert('ออกจากแอป', 'คถณต้องการออกจากแอปเราใช่ไหม?', [
+      {
+        text: 'ไม่',
+        onPress: () => null,
+        style: 'ไม่',
+      },
+      {
+        text: 'ใช่',
+        onPress: () => BackHandler.exitApp(),
+      },
+    ]);
+    return true;
+  };
+
+
+ useFocusEffect(
+    React.useCallback(() => {
+      BackHandler.addEventListener('hardwareBackPress', handleBackPress);  
+    
+      return () => {
+        BackHandler.removeEventListener('hardwareBackPress', handleBackPress);
+      };
+ } ))
 
   useEffect(() => {
     getData();
+
+   
   }, []);
 
   const Caremanual = () => {
@@ -39,6 +67,12 @@ function HomeScreen(props) {
   const Assessment = () => {
     navigation.navigate('Assessment', {userData: 'userData'});
   };
+
+  async function logout() {
+    AsyncStorage.setItem('isLoggedIn','');
+    AsyncStorage.setItem('token','');
+    navigation.navigate("LoginUser");
+  }
 
   return (
     <ScrollView
@@ -92,7 +126,9 @@ function HomeScreen(props) {
         ผลการประเมินอาการ
         </Text>
       </TouchableOpacity>
+      
     </ScrollView>
+    
 
   );
 }

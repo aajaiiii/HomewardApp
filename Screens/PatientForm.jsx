@@ -18,7 +18,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import RNPickerSelect from 'react-native-picker-select';
 import styleform from './styleform'; 
 
-export default function PatientForm({ route }) {
+export default function PatientForm({ route,props }) {
+  console.log(props);
   const [userData, setUserData] = useState('');
   const navigation = useNavigation();
   const [Symptom1, setSymptom1] = useState('');

@@ -20,6 +20,7 @@ import {
 
 
 export default function UpdatePassword(props) {
+  console.log(props);
     const navigation = useNavigation();
     const [password, setPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");

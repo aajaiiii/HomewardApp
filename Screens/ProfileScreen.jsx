@@ -15,111 +15,49 @@ import style from './style';
 import styles from './Login/style';
 import Icon from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { CommonActions } from '@react-navigation/native';
 
-function ProfileScreen({navigation}) {
+function ProfileScreen({ setIsLoggedIn }) {
   const [userData, setUserData] = useState('');
+  const navigation = useNavigation();
 
   async function getData() {
     const token = await AsyncStorage.getItem('token');
     console.log(token);
     axios
-      .post('http://192.168.2.38:5000/userdata', {token: token})
-      .then(res => {
+      .post('http://192.168.2.38:5000/userdata', { token: token })
+      .then((res) => {
         console.log(res.data);
         setUserData(res.data.data);
-        console.log(userData);
-        console.log('tt',token);
-
       });
   }
 
   useEffect(() => {
     getData();
   }, []);
-  
-  //ใช้ได้ตลอด
-  // function logout() {
-  //   AsyncStorage.removeItem('isLoggedIn');
-  //   AsyncStorage.removeItem('token');
-  //   navigation.reset({
-  //     index: 0,
-  //     routes: [{ name: 'LoginUser' }],
-  //   });
-  // }
-  
 
-  // function logout() {
-  //   AsyncStorage.setItem('isLoggedIn', '');
-  //   AsyncStorage.setItem('token', '');
-  //   navigation.dispatch(
-  //     CommonActions.reset({
-  //       index: 0,
-  //       routes: [
-  //         { name: 'LoginUser' },
-  //       ],
-  //     })
-  //   );
-  // }
-
-  // async function logout() {
-  //   try {
-  //     await AsyncStorage.removeItem('token');
-  //     await AsyncStorage.removeItem('isLoggedIn');
-  //     navigation.navigate('LoginUser');
-  //   } catch (error) {
-  //     console.error('Error while logging out:', error);
-  //   }
-  // }
-
-  // function logout() {
-  //   try {
-  //     Alert.alert(
-  //       'ออกจากระบบจากบัญชีของคุณใช่ไหม',
-  //       '',
-  //       [
-  //         {
-  //           text: 'ยกเลิก',
-  //           onPress: () => console.log('ยกเลิกการออกจากระบบ'),
-  //           style: 'cancel',
-  //         },
-  //         {
-  //           text: 'ออกจากระบบ',
-  //           onPress : () => {
-  //             AsyncStorage.setItem('isLoggedIn','');
-  //             AsyncStorage.setItem('token','');
-  //             navigation.navigate('Login');
-  //           },
-  //         },
-  //       ],
-  //       { cancelable: false }
-  //     );
-  //   } catch (error) {
-  //     console.error('Error while logging out:', error);
-  //   }
-  // }
-  
-  // function logout() {
-  //   Alert.alert(
-  //     "ยืนยันการออกจากระบบ",
-  //     "คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?",
-  //     [
-  //       {
-  //         text: "ยกเลิก",
-  //         onPress: () => console.log("ยกเลิก"),
-  //         style: "cancel"
-  //       },
-  //       { text: "ตกลง", onPress: () => handleLogout() }
-  //     ]
-  //   );
-  // }
-  
-  async function logout() {
-    await AsyncStorage.setItem('isLoggedIn', '');
-    await AsyncStorage.setItem('token', '');
-    navigation.navigate("Login");
+  function logout() {
+    Alert.alert(
+      'ยืนยันการออกจากระบบ',
+      'คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?',
+      [
+        {
+          text: 'ยกเลิก',
+          onPress: () => console.log('ยกเลิก'),
+          style: 'cancel',
+        },
+        {
+          text: 'ตกลง',
+          onPress: () => {
+            AsyncStorage.clear().then(() => {
+              setIsLoggedIn(false);
+              navigation.navigate('LoginUser');
+            });
+          },
+        },
+      ]
+    );
   }
-  
+
 
   return (
     <ScrollView

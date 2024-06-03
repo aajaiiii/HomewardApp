@@ -20,6 +20,7 @@ import {useRoute} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 
 export default function PatientForm2(props) {
+  console.log(props);
   const [userData, setUserData] = useState('');
   const navigation = useNavigation();
   const [BloodPressure, setBloodPressure] = useState('');
@@ -72,7 +73,6 @@ export default function PatientForm2(props) {
     };
   
     try {
-      await AsyncStorage.setItem('formData2', JSON.stringify(formdata1));
       const response = await axios.post(
         'http://192.168.2.38:5000/addpatientform',
         formdata1,

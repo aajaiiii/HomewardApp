@@ -13,7 +13,8 @@ import style from './style';
 import Toast from 'react-native-toast-message';
 import {Picker} from '@react-native-picker/picker'; // นำเข้า Picker ให้ถูกต้อง
 
-export default function CaregiverEdit() {
+export default function CaregiverEdit(props) {
+  console.log(props);
   const [user, setUser] = useState('');
   const [name, setName] = useState('');
   const [surname, setSurname] = useState('');

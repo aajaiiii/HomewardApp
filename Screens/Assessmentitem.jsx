@@ -12,8 +12,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import style from './style';
 
-export default function Assessmentitem() {
+export default function Assessmentitem(props) {
   const route = useRoute();
+  console.log(props);
   const selectedItem = route.params.selectedItem;
   const [userData, setUserData] = useState('');
   const [assessment, setAssessment] = useState('');
@@ -168,7 +169,7 @@ export default function Assessmentitem() {
               <Text style={styles.labelText}>อายุ: </Text>
     
             <Text style={styles.infoText}>
-              อายุ: {userAge} ปี {userAgeInMonths} เดือน
+              {userAge} ปี {userAgeInMonths} เดือน
             </Text>
             </View>
           ) : (

@@ -29,7 +29,8 @@ import Assessmentitem from './Screens/Assessmentitem';
 import ForgotPassword from './Screens/Login/ForgotPassword';
 import VerifyOtp from './Screens/Login/VerifyOtp';
 import ResetPassword from './Screens/Login/ResetPassword';
-import { createDrawerNavigator } from '@react-navigation/drawer';
+import {createDrawerNavigator} from '@react-navigation/drawer';
+
 
 const toastConfig = {
   success: props => (
@@ -80,9 +81,8 @@ const toastConfig = {
 
 const HomeStack = () => {
   const Stack = createNativeStackNavigator();
-  
+
   return (
-    
     <Stack.Navigator
       screenOptions={{
         headerShown: true,
@@ -115,22 +115,7 @@ const HomeStack = () => {
         component={Caremanualitem}
         options={{headerShown: false}}
       />
-      <Stack.Screen
-        options={{
-          title: 'บันทึกอาการผู้ป่วย',
-        }}
-        name="PatientForm"
-        component={PatientForm}
-      />
 
-      <Stack.Screen
-        name="PatientForm2"
-        component={PatientForm2}
-        options={{
-          title: 'บันทึกอาการผู้ป่วย',
-          // headerLeft: null,
-        }}
-      />
       <Stack.Screen
         name="Assessment"
         component={Assessment}
@@ -145,15 +130,13 @@ const HomeStack = () => {
           title: 'ผลการประเมินอาการ',
         }}
       />
+      <Stack.Screen name="TabNav" component={TabNav} />
     </Stack.Navigator>
   );
 };
 
-
-
 const ProfileStack = () => {
   const Stack = createNativeStackNavigator();
-  const route = useRoute();
 
   return (
     <Stack.Navigator
@@ -176,60 +159,10 @@ const ProfileStack = () => {
         name="User"
         component={UserScreen}
       />
-      <Stack.Screen
-        options={{
-          title: 'แก้ไขข้อมูลทั่วไป',
-        }}
-        name="UserEdit"
-        component={UserEditScreen}
-      />
-      <Stack.Screen
-        options={{
-          title: 'แก้ไขข้อมูลผู้ดูแล',
-        }}
-        name="CaregiverEdit"
-        component={CaregiverEdit}
-      />
-      <Stack.Screen
-        options={{
-          title: 'เปลี่ยนรหัสผ่าน',
-        }}
-        name="Updatepassword"
-        component={UpdatePassword}
-      />
-      {/* <Stack.Screen name="Login" component={LoginNav} /> */}
+      <Stack.Screen name="LoginUser" component={LoginNav} />
     </Stack.Navigator>
   );
 };
-
-// const UserEditNavigation = () => {
-//   const Stack = createNativeStackNavigator();
-//   return (
-//     <Stack.Navigator>
-//       <Stack.Screen
-//         options={{
-//           title: 'แก้ไขข้อมูลทั่วไป',
-//         }}
-//         name="UserEdit"
-//         component={UserEditScreen}
-//       />
-//       <Stack.Screen
-//         options={{
-//           title: 'แก้ไขข้อมูลผู้ดูแล',
-//         }}
-//         name="CaregiverEdit"
-//         component={CaregiverEdit}
-//       />
-//       <Stack.Screen
-//         options={{
-//           title: 'เปลี่ยนรหัสผ่าน',
-//         }}
-//         name="Updatepassword"
-//         component={UpdatePassword}
-//       />
-//     </Stack.Navigator>
-//   );
-// };
 
 const ChatStack = () => {
   const Stack = createNativeStackNavigator();
@@ -251,20 +184,6 @@ const ChatStack = () => {
   );
 };
 
-
-// const DrawerNav = () => {
-//   const Drawer = createDrawerNavigator();
-//   return (
-//     <Drawer.Navigator
-//       drawerContent={props => <DrawerContent {...props} />}
-//       screenOptions={{
-//         headerShown: false,
-//       }}>
-//       <Drawer.Screen name="Home" component={TabNav} />
-//     </Drawer.Navigator>
-//   );
-// };
-
 const TabNav = () => {
   const Tab = createBottomTabNavigator();
   return (
@@ -272,8 +191,7 @@ const TabNav = () => {
       initialRouteName="หน้าหลัก"
       screenOptions={{
         headerShown: false,
-      }}
-      >
+      }}>
       <Tab.Screen
         name="แช็ต"
         component={ChatStack}
@@ -317,6 +235,72 @@ const TabNav = () => {
   );
 };
 
+//หน้าที่ไม่แสดง TabNav
+const MainStack = () => {
+  const Stack = createNativeStackNavigator();
+
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerTintColor: '#000',
+        headerTitleAlign: 'center',
+      }}>
+
+
+      <Stack.Screen
+        options={{
+          headerShown: false,
+        }}
+        name="TabNav"
+        component={TabNav}
+      />
+            <Stack.Screen
+        options={{
+          title: 'บันทึกอาการผู้ป่วย',
+        }}
+        name="PatientForm"
+        component={PatientForm}
+      />
+
+      <Stack.Screen
+        name="PatientForm2"
+        component={PatientForm2}
+        options={{
+          title: 'บันทึกอาการผู้ป่วย',
+        }}
+      />
+      <Stack.Screen
+        options={{
+          title: 'แก้ไขข้อมูลทั่วไป',
+        }}
+        name="UserEdit"
+        component={UserEditScreen}
+      />
+      <Stack.Screen
+        options={{
+          title: 'แก้ไขข้อมูลผู้ดูแล',
+        }}
+        name="CaregiverEdit"
+        component={CaregiverEdit}
+      />
+      <Stack.Screen
+        options={{
+          title: 'เปลี่ยนรหัสผ่าน',
+        }}
+        name="Updatepassword"
+        component={UpdatePassword}
+      />
+    </Stack.Navigator>
+  );
+};
+
+
+const FormStack = () => {
+  const Stack = createNativeStackNavigator();
+
+
+}
+
 const LoginNav = () => {
   const Stack = createNativeStackNavigator();
   return (
@@ -330,33 +314,33 @@ const LoginNav = () => {
   );
 };
 
-// function App() {
-//   const [isLoggedIn, setIsLoggedIn] = useState(false);
-//   async function getData() {
-//     const data = await AsyncStorage.getItem('isLoggedIn');
-//     console.log(data, 'at app.jsx');
-//     setIsLoggedIn(data);
-//   }
-
-const Stack = createNativeStackNavigator();
-
-
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   async function getData() {
     const data = await AsyncStorage.getItem('isLoggedIn');
     console.log(data, 'at app.jsx');
-    setIsLoggedIn(data);
+    setIsLoggedIn(JSON.parse(data));
   }
 
   useEffect(() => {
     getData();
-  }, [isLoggedIn]); 
+  }, []);
 
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      const data = await AsyncStorage.getItem('isLoggedIn');
+      setIsLoggedIn(JSON.parse(data));
+    };
+
+    const interval = setInterval(checkLoginStatus, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
+    
     <NavigationContainer>
-      {isLoggedIn ? <TabNav /> : <LoginNav />}
+      {isLoggedIn ? <MainStack /> : <LoginNav />}
       <Toast config={toastConfig} />
     </NavigationContainer>
   );

@@ -16,12 +16,13 @@ import axios from 'axios';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import styless from './style';
 import {format} from 'date-fns';
-export default function Assessment() {
+export default function Assessment(props) {
   const navigation = useNavigation();
   const [userData, setUserData] = useState('');
   const [patientForms, setPatientForms] = useState('');
   const [assessments, setAssessments] = useState([]);
   const [sortOrder, setSortOrder] = useState('latest');
+  console.log(props);
 
   async function getData() {
     const token = await AsyncStorage.getItem('token');

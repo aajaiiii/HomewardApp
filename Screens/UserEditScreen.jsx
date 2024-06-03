@@ -17,6 +17,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import style from './style';
 
 export default function UserEditScreen(props) {
+  console.log(props);
   const navigation = useNavigation();
   const [gender, setGender] = useState('');
   const [username, setUsername] = useState('');
@@ -92,7 +93,7 @@ export default function UserEditScreen(props) {
     };
 
     console.log(formdata);
-    axios.post('http://192.168.2.38:5000/updateuser', formdata).then(res => {
+    axios.post('http://192.168.2.38:5000/updateuserapp', formdata).then(res => {
       console.log(res.data);
       if (res.data.status == 'Ok') {
         Toast.show({

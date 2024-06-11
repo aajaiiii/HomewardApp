@@ -41,8 +41,6 @@ export default function PatientForm2(props) {
     setInputHeight(event.nativeEvent.contentSize.height);
   };
 
-
-  
   useEffect(() => {
     const fetchData = async () => {
       const token = await AsyncStorage.getItem('token');

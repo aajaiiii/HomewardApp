@@ -1,19 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Modal,
+  Linking
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Material from 'react-native-vector-icons/MaterialCommunityIcons';
 import { PDFView } from 'react-native-pdf';
 import styles from './Login/style';
-import moment from 'moment'; 
-export default function Caremanualitem({ route, navigation,props }) {
+import moment from 'moment';
+export default function Caremanualitem({route, navigation, props}) {
   console.log(props);
   const [caremanual_name, setCaremanualName] = useState('');
   const [image, setImage] = useState(null);
   const [file, setFile] = useState(null);
   const [detail, setDetail] = useState('');
-  const { id } = route.params;
+  const {id} = route.params;
   const [modalVisible, setModalVisible] = useState(false); // State สำหรับควบคุมการแสดง Modal
   const [updatedAt, setUpdatedAt] = useState('');
 
@@ -23,14 +32,14 @@ export default function Caremanualitem({ route, navigation,props }) {
         const token = await AsyncStorage.getItem('token');
         const response = await axios.get(
           `http://192.168.2.38:5000/getcaremanual/${id}`,
-          { headers: { Authorization: `Bearer ${token}` } },
+          {headers: {Authorization: `Bearer ${token}`}},
         );
         const data = response.data;
         setCaremanualName(data.caremanual_name);
         setImage(data.image);
         setDetail(data.detail);
         setFile(data.file);
-        setUpdatedAt(formatDate(data.updatedAt)); 
+        setUpdatedAt(formatDate(data.updatedAt));
       } catch (error) {
         console.error('Error fetching care manual item data:', error);
       }
@@ -42,14 +51,14 @@ export default function Caremanualitem({ route, navigation,props }) {
   const goBack = () => {
     navigation.goBack();
   };
-  const formatDate = (dateTimeString) => {
-    const dateTime = new Date(dateTimeString); // สร้างวัตถุ Date จากสตริงวันที่และเวลา
-    const day = dateTime.getDate(); // รับวัน
-    const month = dateTime.getMonth() + 1; // รับเดือน (เริ่มต้นจาก 0)
-    const year = dateTime.getFullYear(); // รับปี
-    const hours = dateTime.getHours(); // รับชั่วโมง
-    const minutes = dateTime.getMinutes(); // รับนาที
-  
+  const formatDate = dateTimeString => {
+    const dateTime = new Date(dateTimeString);
+    const day = dateTime.getDate();
+    const month = dateTime.getMonth() + 1;
+    const year = dateTime.getFullYear();
+    const hours = dateTime.getHours();
+    const minutes = dateTime.getMinutes();
+
     // ปรับเปลี่ยนเดือนเป็นภาษาไทย
     const thaiMonths = [
       'มกราคม',
@@ -63,68 +72,76 @@ export default function Caremanualitem({ route, navigation,props }) {
       'กันยายน',
       'ตุลาคม',
       'พฤศจิกายน',
-      'ธันวาคม'
+      'ธันวาคม',
     ];
-  
+
     // จัดรูปแบบให้อยู่ในรูปแบบ 'dd เดือน(ภาษาไทย) yyyy เวลา HH:MM น.'
-    return `${day < 10 ? '0' + day : day} ${thaiMonths[month - 1]} ${year + 543}`;
+    return `${day < 10 ? '0' + day : day} ${thaiMonths[month - 1]} ${
+      year + 543
+    }`;
   };
-  
-  
-  
+
   return (
-   
     <ScrollView
       keyboardShouldPersistTaps={'always'}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 40 }}>
-          
-        <View style={stylei.pagelogin}>
-        <TouchableOpacity style={stylei.iconback}  onPress={goBack}>
+      contentContainerStyle={{paddingBottom: 40}}>
+      <View style={stylei.pagelogin}>
+        <TouchableOpacity style={stylei.iconback} onPress={goBack}>
           <Ionicons name={'arrow-back-outline'} size={22} color={'#fff'} />
         </TouchableOpacity>
         <Text style={stylei.heardCare}>{caremanual_name}</Text>
         <Text style={stylei.textCare}>อัปเดตล่าสุดเมื่อ: {updatedAt}</Text>
         <View style={stylei.loginContainer}>
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <Image
-            source={require('../assets/17990674_1507541979265251_8984399877746883192_n.jpg')}
-            style={{ width: 300, height: 400,marginLeft:'auto',marginRight:'auto' }}
-          />
-        </TouchableOpacity>
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(false);
-          }}
-        >
-          <View style={stylei.modalContainer}>
-            <TouchableOpacity style={stylei.closeButton} onPress={() => setModalVisible(false)}>
-              <Ionicons name="close" size={32} color="#fff" />
-            </TouchableOpacity>
+          <TouchableOpacity onPress={() => setModalVisible(true)}>
             <Image
-              source={require('../assets/17990674_1507541979265251_8984399877746883192_n.jpg')}
-              style={stylei.modalImage}
+              source={{uri: image}}
+              style={{
+                width: 300,
+                height: 400,
+                marginLeft: 'auto',
+                marginRight: 'auto',
+              }}
             />
+          </TouchableOpacity>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => {
+              setModalVisible(false);
+            }}>
+            <View style={stylei.modalContainer}>
+              <TouchableOpacity
+                style={stylei.closeButton}
+                onPress={() => setModalVisible(false)}>
+                <Ionicons name="close" size={32} color="#fff" />
+              </TouchableOpacity>
+              <Image source={{uri: image}} style={stylei.modalImage} />
+            </View>
+          </Modal>
+
+          <TouchableOpacity
+  style={stylei.containerCarefile}
+  onPress={() => {
+    Linking.openURL(file);
+  }}>
+  <Material name={'file-pdf-box'} color={'red'} size={24} />
+  <Text style={stylei.fileText}>เปิดไฟล์ PDF</Text>
+</TouchableOpacity>
+{/* <PDFView
+  fadeInDuration={250.0}
+  style={{ flex: 1 }}
+  resource={file} 
+  resourceType={'url'}
+/> */}
+          <View>
+            <Text style={stylei.text}>รายละเอียด : {detail}</Text>
           </View>
-        </Modal>
-
-        <TouchableOpacity style={stylei.containerCarefile} onPress={() => {
-        }}>
-          <Material name={'file-pdf-box'} color={'red'} size={24} />
-          <Text style={stylei.fileText}>{file}</Text>
-        </TouchableOpacity>
-        <View>
-        <Text style={stylei.text}>รายละเอียด : {detail}</Text>
         </View>
-
-      </View>
       </View>
       {/* <View style={stylei.containerCare}> */}
-        
-       
+
       {/* </View> */}
     </ScrollView>
   );
@@ -137,19 +154,18 @@ const stylei = StyleSheet.create({
     fontSize: 30,
     fontWeight: '700',
     padding: 5,
-    textAlign:'center',
-    color:'#fff',
+    textAlign: 'center',
+    color: '#fff',
   },
-  textCare:{
+  textCare: {
     color: 'black',
     fontFamily: 'Arial',
     fontSize: 16,
     fontWeight: 'normal',
-    paddingTop:1,
+    paddingTop: 1,
     padding: 10,
-    textAlign:'center',
-    color:'#fff',
-    
+    textAlign: 'center',
+    color: '#fff',
   },
   containerCare: {
     backgroundColor: '#fff',
@@ -164,7 +180,6 @@ const stylei = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 4.65,
     elevation: 3,
-
   },
   image: {
     width: '100%',
@@ -178,8 +193,8 @@ const stylei = StyleSheet.create({
     marginTop: 20,
     // borderWidth: 1,
     // borderColor: '#ccc',
-    // borderRadius: 5, 
-    padding:5,
+    // borderRadius: 5,
+    padding: 5,
   },
   fileText: {
     marginLeft: 10,
@@ -203,18 +218,16 @@ const stylei = StyleSheet.create({
     top: 20,
     right: 20,
   },
-  text:{
+  text: {
     color: 'black',
     fontFamily: 'Arial',
     fontSize: 16,
     fontWeight: 'normal',
     padding: 10,
-    
   },
   iconback: {
     paddingHorizontal: 16,
-    paddingTop:16,
-    
+    paddingTop: 16,
   },
   loginContainer: {
     backgroundColor: '#fff',
@@ -225,9 +238,9 @@ const stylei = StyleSheet.create({
     height: '100%',
     flexDirection: 'column',
   },
-  pagelogin:{
+  pagelogin: {
     // backgroundColor: '#19A7CE',
     // backgroundColor: '#4691D3',
-        backgroundColor: '#87CEFA',
+    backgroundColor: '#87CEFA',
   },
 });

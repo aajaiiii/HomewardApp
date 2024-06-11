@@ -29,8 +29,7 @@ import Assessmentitem from './Screens/Assessmentitem';
 import ForgotPassword from './Screens/Login/ForgotPassword';
 import VerifyOtp from './Screens/Login/VerifyOtp';
 import ResetPassword from './Screens/Login/ResetPassword';
-import {createDrawerNavigator} from '@react-navigation/drawer';
-
+import ChatSendScreen from './Screens/ChatSendScreen';
 
 const toastConfig = {
   success: props => (
@@ -180,6 +179,7 @@ const ChatStack = () => {
         name="Chat"
         component={ChatScreen}
       />
+
     </Stack.Navigator>
   );
 };
@@ -289,6 +289,11 @@ const MainStack = () => {
         }}
         name="Updatepassword"
         component={UpdatePassword}
+      />
+ <Stack.Screen
+        name="ChatSend"
+        component={ChatSendScreen}
+        options={({ route }) => ({ title: route.params.userName })}
       />
     </Stack.Navigator>
   );

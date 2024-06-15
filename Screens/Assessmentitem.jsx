@@ -230,8 +230,13 @@ export default function Assessmentitem(props) {
           <Text></Text>
           <Text style={styles.sectionHeader}>Vital signs</Text>
           <View style={styles.row}>
-            <Text style={styles.labelText}>ความดันโลหิต:</Text>
-            <Text style={styles.infoText}>{selectedItem.BloodPressure}</Text>
+            <Text style={styles.labelText}>ความดันตัวบน:</Text>
+            <Text style={styles.infoText}>{selectedItem.SBP}</Text>
+            <Text style={styles.infoText}>mmHg</Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={styles.labelText}>ความดันตัวล่าง:</Text>
+            <Text style={styles.infoText}>{selectedItem.DBP}</Text>
             <Text style={styles.infoText}>mmHg</Text>
           </View>
           <View style={styles.row}>

@@ -124,11 +124,24 @@ export default function Caremanualitem({route, navigation, props}) {
           <TouchableOpacity
   style={stylei.containerCarefile}
   onPress={() => {
-    Linking.openURL(file);
+    if (file) {
+      Linking.openURL(file);
+    } else {
+      console.error('File URL is not available.');
+    }
   }}>
   <Material name={'file-pdf-box'} color={'red'} size={24} />
   <Text style={stylei.fileText}>เปิดไฟล์ PDF</Text>
 </TouchableOpacity>
+
+{/* 
+<PDFView
+  fadeInDuration={250.0}
+  style={{ flex: 1 }}
+  resource={file} 
+  resourceType={'url'}
+/> */}
+
 {/* <PDFView
   fadeInDuration={250.0}
   style={{ flex: 1 }}

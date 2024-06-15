@@ -12,7 +12,7 @@ import {useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import style from './style';
-import styleform from './styleform'; 
+import styleform from './styleform';
 import Icon from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import RNPickerSelect from 'react-native-picker-select';
@@ -23,7 +23,9 @@ export default function PatientForm2(props) {
   console.log(props);
   const [userData, setUserData] = useState('');
   const navigation = useNavigation();
-  const [BloodPressure, setBloodPressure] = useState('');
+  // const [BloodPressure, setBloodPressure] = useState('');
+  const [SBP, setSBP] = useState('');
+  const [DBP, setDBP] = useState('');
   const [PulseRate, setPulseRate] = useState('');
   const [Temperature, setTemperature] = useState('');
   const [DTX, setDTX] = useState('');
@@ -33,7 +35,7 @@ export default function PatientForm2(props) {
   const [request_detail, setRequest_detail] = useState('');
   const [Recorder, setRecorder] = useState('');
   const route = useRoute();
-  const { formData } = route.params;
+  const {formData} = route.params;
   const isFocused = useIsFocused();
   const [inputHeight, setInputHeight] = useState(40); // ความสูงเริ่มต้นของ TextInput
 
@@ -50,15 +52,14 @@ export default function PatientForm2(props) {
           setUserData(res.data.data);
         });
     };
-  
+
     fetchData();
   }, [formData]);
 
-  
-
   const AddpatientForm = async () => {
     const formdata1 = {
-      BloodPressure,
+      SBP,
+      DBP,
       PulseRate,
       Temperature,
       DTX,
@@ -69,7 +70,7 @@ export default function PatientForm2(props) {
       Recorder,
       ...formData,
     };
-  
+
     try {
       const response = await axios.post(
         'http://192.168.2.38:5000/addpatientform',
@@ -93,12 +94,9 @@ export default function PatientForm2(props) {
       });
     }
   };
-  
-
 
   const goBack = () => {
     navigation.goBack();
-    
   };
 
   return (
@@ -106,44 +104,54 @@ export default function PatientForm2(props) {
       keyboardShouldPersistTaps={'always'}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{paddingBottom: 40}}
-      style={{ backgroundColor: '#F7F7F7'}}>
+      style={{backgroundColor: '#F7F7F7'}}>
       <View style={[styleform.container, {flex: 1}]}>
         <Text style={styleform.sectionHeader}>Vital signs</Text>
         <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
           <View style={stylep.texttitle}>
-            <Text style={stylep.text}>ความดันโลหิต(mmHg)</Text>
-            <TextInput
-  style={[style.textInputRead, style.text]}
-  onChangeText={text => setBloodPressure(text)}
-  value={BloodPressure}
-/>
-
-          </View>
-          <View style={stylep.texttitle}>
-            <Text style={stylep.text}>ชีพจร(ครั้ง/นาที)</Text>
+            {/* <Text style={stylep.text}>ความดันโลหิต(mmHg)</Text> */}
+            <Text style={stylep.text}>ความดันตัวบน(mmHg)</Text>
             <TextInput
               style={[style.textInputRead, style.text]}
-                onChange={e => setPulseRate(e.nativeEvent.text)}
+              onChangeText={text => setSBP(text)}
+              value={SBP}
+            />
+          </View>
+          <View style={stylep.texttitle}>
+            {/* <Text style={stylep.text}>ความดันโลหิต(mmHg)</Text> */}
+            <Text style={stylep.text}>ความดันตัวล่าง(mmHg)</Text>
+            <TextInput
+              style={[style.textInputRead, style.text]}
+              onChangeText={text => setDBP(text)}
+              value={DBP}
             />
           </View>
         </View>
         <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
+        <View style={stylep.texttitle}>
+            <Text style={stylep.text}>ชีพจร(ครั้ง/นาที)</Text>
+            <TextInput
+              style={[style.textInputRead, style.text]}
+              onChange={e => setPulseRate(e.nativeEvent.text)}
+            />
+          </View>
           <View style={stylep.texttitle}>
             <Text style={stylep.text}>การหายใจ(ครั้ง/นาที)</Text>
             <TextInput
               style={[style.textInputRead, style.text]}
-                onChange={e => setRespiration(e.nativeEvent.text)}
+              onChange={e => setRespiration(e.nativeEvent.text)}
             />
           </View>
-          <View style={stylep.texttitle}>
+         
+        </View>
+        <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
+        <View style={stylep.texttitle}>
             <Text style={stylep.text}>อุณหภูมิ(°C)</Text>
             <TextInput
               style={[style.textInputRead, style.text]}
-                onChange={e => setTemperature(e.nativeEvent.text)}
+              onChange={e => setTemperature(e.nativeEvent.text)}
             />
           </View>
-        </View>
-        <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
           <View style={stylep.texttitle}>
             <Text style={stylep.text}>ระดับความเจ็บปวด</Text>
             <RNPickerSelect
@@ -160,14 +168,16 @@ export default function PatientForm2(props) {
                 {label: '8', value: '8'},
                 {label: '9', value: '9'},
                 {label: '10', value: '10'},
-              
               ]}
               style={pickerSelectStyles}
-          placeholder={{ label: 'เลือกระดับ', value: null }}
-          useNativeAndroidPickerStyle={false} 
+              placeholder={{label: 'เลือกระดับ', value: null}}
+              useNativeAndroidPickerStyle={false}
             />
           </View>
-          <View style={stylep.texttitle}>
+         
+        </View>
+        <View style={{alignItems: 'Left'}}>
+        <View style={stylep.texttitle}>
             <Text style={stylep.text}>ความรุนแรงของอาการ</Text>
             <RNPickerSelect
               onValueChange={value => setLevelSymptom(value)}
@@ -177,35 +187,36 @@ export default function PatientForm2(props) {
                 {label: 'พอ ๆ เดิม', value: 'พอ ๆ เดิม'},
               ]}
               style={pickerSelectStyles}
-          placeholder={{ label: 'เลือกความรุนแรง', value: null }}
-          useNativeAndroidPickerStyle={false} 
+              placeholder={{label: 'เลือกความรุนแรง', value: null}}
+              useNativeAndroidPickerStyle={false}
+            />
+          </View>
+          <View style={[stylep.texttitle]}>
+            <Text style={stylep.text}>ระดับน้ำตาลในเลือด(mg/dL)</Text>
+            <TextInput
+              style={[style.textInputRead, style.text, {width: 175}]}
+              onChange={e => setDTX(e.nativeEvent.text)}
             />
           </View>
         </View>
-        <View style={{alignItems: 'Left'}}>
-        <View style={[stylep.texttitle]}>
-            <Text style={stylep.text}>ระดับน้ำตาลในเลือด(mg/dL)</Text>
-            <TextInput
-              style={[style.textInputRead, style.text,{width:175}]}
-                onChange={e => setDTX(e.nativeEvent.text)}
-            />
-          </View>
-      </View>
         <View>
           <Text style={stylep.text}>
             สิ่งที่อยากให้ทีมแพทย์ช่วยเหลือเพิ่มเติม
           </Text>
           <TextInput
-        style={[style.textInputRead, style.text, { height: Math.max(40, inputHeight) }]}
-        value={request_detail}
-        onChangeText={setRequest_detail}
-        multiline={true}
-        textAlignVertical="top"
-        onContentSizeChange={handleContentSizeChange}
-      />
+            style={[
+              style.textInputRead,
+              style.text,
+              {height: Math.max(40, inputHeight)},
+            ]}
+            value={request_detail}
+            onChangeText={setRequest_detail}
+            multiline={true}
+            textAlignVertical="top"
+            onContentSizeChange={handleContentSizeChange}
+          />
         </View>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
-
           <View style={stylep.texttitle}>
             <Text style={stylep.text}>ผู้บันทึก</Text>
             <RNPickerSelect
@@ -213,24 +224,22 @@ export default function PatientForm2(props) {
               items={[
                 {label: 'ผู้ป่วย', value: 'ผู้ป่วย'},
                 {label: 'ผู้ดูแล', value: 'ผู้ดูแล'},
-                
               ]}
               style={pickerSelectStyles}
-          placeholder={{ label: 'เลือกผู้บันทึก', value: null }}
-          useNativeAndroidPickerStyle={false} 
+              placeholder={{label: 'เลือกผู้บันทึก', value: null}}
+              useNativeAndroidPickerStyle={false}
             />
           </View>
         </View>
       </View>
       <View style={stylep.buttonContainer}>
-  <TouchableOpacity onPress={goBack} style={stylep.textCC}>
-    <Text style={stylep.cancelButtonText}>ย้อนกลับ</Text>
-  </TouchableOpacity>
-  <TouchableOpacity onPress={AddpatientForm} style={stylep.textOk}>
-    <Text style={stylep.buttonText}>บันทึก</Text>
-  </TouchableOpacity>
-</View>
-
+        <TouchableOpacity onPress={goBack} style={stylep.textCC}>
+          <Text style={stylep.cancelButtonText}>ย้อนกลับ</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={AddpatientForm} style={stylep.textOk}>
+          <Text style={stylep.buttonText}>บันทึก</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }
@@ -242,14 +251,13 @@ const stylep = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'normal',
     padding: 5,
-    paddingLeft:8,
-
+    paddingLeft: 8,
   },
   texttitle: {
     flex: 1,
     marginRight: 3,
-  }, 
-  select:{
+  },
+  select: {
     fontSize: 16,
     paddingVertical: 8,
     paddingHorizontal: 10,
@@ -257,7 +265,7 @@ const stylep = StyleSheet.create({
     borderColor: 'purple',
     borderRadius: 8,
     color: 'black',
-    paddingRight: 30, 
+    paddingRight: 30,
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -273,7 +281,7 @@ const stylep = StyleSheet.create({
     flex: 1,
     marginHorizontal: 5,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.8,
     shadowRadius: 2,
     elevation: 3,
@@ -288,7 +296,7 @@ const stylep = StyleSheet.create({
     flex: 1,
     marginHorizontal: 5,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.8,
     shadowRadius: 2,
     elevation: 3,
@@ -301,30 +309,29 @@ const stylep = StyleSheet.create({
     color: '#87CEFA',
     fontWeight: 'bold',
   },
-
 });
 
 const pickerSelectStyles = StyleSheet.create({
-    inputIOS: {
-        borderWidth: 1, 
-        borderColor: '#DCDCDC', 
-        borderRadius: 10, 
-        paddingHorizontal: 8,
-        marginTop: 1, 
-        height:45,
-        marginVertical:4,
-    },
-    inputAndroid: {
-        borderWidth: 1, 
-        borderColor: '#DCDCDC', 
-        borderRadius: 10, 
-        paddingHorizontal: 8,
-        marginTop: 1, 
-        height:45,
-        marginVertical:4,
-    },
-    placeholder: {
-      color: 'gray',
-      fontSize: 14, // Adjust placeholder font size
-    },
-  });
+  inputIOS: {
+    borderWidth: 1,
+    borderColor: '#DCDCDC',
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    marginTop: 1,
+    height: 45,
+    marginVertical: 4,
+  },
+  inputAndroid: {
+    borderWidth: 1,
+    borderColor: '#DCDCDC',
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    marginTop: 1,
+    height: 45,
+    marginVertical: 4,
+  },
+  placeholder: {
+    color: 'gray',
+    fontSize: 14, // Adjust placeholder font size
+  },
+});

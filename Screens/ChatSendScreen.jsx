@@ -11,6 +11,7 @@ import {
   Platform,
   Image,
   Modal,
+  Linking,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -21,8 +22,7 @@ import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
 
 function ChatSendScreen() {
   const route = useRoute();
-  const {userName, recipientId, recipientModel, currentRecipient} =
-    route.params;
+  const {userName, recipientId, recipientModel, currentRecipient} = route.params;
   const [message, setMessage] = useState('');
   const [recipientChats, setRecipientChats] = useState([]);
   const [data, setData] = useState({});
@@ -67,6 +67,8 @@ function ChatSendScreen() {
       }
     });
   };
+
+  
 
   const ImageModal = () => (
     <Modal
@@ -120,6 +122,7 @@ function ChatSendScreen() {
     fetchData();
   }, []);
 
+  
   useEffect(() => {
     if (sender) {
       fetchRecipientChats(recipientId, recipientModel);
@@ -134,6 +137,8 @@ function ChatSendScreen() {
       const response = await axios.get(
         `http://192.168.2.38:5000/chat/${recipientId}/${recipientModel}/${sender}/${senderModel}`,
       );
+      console.log('Response Data:', response.data);
+
       setRecipientChats(response.data.chats || []);
       console.log('Chats:', response.data.chats);
     } catch (error) {
@@ -217,6 +222,17 @@ function ChatSendScreen() {
       minutes < 10 ? '0' + minutes : minutes
     }`;
   };
+
+  const isValidUrl = message => {
+    try {
+      const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$/i;
+      return urlPattern.test(message);
+    } catch (e) {
+      console.error('Error in URL validation regex:', e);
+      return false;
+    }
+  };
+
   return (
     <View style={{flex: 1}}>
       <ScrollView style={styles.chatMessages} ref={scrollViewRef}>
@@ -259,10 +275,18 @@ function ChatSendScreen() {
                       </View>
                     </TouchableOpacity>
                   ) : (
-                    <View style={[styles.chatMessage, styles.sent]}>
-                      <Text style={[styles.messageContent, styles.sentText]}>
-                        {chat.message}
-                      </Text>
+                          <View style={[styles.chatMessage, styles.sent]}>
+                      {isValidUrl(chat.message) ? (
+                        <TouchableOpacity onPress={() => Linking.openURL(chat.message)}>
+                          <Text style={[styles.messageContent, styles.sentText, { textDecorationLine: 'underline' }]}>
+                            {chat.message}
+                          </Text>
+                        </TouchableOpacity>
+                      ) : (
+                        <Text style={[styles.messageContent, styles.sentText]}>
+                          {chat.message}
+                        </Text>
+                      )}
                     </View>
                   )}
                 </>
@@ -283,11 +307,18 @@ function ChatSendScreen() {
                     </TouchableOpacity>
                   ) : (
                     <View style={[styles.chatMessage, styles.received]}>
-                      <Text
-                        style={[styles.messageContent, styles.receivedText]}>
+                    {isValidUrl(chat.message) ? (
+                      <TouchableOpacity onPress={() => Linking.openURL(chat.message)}>
+                        <Text style={[styles.messageContent, styles.receivedText, { textDecorationLine: 'underline' }]}>
+                          {chat.message}
+                        </Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <Text style={[styles.messageContent, styles.receivedText]}>
                         {chat.message}
                       </Text>
-                    </View>
+                    )}
+                  </View>
                   )}
 
                   <Text style={[styles.date, styles.receivedDate]}>

@@ -24,7 +24,7 @@ function ProfileScreen({ setIsLoggedIn }) {
     const token = await AsyncStorage.getItem('token');
     console.log(token);
     axios
-      .post('http://192.168.2.38:5000/userdata', { token: token })
+      .post('http://192.168.2.43:5000/userdata', { token: token })
       .then((res) => {
         console.log(res.data);
         setUserData(res.data.data);

@@ -18,62 +18,100 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import RNPickerSelect from 'react-native-picker-select';
 import {useRoute} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
-
 export default function PatientForm2(props) {
   console.log(props);
   const [userData, setUserData] = useState('');
   const navigation = useNavigation();
-  // const [BloodPressure, setBloodPressure] = useState('');
   const [SBP, setSBP] = useState('');
   const [DBP, setDBP] = useState('');
   const [PulseRate, setPulseRate] = useState('');
   const [Temperature, setTemperature] = useState('');
   const [DTX, setDTX] = useState('');
-  const [Resptration, setRespiration] = useState('');
+  const [Respiration, setRespiration] = useState('');
   const [LevelSymptom, setLevelSymptom] = useState('');
   const [Painscore, setPainscore] = useState('');
   const [request_detail, setRequest_detail] = useState('');
   const [Recorder, setRecorder] = useState('');
   const route = useRoute();
-  const {formData} = route.params;
+  const { formData } = route.params;
   const isFocused = useIsFocused();
-  const [inputHeight, setInputHeight] = useState(40); // ความสูงเริ่มต้นของ TextInput
+  const [inputHeight, setInputHeight] = useState(40); // Initial height of TextInput
 
   const handleContentSizeChange = event => {
     setInputHeight(event.nativeEvent.contentSize.height);
+  };
+
+  const saveFormData = async (data) => {
+    try {
+      await AsyncStorage.setItem('patientForm', JSON.stringify(data));
+    } catch (e) {
+      console.error('Failed to save the form data.', e);
+    }
+  };
+
+  const loadFormData = async () => {
+    try {
+      const jsonData = await AsyncStorage.getItem('patientForm');
+      return jsonData ? JSON.parse(jsonData) : null;
+    } catch (e) {
+      console.error('Failed to load the form data.', e);
+    }
   };
 
   useEffect(() => {
     const fetchData = async () => {
       const token = await AsyncStorage.getItem('token');
       axios
-        .post('http://192.168.2.38:5000/userdata', {token: token})
+        .post('http://192.168.2.43:5000/userdata', { token: token })
         .then(res => {
           setUserData(res.data.data);
         });
+
+      const savedData = await loadFormData();
+      if (savedData) {
+        setSBP(savedData.SBP || '');
+        setDBP(savedData.DBP || '');
+        setPulseRate(savedData.PulseRate || '');
+        setTemperature(savedData.Temperature || '');
+        setDTX(savedData.DTX || '');
+        setRespiration(savedData.Respiration || '');
+        setLevelSymptom(savedData.LevelSymptom || '');
+        setPainscore(savedData.Painscore || '');
+        setRequest_detail(savedData.request_detail || '');
+        setRecorder(savedData.Recorder || '');
+      }
     };
 
     fetchData();
   }, [formData]);
 
   const AddpatientForm = async () => {
+    if (formData.symptoms.includes('') || formData.symptoms.includes('new_symptom')) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'กรุณาเลือกอาการให้ครบถ้วน',
+      });
+      return;
+    }
     const formdata1 = {
+      Symptoms: formData.symptoms,
       SBP,
       DBP,
       PulseRate,
       Temperature,
       DTX,
-      Resptration,
+      Respiration,
       LevelSymptom,
       Painscore,
       request_detail,
       Recorder,
-      ...formData,
+      user: formData.user
     };
 
     try {
       const response = await axios.post(
-        'http://192.168.2.38:5000/addpatientform',
+        'http://192.168.2.43:5000/addpatientform',
         formdata1,
       );
       if (response.data.status === 'ok') {
@@ -82,20 +120,35 @@ export default function PatientForm2(props) {
           text1: 'Successful',
           text2: 'บันทึกอาการแล้ว',
         });
-        navigation.navigate('Home', {refresh: true});
+        await AsyncStorage.removeItem('patientForm');
+        navigation.navigate('Home', { refresh: true });
       }
     } catch (error) {
       console.error('Error adding patient form:', error);
       Toast.show({
         type: 'error',
         text1: 'Error',
-        text2:
-          'There was a problem updating the patient form. Please try again.',
+        text2: 'There was a problem updating the patient form. Please try again.',
       });
     }
   };
 
-  const goBack = () => {
+  const goBack = async () => {
+    const formdata1 = {
+      Symptoms: formData.symptoms,
+      SBP,
+      DBP,
+      PulseRate,
+      Temperature,
+      DTX,
+      Respiration,
+      LevelSymptom,
+      Painscore,
+      request_detail,
+      Recorder,
+      user: formData.user
+    };
+    await saveFormData(formdata1);
     navigation.goBack();
   };
 
@@ -103,13 +156,12 @@ export default function PatientForm2(props) {
     <ScrollView
       keyboardShouldPersistTaps={'always'}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{paddingBottom: 40}}
-      style={{backgroundColor: '#F7F7F7'}}>
-      <View style={[styleform.container, {flex: 1}]}>
+      contentContainerStyle={{ paddingBottom: 40 }}
+      style={{ backgroundColor: '#F7F7F7' }}>
+      <View style={[styleform.container, { flex: 1 }]}>
         <Text style={styleform.sectionHeader}>Vital signs</Text>
-        <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
           <View style={stylep.texttitle}>
-            {/* <Text style={stylep.text}>ความดันโลหิต(mmHg)</Text> */}
             <Text style={stylep.text}>ความดันตัวบน(mmHg)</Text>
             <TextInput
               style={[style.textInputRead, style.text]}
@@ -118,7 +170,6 @@ export default function PatientForm2(props) {
             />
           </View>
           <View style={stylep.texttitle}>
-            {/* <Text style={stylep.text}>ความดันโลหิต(mmHg)</Text> */}
             <Text style={stylep.text}>ความดันตัวล่าง(mmHg)</Text>
             <TextInput
               style={[style.textInputRead, style.text]}
@@ -127,12 +178,13 @@ export default function PatientForm2(props) {
             />
           </View>
         </View>
-        <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
-        <View style={stylep.texttitle}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+          <View style={stylep.texttitle}>
             <Text style={stylep.text}>ชีพจร(ครั้ง/นาที)</Text>
             <TextInput
               style={[style.textInputRead, style.text]}
               onChange={e => setPulseRate(e.nativeEvent.text)}
+              value={PulseRate}
             />
           </View>
           <View style={stylep.texttitle}>
@@ -140,16 +192,17 @@ export default function PatientForm2(props) {
             <TextInput
               style={[style.textInputRead, style.text]}
               onChange={e => setRespiration(e.nativeEvent.text)}
+              value={Respiration}
             />
           </View>
-         
         </View>
-        <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
-        <View style={stylep.texttitle}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+          <View style={stylep.texttitle}>
             <Text style={stylep.text}>อุณหภูมิ(°C)</Text>
             <TextInput
               style={[style.textInputRead, style.text]}
               onChange={e => setTemperature(e.nativeEvent.text)}
+              value={Temperature}
             />
           </View>
           <View style={stylep.texttitle}>
@@ -157,57 +210,57 @@ export default function PatientForm2(props) {
             <RNPickerSelect
               onValueChange={value => setPainscore(value)}
               items={[
-                {label: '0', value: '0'},
-                {label: '1', value: '1'},
-                {label: '2', value: '2'},
-                {label: '3', value: '3'},
-                {label: '4', value: '4'},
-                {label: '5', value: '5'},
-                {label: '6', value: '6'},
-                {label: '7', value: '7'},
-                {label: '8', value: '8'},
-                {label: '9', value: '9'},
-                {label: '10', value: '10'},
+                { label: '0', value: '0' },
+                { label: '1', value: '1' },
+                { label: '2', value: '2' },
+                { label: '3', value: '3' },
+                { label: '4', value: '4' },
+                { label: '5', value: '5' },
+                { label: '6', value: '6' },
+                { label: '7', value: '7' },
+                { label: '8', value: '8' },
+                { label: '9', value: '9' },
+                { label: '10', value: '10' },
               ]}
               style={pickerSelectStyles}
-              placeholder={{label: 'เลือกระดับ', value: null}}
+              placeholder={{ label: 'เลือกระดับ', value: null }}
               useNativeAndroidPickerStyle={false}
+              value={Painscore}
             />
           </View>
-         
         </View>
-        <View style={{alignItems: 'Left'}}>
-        <View style={stylep.texttitle}>
+        <View style={{ alignItems: 'Left' }}>
+          <View style={stylep.texttitle}>
             <Text style={stylep.text}>ความรุนแรงของอาการ</Text>
             <RNPickerSelect
               onValueChange={value => setLevelSymptom(value)}
               items={[
-                {label: 'ดีขึ้น', value: 'ดีขึ้น'},
-                {label: 'แย่ลง', value: 'แย่ลง'},
-                {label: 'พอ ๆ เดิม', value: 'พอ ๆ เดิม'},
+                { label: 'ดีขึ้น', value: 'ดีขึ้น' },
+                { label: 'แย่ลง', value: 'แย่ลง' },
+                { label: 'พอ ๆ เดิม', value: 'พอ ๆ เดิม' },
               ]}
               style={pickerSelectStyles}
-              placeholder={{label: 'เลือกความรุนแรง', value: null}}
+              placeholder={{ label: 'เลือกความรุนแรง', value: null }}
               useNativeAndroidPickerStyle={false}
+              value={LevelSymptom}
             />
           </View>
           <View style={[stylep.texttitle]}>
             <Text style={stylep.text}>ระดับน้ำตาลในเลือด(mg/dL)</Text>
             <TextInput
-              style={[style.textInputRead, style.text, {width: 175}]}
+              style={[style.textInputRead, style.text, { width: 175 }]}
               onChange={e => setDTX(e.nativeEvent.text)}
+              value={DTX}
             />
           </View>
         </View>
         <View>
-          <Text style={stylep.text}>
-            สิ่งที่อยากให้ทีมแพทย์ช่วยเหลือเพิ่มเติม
-          </Text>
+          <Text style={stylep.text}>สิ่งที่อยากให้ทีมแพทย์ช่วยเหลือเพิ่มเติม</Text>
           <TextInput
             style={[
               style.textInputRead,
               style.text,
-              {height: Math.max(40, inputHeight)},
+              { height: Math.max(40, inputHeight) },
             ]}
             value={request_detail}
             onChangeText={setRequest_detail}
@@ -216,18 +269,19 @@ export default function PatientForm2(props) {
             onContentSizeChange={handleContentSizeChange}
           />
         </View>
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <View style={stylep.texttitle}>
             <Text style={stylep.text}>ผู้บันทึก</Text>
             <RNPickerSelect
               onValueChange={value => setRecorder(value)}
               items={[
-                {label: 'ผู้ป่วย', value: 'ผู้ป่วย'},
-                {label: 'ผู้ดูแล', value: 'ผู้ดูแล'},
+                { label: 'ผู้ป่วย', value: 'ผู้ป่วย' },
+                { label: 'ผู้ดูแล', value: 'ผู้ดูแล' },
               ]}
               style={pickerSelectStyles}
-              placeholder={{label: 'เลือกผู้บันทึก', value: null}}
+              placeholder={{ label: 'เลือกผู้บันทึก', value: null }}
               useNativeAndroidPickerStyle={false}
+              value={Recorder}
             />
           </View>
         </View>
@@ -281,7 +335,7 @@ const stylep = StyleSheet.create({
     flex: 1,
     marginHorizontal: 5,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 2,
     elevation: 3,
@@ -296,7 +350,7 @@ const stylep = StyleSheet.create({
     flex: 1,
     marginHorizontal: 5,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 2,
     elevation: 3,

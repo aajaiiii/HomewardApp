@@ -60,7 +60,7 @@ export default function UpdatePassword(props) {
       };
   
       setLoading(true);
-      axios.post('http://192.168.2.38:5000/updatepassuser', formData).then(res => {
+      axios.post('http://192.168.2.43:5000/updatepassuser', formData).then(res => {
         setLoading(false);
         if (res.data.status === 'Ok') {
           Toast.show({

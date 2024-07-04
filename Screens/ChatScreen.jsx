@@ -6,13 +6,13 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
-   Modal ,
+  Modal,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import {useNavigation} from '@react-navigation/native';
 
-function ChatScreen() {
+function ChatScreen({ setUnreadCount }) {
   const [allMpersonnel, setAllMpersonnel] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
   const navigation = useNavigation();
@@ -25,7 +25,7 @@ function ChatScreen() {
   async function getData() {
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await axios.post('http://192.168.2.38:5000/userdata', {
+      const response = await axios.post('http://192.168.2.43:5000/userdata', {
         token: token,
       });
       console.log(response.data);
@@ -38,27 +38,27 @@ function ChatScreen() {
 
   useEffect(() => {
     getData();
-    const interval = setInterval(getData, 1000); // เรียก getData ทุก 1 วินาที
+    const interval = setInterval(getData, 1000);
     return () => clearInterval(interval);
   }, []);
-  
-  const fetchAllUsers = async (userId) => {
+
+  const fetchAllUsers = async userId => {
     try {
       const response = await fetch(
-        `http://192.168.2.38:5000/allMpersonnelchat1?userId=${userId}`, // ส่ง userId ผ่าน query string
+        `http://192.168.2.43:5000/allMpersonnelchat1?userId=${userId}`, // ส่ง userId ผ่าน query string
       );
       const data = await response.json();
-  
+
       const usersWithLastMessage = await Promise.all(
         data.data.map(async user => {
           const lastMessageResponse = await fetch(
-            `http://192.168.2.38:5000/lastmessage/${user._id}?loginUserId=${userId}`, // ส่ง userId และ loginUserId ผ่าน query string
+            `http://192.168.2.43:5000/lastmessage/${user._id}?loginUserId=${userId}`, // ส่ง userId และ loginUserId ผ่าน query string
           );
           const lastMessageData = await lastMessageResponse.json();
           return {...user, lastMessage: lastMessageData.lastMessage};
         }),
       );
-  
+
       const sortedUsers = usersWithLastMessage.sort((a, b) => {
         if (!a.lastMessage) return 1;
         if (!b.lastMessage) return -1;
@@ -67,11 +67,23 @@ function ChatScreen() {
         );
       });
       setAllMpersonnel(sortedUsers);
+      setUnreadCount(countUnreadUsers(sortedUsers));
     } catch (error) {
       console.error('Error fetching all users:', error);
     }
   };
-  
+
+  const countUnreadUsers = (allMpersonnelData = allMpersonnel) => {
+    const unreadUsers = allMpersonnelData.filter(user => {
+      const lastMessage = user.lastMessage;
+      return (
+        lastMessage &&
+        lastMessage.senderModel === 'MPersonnel' &&
+        !lastMessage.isRead
+      );
+    });
+    return unreadUsers.length;
+  };
 
   const handleSelectRecipient = user => {
     setRecipientId(user._id);
@@ -112,39 +124,46 @@ function ChatScreen() {
           onChangeText={setSearchKeyword}
         />
       </View>
+      {/* <Text>{countUnreadUsers()}</Text> */}
       <ScrollView style={styles.userList}>
-      {allMpersonnel.map(user => (
-  <TouchableOpacity
-    key={user._id}
-    style={styles.userItem}
-    onPress={() => handleSelectRecipient(user)}>
-    <View style={styles.userInfo}>
-      <Text style={styles.userName}>
-        {user.name} {user.surname}
-      </Text>
-      {user.lastMessage && (
-        <Text
-          style={
-            user.lastMessage.senderModel === 'MPersonnel' && !user.lastMessage.isRead
-              ? styles.lastMessageUnread
-              : styles.lastMessage
-          }>
-          {user.lastMessage.sender._id === userData._id ? 'คุณ' : user.lastMessage.sender.name}
-          :{' '}
-          {user.lastMessage.image ? 'ส่งรูปภาพ' : truncateText(user.lastMessage.message, 10)}
-          <Text style={styles.timeText}>
-            {' '}
-            {formatTime(user.lastMessage.createdAt)}
-          </Text>
-        </Text>
-      )}
-    </View>
-    {user.lastMessage &&
-      user.lastMessage.senderModel === 'MPersonnel' &&
-      !user.lastMessage.isRead && <View style={styles.unreadDot}></View>}
-  </TouchableOpacity>
-))}
-
+        {allMpersonnel.map(user => (
+          <TouchableOpacity
+            key={user._id}
+            style={styles.userItem}
+            onPress={() => handleSelectRecipient(user)}>
+            <View style={styles.userInfo}>
+              <Text style={styles.userName}>
+                {user.name} {user.surname}
+              </Text>
+              {user.lastMessage && (
+                <Text
+                  style={
+                    user.lastMessage.senderModel === 'MPersonnel' &&
+                    !user.lastMessage.isRead
+                      ? styles.lastMessageUnread
+                      : styles.lastMessage
+                  }>
+                  {user.lastMessage.sender._id === userData._id
+                    ? 'คุณ'
+                    : user.lastMessage.sender.name}
+                  :{' '}
+                  {user.lastMessage.image
+                    ? 'ส่งรูปภาพ'
+                    : truncateText(user.lastMessage.message, 10)}
+                  <Text style={styles.timeText}>
+                    {' '}
+                    {formatTime(user.lastMessage.createdAt)}
+                  </Text>
+                </Text>
+              )}
+            </View>
+            {user.lastMessage &&
+              user.lastMessage.senderModel === 'MPersonnel' &&
+              !user.lastMessage.isRead && (
+                <View style={styles.unreadDot}></View>
+              )}
+          </TouchableOpacity>
+        ))}
       </ScrollView>
     </View>
   );
@@ -196,7 +215,7 @@ const styles = StyleSheet.create({
     elevation: 2,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between', 
+    justifyContent: 'space-between',
   },
   userInfo: {
     flex: 1,

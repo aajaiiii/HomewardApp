@@ -30,10 +30,6 @@ import ForgotPassword from './Screens/Login/ForgotPassword';
 import VerifyOtp from './Screens/Login/VerifyOtp';
 import ResetPassword from './Screens/Login/ResetPassword';
 import ChatSendScreen from './Screens/ChatSendScreen';
-import Informationone from './Screens/AddData/informationone';
-import Informationtwo from './Screens/AddData/informationtwo';
-import Success from './Screens/AddData/success';
-import CustomHeader from './Screens/AddData/CustomHeader';
 
 const toastConfig = {
   success: props => (
@@ -333,65 +329,13 @@ const FormStack = () => {
     </Stack.Navigator>
   );
 };
-const InformationStack = () => {
-  const Stack = createNativeStackNavigator();
 
-  const screenOptions = (title, currentScreen) => ({
-    header: () => <CustomHeader currentScreen={currentScreen} />,
-    headerTitle: title,
-  });
-
-  return (
-    <Stack.Navigator
-    screenOptions={{
-      // headerShown: true,
-      headerTintColor: '#000',
-      headerTitleAlign: 'center',
-    }}>
-      <Stack.Screen
-        name="Informationone"
-        component={Informationone}
-        options={screenOptions('หน้า1', 'Informationone')}
-      />
-      <Stack.Screen
-        name="Informationtwo"
-        component={Informationtwo}
-        options={screenOptions('หน้า2', 'Informationtwo')}
-      />
-      <Stack.Screen
-        options={{headerShown: false}}
-        name="Home"
-        component={TabNav}
-      />
-        <Stack.Screen
-        name="Success"
-        component={Success}
-        options={{
-          headerTitle: () => (
-            <Image
-              source={require('./assets/Logoblue.png')}
-              style={{width: 200, height: 50, marginTop: 8}} 
-            />
-          ),
-          headerLeft: null,
-          headerBackVisible: false,
-        }}
-      />
-       <Stack.Screen
-        options={{headerShown: false}}
-        name="Profile"
-        component={ProfileStack}
-      />
-    </Stack.Navigator>
-  );
-};
 const LoginNav = () => {
   const Stack = createNativeStackNavigator();
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
       <Stack.Screen name="Login" component={LoginPage} />
       <Stack.Screen name="Home" component={TabNav} />
-      <Stack.Screen name="Information" component={InformationStack} />
       <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
       <Stack.Screen name="VerifyOtp" component={VerifyOtp} />
       <Stack.Screen name="ResetPassword" component={ResetPassword} />
@@ -402,15 +346,11 @@ const LoginNav = () => {
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [addDataFirst, setAddDataFirst] = useState(null);
 
   async function getData() {
     const data = await AsyncStorage.getItem('isLoggedIn');
-    const addDataFirstValue = await AsyncStorage.getItem('addDataFirst');
     console.log(data, 'at app.jsx');
-    console.log('addDataFirstจ้า:', JSON.parse(addDataFirstValue));
     setIsLoggedIn(JSON.parse(data));
-    setAddDataFirst(JSON.parse(addDataFirstValue));
   }
 
   useEffect(() => {
@@ -420,9 +360,7 @@ function App() {
   useEffect(() => {
     const checkLoginStatus = async () => {
       const data = await AsyncStorage.getItem('isLoggedIn');
-      const addDataFirstValue = await AsyncStorage.getItem('addDataFirst');
       setIsLoggedIn(JSON.parse(data));
-      setAddDataFirst(JSON.parse(addDataFirstValue));
     };
 
     const interval = setInterval(checkLoginStatus, 1000);
@@ -432,14 +370,7 @@ function App() {
   return (
     <NavigationContainer>
       {isLoggedIn ? (
-        addDataFirst ? (
-          <MainStack
-            unreadCount={unreadCount}
-            setUnreadCount={setUnreadCount}
-          />
-        ) : (
-          <InformationStack />
-        )
+        <MainStack unreadCount={unreadCount} setUnreadCount={setUnreadCount} />
       ) : (
         <LoginNav />
       )}

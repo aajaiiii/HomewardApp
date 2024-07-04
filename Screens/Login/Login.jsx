@@ -38,22 +38,28 @@ function LoginPage({ setIsLoggedIn }) {
       username: username,
       password,
     };
-
+  
     axios
-      .post('http://192.168.2.38:5000/loginuser', userData)
+      .post('http://192.168.2.43:5000/loginuser', userData)
       .then(res => {
         console.log(res.data);
         if (res.data.status == 'ok') {
-          // Alert.alert('Login success');
-          AsyncStorage.setItem('token', res.data.data);
-          AsyncStorage.setItem('isLoggedIn', JSON.stringify(true));          
-          navigation.navigate('Home');
+          AsyncStorage.setItem('token', res.data.data.token);
+          AsyncStorage.setItem('isLoggedIn', JSON.stringify(true));
+          AsyncStorage.setItem('addDataFirst', JSON.stringify(res.data.data.addDataFirst));
+          // console.log('อะไร',JSON.stringify(res.data.data.addDataFirst));
+          if (res.data.data.addDataFirst) {
+            navigation.navigate('Home');
+          } else {
+            navigation.navigate('Information');
+          }
         }
       })
       .catch(error => {
         setError(error.response?.data?.error);
       });
   }
+  
 
   const forgot = () => {
     navigation.navigate('ForgotPassword');

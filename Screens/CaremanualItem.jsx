@@ -31,7 +31,7 @@ export default function Caremanualitem({route, navigation, props}) {
       try {
         const token = await AsyncStorage.getItem('token');
         const response = await axios.get(
-          `http://192.168.2.38:5000/getcaremanual/${id}`,
+          `http://192.168.2.43:5000/getcaremanual/${id}`,
           {headers: {Authorization: `Bearer ${token}`}},
         );
         const data = response.data;

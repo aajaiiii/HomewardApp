@@ -26,7 +26,7 @@ export default function Assessmentitem(props) {
     const token = await AsyncStorage.getItem('token');
     console.log(token);
     axios
-      .post('http://192.168.2.38:5000/userdata', {token: token})
+      .post('http://192.168.2.43:5000/userdata', {token: token})
       .then(res => {
         console.log(res.data);
         setUserData(res.data.data);
@@ -96,7 +96,7 @@ export default function Assessmentitem(props) {
     try {
       if (selectedItem) {
         const response = await axios.get(
-          `http://192.168.2.38:5000/getassessment/${selectedItem._id}`,
+          `http://192.168.2.43:5000/getassessment/${selectedItem._id}`,
         );
         const assessmentData = response.data.data;
         setAssessment(assessmentData);
@@ -120,7 +120,7 @@ export default function Assessmentitem(props) {
     try {
       if (assessment && assessment.MPersonnel) {
         const response = await axios.get(
-          `http://192.168.2.38:5000/getmpersonnel/${assessment.MPersonnel}`,
+          `http://192.168.2.43:5000/getmpersonnel/${assessment.MPersonnel}`,
         );
         setMPersonnel(response.data);
         console.log('แพทย์', response.data);
@@ -187,46 +187,12 @@ export default function Assessmentitem(props) {
 
         <View style={styles.section}>
           <Text style={styles.sectionHeader}>อาการและอาการที่แสดง</Text>
-          {selectedItem.Symptom1 && (
-            <View style={styles.row}>
-              <Text style={styles.labelText}>อาการที่ 1: </Text>
-              <Text style={styles.infoTextFetched}>
-                {selectedItem.Symptom1}
-              </Text>
+          {selectedItem.Symptoms && selectedItem.Symptoms.map((symptom, index) => (
+            <View style={styles.row} key={index}>
+              <Text style={styles.labelText}>{`อาการที่ ${index + 1}: `}</Text>
+              <Text style={styles.infoText}>{symptom}</Text>
             </View>
-          )}
-          {selectedItem.Symptom2 && (
-            <View style={styles.row}>
-              <Text style={styles.labelText}>อาการที่ 2: </Text>
-              <Text style={styles.infoTextFetched}>
-                {selectedItem.Symptom2}
-              </Text>
-            </View>
-          )}
-          {selectedItem.Symptom3 && (
-            <View style={styles.row}>
-              <Text style={styles.labelText}>อาการที่ 3: </Text>
-              <Text style={styles.infoTextFetched}>
-                {selectedItem.Symptom3}
-              </Text>
-            </View>
-          )}
-          {selectedItem.Symptom4 && (
-            <View style={styles.row}>
-              <Text style={styles.labelText}>อาการที่ 4: </Text>
-              <Text style={styles.infoTextFetched}>
-                {selectedItem.Symptom4}
-              </Text>
-            </View>
-          )}
-          {selectedItem.Symptom5 && (
-            <View style={styles.row}>
-              <Text style={styles.labelText}>อาการที่ 5: </Text>
-              <Text style={styles.infoTextFetched}>
-                {selectedItem.Symptom5}
-              </Text>
-            </View>
-          )}
+          ))}
           <Text></Text>
           <Text style={styles.sectionHeader}>Vital signs</Text>
           <View style={styles.row}>
@@ -256,7 +222,7 @@ export default function Assessmentitem(props) {
           </View>
           <View style={styles.row}>
             <Text style={styles.labelText}>การหายใจ:</Text>
-            <Text style={styles.infoText}>{selectedItem.Resptration}</Text>
+            <Text style={styles.infoText}>{selectedItem.Respiration}</Text>
             <Text style={styles.infoText}>ครั้ง/นาที</Text>
           </View>
           <View style={styles.row}>

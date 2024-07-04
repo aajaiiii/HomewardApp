@@ -20,7 +20,7 @@ const VerifyOtp = ({route, navigation}) => {
 
   const verifyOtp = async () => {
     try {
-      const response = await axios.post('http://192.168.2.38:5000/verify-otp', {
+      const response = await axios.post('http://192.168.2.43:5000/verify-otp', {
         email,
         otp,
       });

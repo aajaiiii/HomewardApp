@@ -33,6 +33,8 @@ function ChatSendScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImageUri, setSelectedImageUri] = useState('');
 
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
+
   const selectImage = () => {
     const options = {
       mediaType: 'photo',
@@ -107,7 +109,7 @@ function ChatSendScreen() {
     const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
-        const response = await axios.post('http://192.168.2.38:5000/userdata', {
+        const response = await axios.post('http://192.168.2.43:5000/userdata', {
           token: token,
         });
         const userData = response.data.data;
@@ -135,17 +137,19 @@ function ChatSendScreen() {
         `Fetching chats for recipientId: ${recipientId}, recipientModel: ${recipientModel}, sender: ${sender}, senderModel: ${senderModel}`,
       );
       const response = await axios.get(
-        `http://192.168.2.38:5000/chat/${recipientId}/${recipientModel}/${sender}/${senderModel}`,
+        `http://192.168.2.43:5000/chat/${recipientId}/${recipientModel}/${sender}/${senderModel}`,
       );
       console.log('Response Data:', response.data);
 
       setRecipientChats(response.data.chats || []);
       console.log('Chats:', response.data.chats);
+      
     } catch (error) {
       console.error('Error fetching recipient chats:', error);
     }
   };
 
+  
   const handleChangeMessage = text => {
     setMessage(text);
   };
@@ -167,7 +171,7 @@ function ChatSendScreen() {
       }
 
       const response = await axios.post(
-        'http://192.168.2.38:5000/chat',
+        'http://192.168.2.43:5000/chat',
         formData,
         {
           headers: {
@@ -188,6 +192,17 @@ function ChatSendScreen() {
     }
   };
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (sender) {
+        fetchRecipientChats(recipientId, recipientModel);
+      }
+    }, 1000);
+  
+    return () => clearInterval(interval);
+  }, [recipientId, recipientModel, sender]);
+
+  
   const formatDate = dateTimeString => {
     const dateTime = new Date(dateTimeString);
     const day = dateTime.getDate();

@@ -34,7 +34,7 @@ function UserScreen(props) {
     const token = await AsyncStorage.getItem('token');
     console.log(token);
     axios
-      .post('http://192.168.2.38:5000/userdata', {token: token})
+      .post('http://192.168.2.43:5000/userdata', {token: token})
       .then(res => {
         console.log(res.data);
         setUserData(res.data.data);
@@ -60,42 +60,34 @@ function UserScreen(props) {
     try {
       if (userData) {
         const response = await axios.get(
-          `http://192.168.2.38:5000/getcaregiver/${userData._id}`,
+          `http://192.168.2.43:5000/getcaregiver/${userData._id}`
         );
         setCaregiverInfo(response.data.data);
       }
     } catch (error) {
-      console.error('Error fetching caregiver info:', error);
+      if (error.response && error.response.status === 404) {
+        // Caregiver info not found
+        setCaregiverInfo(null);
+      } else {
+        console.error('Error fetching caregiver info:', error);
+      }
     }
   };
 
-  useEffect(() => {
-    fetchCaregiverInfo();
-  }, [userData]);
-
   const currentDate = new Date();
 
-  // const userBirthday =
-  //   userData && userData.birthday ? new Date(userData.birthday) : null;
-  // const ageDiff = userBirthday
-  //   ? currentDate.getFullYear() - userBirthday.getFullYear()
-  //   : 0;
-  // const isBeforeBirthday =
-  //   userBirthday &&
-  //   (currentDate.getMonth() < userBirthday.getMonth() ||
-  //     (currentDate.getMonth() === userBirthday.getMonth() &&
-  //       currentDate.getDate() < userBirthday.getDate()));
-  // const userAge = isBeforeBirthday ? ageDiff - 1 : ageDiff;
-  // const userAgeInMonths = (ageDiff * 12) + (currentDate.getMonth() - userBirthday.getMonth());
 
-useEffect(() => {
+  useEffect(() => {
     if (userData && userData.birthday) {
       const userBirthday = new Date(userData.birthday);
       const ageDiff = currentDate.getFullYear() - userBirthday.getFullYear();
       const monthDiff = currentDate.getMonth() - userBirthday.getMonth();
       setUserAgeInMonths(monthDiff >= 0 ? monthDiff : 12 + monthDiff);
 
-      if (monthDiff < 0 || (monthDiff === 0 && currentDate.getDate() < userBirthday.getDate())) {
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && currentDate.getDate() < userBirthday.getDate())
+      ) {
         setUserAge(ageDiff - 1);
       } else {
         setUserAge(ageDiff);
@@ -103,13 +95,12 @@ useEffect(() => {
     }
   }, [userData, currentDate]);
 
-  
   return (
     <ScrollView
       keyboardShouldPersistTaps={'always'}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{paddingBottom: 40}}
-      style={{ backgroundColor: '#F7F7F7'}}>
+      style={{backgroundColor: '#F7F7F7'}}>
       <View style={[style.container, {flex: 1}]}>
         <View
           style={{
@@ -162,18 +153,15 @@ useEffect(() => {
               </Text>
             </View>
             <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
-            <Text style={style.text}>อายุ:</Text>
-{userData && userData.birthday ? (
-  <Text style={[style.text]}>
-    {userAge} ปี {userAgeInMonths} เดือน
-  </Text>
-) : (
-  <Text style={[style.text]}>0 ปี 0 เดือน</Text>
-)}
-
-</View>
-
-
+              <Text style={style.text}>อายุ:</Text>
+              {userData && userData.birthday ? (
+                <Text style={[style.text]}>
+                  {userAge} ปี {userAgeInMonths} เดือน
+                </Text>
+              ) : (
+                <Text style={[style.text]}>0 ปี 0 เดือน</Text>
+              )}
+            </View>
 
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <Text style={style.text}>สัญชาติ :</Text>
@@ -181,7 +169,7 @@ useEffect(() => {
                 {userData.nationality}
               </Text>
             </View>
-            <View style={{flexDirection: 'row',  flex: 1}}>
+            <View style={{flexDirection: 'row', flex: 1}}>
               <Text style={[style.text]}>ที่อยู่ :</Text>
               <Text style={[style.text, style.textWidth]}>
                 {userData.Address}
@@ -195,8 +183,9 @@ useEffect(() => {
         )}
       </View>
 
+
       <View style={style.container}>
-        {caregiverInfo && (
+        {caregiverInfo ? (
           <>
             <View
               style={{
@@ -234,6 +223,21 @@ useEffect(() => {
               </Text>
             </View>
           </>
+        ) : (
+          <View
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <Text style={styles.texter}>ข้อมูลผู้ดูแล</Text>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => {
+              navigation.navigate('CaregiverAdd', {userId: userData._id});
+            }}>
+            <Text style={styles.addButtonText}>เพิ่มข้อมูลผู้ดูแล</Text>
+          </TouchableOpacity>
+          </View>
         )}
       </View>
     </ScrollView>
@@ -252,5 +256,12 @@ const styles = StyleSheet.create({
   IconUserSC: {
     fontSize: 20,
   },
+  addButtonText:{
+    backgroundColor: '#87CEFA',
+    padding:10,
+    margin:5,
+    color:'#fff',
+    fontWeight:'bold'
+  }
 });
 export default UserScreen;

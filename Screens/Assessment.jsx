@@ -28,7 +28,7 @@ export default function Assessment(props) {
     const token = await AsyncStorage.getItem('token');
     console.log(token);
     axios
-      .post('http://192.168.2.38:5000/userdata', {token: token})
+      .post('http://192.168.2.43:5000/userdata', {token: token})
       .then(res => {
         console.log(res.data);
         setUserData(res.data.data);
@@ -51,7 +51,7 @@ export default function Assessment(props) {
     try {
       if (userData) {
         const response = await axios.get(
-          `http://192.168.2.38:5000/getpatientforms/${userData._id}`,
+          `http://192.168.2.43:5000/getpatientforms/${userData._id}`,
         );
         const sortedForms = sortForms(response.data.data, sortOrder);
         setPatientForms(sortedForms);
@@ -64,7 +64,7 @@ export default function Assessment(props) {
   const fetchAssessments = async () => {
     try {
       const response = await axios.get(
-        `http://192.168.2.38:5000/allAssessment`,
+        `http://192.168.2.43:5000/allAssessment`,
       );
       setAssessments(response.data.data);
     } catch (error) {
@@ -130,35 +130,38 @@ export default function Assessment(props) {
         {/* <Text style={hasAssessment(item._id) ? styles.assessed : styles.notAssessed}>
                     <Text style={styles.statusLabel}>สถานะ:</Text> <Text>{hasAssessment(item._id) ? 'ประเมินแล้ว' : 'ยังไม่ได้ประเมิน'}</Text>
                 </Text> */}
-<Text style={getAssessment(item._id) ? getStatusStyle(getAssessment(item._id).status_name) : styles.notAssessed}>
-  <Text style={styles.statusLabel}>ผลการประเมิน: </Text>
-  <Text style={styles.statusText}>
-    {getAssessment(item._id)
-      ? getAssessment(item._id).status_name
-      : 'ยังไม่ได้ประเมิน'}
-  </Text>
-</Text>
-
+        <Text
+          style={
+            getAssessment(item._id)
+              ? getStatusStyle(getAssessment(item._id).status_name)
+              : styles.notAssessed
+          }>
+          <Text style={styles.statusLabel}>ผลการประเมิน: </Text>
+          <Text style={styles.statusText}>
+            {getAssessment(item._id)
+              ? getAssessment(item._id).status_name
+              : 'ยังไม่ได้ประเมิน'}
+          </Text>
+        </Text>
       </View>
     </TouchableOpacity>
   );
 
-  const getStatusStyle = (status) => {
+  const getStatusStyle = status => {
     switch (status) {
-      case "ปกติ":
+      case 'ปกติ':
         return styles.normalStatus;
-      case "ผิดปกติ":
+      case 'ผิดปกติ':
         return styles.abnormalStatus;
-      case "จบการรักษา":
+      case 'จบการรักษา':
         return styles.completedStatus;
       default:
         return styles.defaultStatus;
     }
   };
 
-  
-  const handlePress = (item) => {
-      navigation.navigate('Assessmentitem', { selectedItem: item });
+  const handlePress = item => {
+    navigation.navigate('Assessmentitem', {selectedItem: item});
   };
 
   return (

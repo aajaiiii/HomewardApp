@@ -20,7 +20,7 @@ const ResetPasswordScreen = ({ route, navigation }) => {
 
     const resetPassword = async () => {
         try {
-            const response = await axios.post('http://192.168.2.38:5000/reset-password', { email, newPassword, confirmpassword: confirmPassword });
+            const response = await axios.post('http://192.168.2.43:5000/reset-password', { email, newPassword, confirmpassword: confirmPassword });
             if (response.data === 'เปลี่ยนรหัสสำเร็จ') {
                 navigation.navigate('Login');
             } else {

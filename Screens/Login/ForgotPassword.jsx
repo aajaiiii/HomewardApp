@@ -13,7 +13,7 @@ export default function ForgotPassword({ navigation }) {
 
   const requestOtp = async () => {
     try {
-      const response = await axios.post('http://192.168.2.38:5000/forgot-passworduser', { email });
+      const response = await axios.post('http://192.168.2.43:5000/forgot-passworduser', { email });
       setMessage(response.data);
       navigation.navigate('VerifyOtp', { email });
     } catch (error) {

@@ -50,7 +50,7 @@ export default function CaregiverEdit(props) {
       console.log(formdata);
 
       const res = await axios.post(
-        'http://192.168.2.38:5000/updatecaregiver',
+        'http://192.168.2.43:5000/updatecaregiver',
         formdata,
       );
       console.log(res.data);

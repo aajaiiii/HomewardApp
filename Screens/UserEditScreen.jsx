@@ -49,7 +49,7 @@ export default function UserEditScreen(props) {
     const token = await AsyncStorage.getItem('token');
     console.log(token);
     axios
-      .post('http://192.168.2.38:5000/userdata', {token: token})
+      .post('http://192.168.2.43:5000/userdata', {token: token})
       .then(res => {
         console.log(res.data);
         setUserData(res.data.data);
@@ -84,6 +84,7 @@ export default function UserEditScreen(props) {
       username: username,
       name,
       surname,
+      email,
       tel,
       gender,
       birthday,
@@ -93,7 +94,7 @@ export default function UserEditScreen(props) {
     };
 
     console.log(formdata);
-    axios.post('http://192.168.2.38:5000/updateuserapp', formdata).then(res => {
+    axios.post('http://192.168.2.43:5000/updateuserapp', formdata).then(res => {
       console.log(res.data);
       if (res.data.status == 'Ok') {
         Toast.show({
@@ -123,15 +124,7 @@ export default function UserEditScreen(props) {
               readOnly
             />
           </View>
-          <View style={{flexDirection: 'row', alignItems: 'center'}}>
-            <Text style={style.text}>อีเมล</Text>
-            <TextInput
-              style={[style.text]}
-              onChange={e => setEmail(e.nativeEvent.text)}
-              defaultValue={email}
-              readOnly
-            />
-          </View>
+      
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Text style={style.text}>เลขประจำตัวประชาชน</Text>
              <TextInput
@@ -146,6 +139,14 @@ export default function UserEditScreen(props) {
               onChange={e => setIDCardNumber(e.nativeEvent.text)}
               defaultValue={ID_card_number}
             /> */}
+          </View>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Text style={style.text}>อีเมล</Text>
+            <TextInput
+              style={[style.textInputRead, style.text]}
+              onChange={e => setEmail(e.nativeEvent.text)}
+              value={email}
+            />
           </View>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Text style={style.text}>ชื่อ</Text>

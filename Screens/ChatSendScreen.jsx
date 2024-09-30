@@ -32,8 +32,9 @@ function ChatSendScreen() {
   const [inputHeight, setInputHeight] = useState(40); // ความสูงเริ่มต้นของ TextInput
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImageUri, setSelectedImageUri] = useState('');
+  const [modalImageUri, setModalImageUri] = useState('');
+  const [autoScroll, setAutoScroll] = useState(true);
 
-  const [unreadChatCount, setUnreadChatCount] = useState(0);
 
   const selectImage = () => {
     const options = {
@@ -42,9 +43,9 @@ function ChatSendScreen() {
 
     launchImageLibrary(options, response => {
       if (response.didCancel) {
-        console.log('User cancelled image picker');
+        // console.log('User cancelled image picker');
       } else if (response.errorCode) {
-        console.log('ImagePicker Error: ', response.errorCode);
+        // console.log('ImagePicker Error: ', response.errorCode);
       } else {
         const uri = response.assets[0]?.uri;
         setSelectedImageUri(uri);
@@ -86,7 +87,7 @@ function ChatSendScreen() {
           <Ionicons name="close-circle" size={30} color="white" />
         </TouchableOpacity>
         <Image
-          source={{uri: selectedImageUri}}
+         source={{uri: modalImageUri}} 
           style={styles.modalImage}
           resizeMode="contain"
         />
@@ -100,16 +101,27 @@ function ChatSendScreen() {
   };
 
   useEffect(() => {
-    if (scrollViewRef.current) {
-      scrollViewRef.current.scrollToEnd({animated: true});
+    if (autoScroll && scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
     }
   }, [recipientChats]);
+
+  const handleScroll = event => {
+    const contentHeight = event.nativeEvent.contentSize.height;
+    const scrollOffsetY = event.nativeEvent.contentOffset.y;
+    const visibleHeight = event.nativeEvent.layoutMeasurement.height;
+    if (scrollOffsetY + visibleHeight >= contentHeight - 50) {
+      setAutoScroll(true);
+    } else {
+      setAutoScroll(false);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
-        const response = await axios.post('http://192.168.2.43:5000/userdata', {
+        const response = await axios.post('http://192.168.2.57:5000/userdata', {
           token: token,
         });
         const userData = response.data.data;
@@ -134,15 +146,15 @@ function ChatSendScreen() {
   const fetchRecipientChats = async (recipientId, recipientModel) => {
     try {
       console.log(
-        `Fetching chats for recipientId: ${recipientId}, recipientModel: ${recipientModel}, sender: ${sender}, senderModel: ${senderModel}`,
+        `แชท12: ${recipientId}, recipientModel: ${recipientModel}, sender: ${sender}, senderModel: ${senderModel}`,
       );
       const response = await axios.get(
-        `http://192.168.2.43:5000/chat/${recipientId}/${recipientModel}/${sender}/${senderModel}`,
+        `http://192.168.2.57:5000/chat/${recipientId}/${recipientModel}/${sender}/${senderModel}`,
       );
-      console.log('Response Data:', response.data);
+      // console.log('Response Data:', response.data);
 
       setRecipientChats(response.data.chats || []);
-      console.log('Chats:', response.data.chats);
+      // console.log('Chats:', response.data.chats);
       
     } catch (error) {
       console.error('Error fetching recipient chats:', error);
@@ -171,7 +183,7 @@ function ChatSendScreen() {
       }
 
       const response = await axios.post(
-        'http://192.168.2.43:5000/chat',
+        'http://192.168.2.57:5000/sendchat',
         formData,
         {
           headers: {
@@ -194,13 +206,13 @@ function ChatSendScreen() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (sender) {
+      if (sender && !modalVisible) {  // refresh เฉพาะเมื่อ modal ปิดอยู่
         fetchRecipientChats(recipientId, recipientModel);
       }
-    }, 1000);
+    }, 5000);
   
     return () => clearInterval(interval);
-  }, [recipientId, recipientModel, sender]);
+  }, [recipientId, recipientModel, sender, modalVisible]);  
 
   
   const formatDate = dateTimeString => {
@@ -249,8 +261,11 @@ function ChatSendScreen() {
   };
 
   return (
-    <View style={{flex: 1}}>
-      <ScrollView style={styles.chatMessages} ref={scrollViewRef}>
+    <View style={[styles.viewStyle]}>
+      <ScrollView  style={styles.chatMessages}
+        ref={scrollViewRef}
+        onScroll={handleScroll}
+        scrollEventThrottle={16} >
         {recipientChats.map((chat, index) => (
           <View key={index}>
             {(index === 0 ||
@@ -265,7 +280,7 @@ function ChatSendScreen() {
                   ? styles.sentContainer
                   : styles.receivedContainer,
               ]}>
-              <ImageModal />
+             
               {chat.sender._id === data._id ? (
                 <>
                   <View style={styles.statustime}>
@@ -279,7 +294,7 @@ function ChatSendScreen() {
                   {chat.image ? (
                     <TouchableOpacity
                       onPress={() => {
-                        setSelectedImageUri(chat.image);
+                        setModalImageUri(chat.image); 
                         setModalVisible(true);
                       }}>
                       <View style={[styles.received]}>
@@ -310,7 +325,7 @@ function ChatSendScreen() {
                   {chat.image ? (
                     <TouchableOpacity
                       onPress={() => {
-                        setSelectedImageUri(chat.image);
+                        setModalImageUri(chat.image); 
                         setModalVisible(true);
                       }}>
                       <View style={[styles.received]}>
@@ -345,6 +360,9 @@ function ChatSendScreen() {
           </View>
         ))}
       </ScrollView>
+
+      <ImageModal />
+
       {selectedImageUri ? (
         <View style={styles.selectedImageContainer}>
           <Image
@@ -361,12 +379,12 @@ function ChatSendScreen() {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.chatForm}>
-        <View style={{flexDirection: 'row', alignItems: 'center', flex: 1,padding:3}}>
-          <TouchableOpacity onPress={selectImage}>
-            <Ionicons name="image" size={24} color="white" />
+        <View style={{flexDirection: 'row', alignItems: 'center', flex: 1, padding:5}}>
+          <TouchableOpacity onPress={selectImage} style={{margin:3}}>
+            <Ionicons name="image" size={24} color="black" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={takePhoto}>
-            <Ionicons name="camera" size={28} color="white" />
+          <TouchableOpacity onPress={takePhoto} style={{margin:3}}>
+            <Ionicons name="camera" size={28} color="black" />
           </TouchableOpacity>
           <TextInput
             style={[styles.input, , {height: Math.max(40, inputHeight)}]}
@@ -380,7 +398,7 @@ function ChatSendScreen() {
 
           {(message || selectedImageUri) && (
             <TouchableOpacity onPress={handleSubmit}>
-              <Feather name="send" size={24} color="white" />
+              <Feather name="send" size={24} color="black" />
             </TouchableOpacity>
           )}
         </View>
@@ -391,7 +409,7 @@ function ChatSendScreen() {
 const styles = StyleSheet.create({
   viewStyle: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#F7F7F7',
   },
   chatMessages: {
     flex: 1,
@@ -453,7 +471,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   sentText: {
-    color: '#fff',
+    color: '#000',
   },
   receivedText: {
     color: '#000',

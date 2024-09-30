@@ -11,7 +11,7 @@ import axios from 'axios';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import style from './style';
 import Toast from 'react-native-toast-message';
-import {Picker} from '@react-native-picker/picker'; // นำเข้า Picker ให้ถูกต้อง
+import {Picker} from '@react-native-picker/picker';
 
 export default function CaregiverEdit(props) {
   console.log(props);
@@ -20,6 +20,8 @@ export default function CaregiverEdit(props) {
   const [surname, setSurname] = useState('');
   const [tel, setTel] = useState('');
   const [Relationship, setRelationship] = useState('');
+  const [customRelationship, setCustomRelationship] = useState('');
+  const [isCustomRelationship, setIsCustomRelationship] = useState(false);
   const navigation = useNavigation();
   const route = useRoute();
 
@@ -30,6 +32,13 @@ export default function CaregiverEdit(props) {
     setSurname(caregiverData.surname);
     setTel(caregiverData.tel);
     setRelationship(caregiverData.Relationship);
+    if (caregiverData.Relationship === 'อื่น ๆ') {
+      setIsCustomRelationship(true);
+      setCustomRelationship(caregiverData.customRelationship || '');
+    } else {
+      setIsCustomRelationship(false);
+      setRelationship(caregiverData.Relationship);
+    }
     console.log('sss', user);
   }, []);
 
@@ -44,20 +53,20 @@ export default function CaregiverEdit(props) {
         name,
         surname,
         tel,
-        Relationship,
+        Relationship: isCustomRelationship ? customRelationship : Relationship,
       };
 
       console.log(formdata);
 
       const res = await axios.post(
-        'http://192.168.2.43:5000/updatecaregiver',
+        'http://192.168.2.57:5000/updatecaregiver',
         formdata,
       );
       console.log(res.data);
       if (res.data.status === 'Ok') {
         Toast.show({
           type: 'success',
-          text1: 'Updated',
+          text1: 'แก้ไขสำเร็จ',
           text2: 'แก้ไขรหัสผ่านแล้ว',
         });
         navigation.navigate('User', {refresh: true});
@@ -90,26 +99,42 @@ export default function CaregiverEdit(props) {
             defaultValue={surname}
           />
         </View>
-        <View >
+        <View>
           <Text style={style.text}>เกี่ยวข้องเป็น</Text>
           <View style={style.pickerContainer}>
-          <Picker
-            style={[style.Picker, style.text]}
-            selectedValue={Relationship}
-            onValueChange={itemValue => setRelationship(itemValue)}>
-            {/* <Picker.Item label="เลือกความสัมพันธ์" value="" /> */}
-            <Picker.Item label="พ่อ" value="พ่อ" />
-            <Picker.Item label="แม่" value="แม่" />
-            <Picker.Item label="สามี" value="สามี" />
-            <Picker.Item label="ภรรยา" value="ภรรยา" />
-            <Picker.Item label="ลูก" value="ลูก" />
-            <Picker.Item
-              label="ไม่มีความเกี่ยวข้อง"
-              value="ไม่มีความเกี่ยวข้อง"
-            />
-          </Picker>
+            <Picker
+              style={[style.Picker, style.text]}
+              selectedValue={isCustomRelationship ? 'อื่น ๆ' : Relationship}
+              onValueChange={itemValue => {
+                if (itemValue === 'อื่น ๆ') {
+                  setIsCustomRelationship(true);
+                } else {
+                  setIsCustomRelationship(false);
+                  setRelationship(itemValue);
+                }
+              }}>
+              <Picker.Item label="เลือกความสัมพันธ์" value="" />
+              <Picker.Item label="พ่อ" value="พ่อ" />
+              <Picker.Item label="แม่" value="แม่" />
+              <Picker.Item label="ลูก" value="ลูก" />
+              <Picker.Item label="สามี" value="สามี" />
+              <Picker.Item label="ภรรยา" value="ภรรยา" />
+              <Picker.Item label="อื่น ๆ" value="อื่น ๆ" />
+              {/* <Picker.Item label="ไม่มีความเกี่ยวข้อง" value="ไม่มีความเกี่ยวข้อง" /> */}
+
+            </Picker>
           </View>
         </View>
+        {isCustomRelationship && (
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Text style={style.text}>กรุณาระบุ</Text>
+            <TextInput
+              style={[style.textInputRead, style.text]}
+              onChangeText={text => setCustomRelationship(text)}
+              value={customRelationship}
+            />
+          </View>
+        )}
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <Text style={style.text}>เบอร์โทรศัพท์</Text>
           <TextInput

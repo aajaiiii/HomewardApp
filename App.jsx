@@ -1,4 +1,4 @@
-import {Text, Image, TouchableOpacity} from 'react-native';
+import {Text, Image, TouchableOpacity, StyleSheet} from 'react-native';
 import HomeScreen from './Screens/HomeScreen';
 import {
   useNavigation,
@@ -14,7 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useEffect, useState} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import SplashScreen from 'react-native-splash-screen';
-
+import axios from 'axios';
 import Toast, {BaseToast, ErrorToast} from 'react-native-toast-message';
 import CaremanualScreen from './Screens/CaremanualScreen';
 import UserEditScreen from './Screens/UserEditScreen';
@@ -34,6 +34,41 @@ import Informationone from './Screens/AddData/informationone';
 import Informationtwo from './Screens/AddData/informationtwo';
 import Success from './Screens/AddData/success';
 import CustomHeader from './Screens/AddData/CustomHeader';
+import SearchKeyword from './Screens/SearchKeyword';
+import PatientFormEdit from './Screens/PatientFormEdit';
+import PatientFormEdit2 from './Screens/PatientFormEdit2';
+import UpdateOTP from './Screens/email/updateotp';
+import VerifyOtpEmail from './Screens/email/VerifyOtp';
+import EmailVerification from './Screens/email/email-verification';
+import UpdateEmail from './Screens/email/updateemail';
+
+const fetchUnreadCount = async setUnreadCount => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+    const response = await axios.post('http://192.168.2.57:5000/userdata', {
+      token,
+    });
+    const userId = response.data.data._id;
+    console.log('ได้อะไร', userId);
+    const usersResponse = await axios.get(
+      `http://192.168.2.57:5000/allMpersonnelchat1?userId=${userId}`,
+    );
+    const users = usersResponse.data.data;
+
+    const unreadUsers = users.filter(user => {
+      const lastMessage = user.lastMessage;
+      return (
+        lastMessage &&
+        lastMessage.senderModel === 'MPersonnel' &&
+        !lastMessage.isRead
+      );
+    });
+
+    setUnreadCount(unreadUsers.length);
+  } catch (error) {
+    console.error('Error fetching unread count:', error);
+  }
+};
 
 const toastConfig = {
   success: props => (
@@ -46,6 +81,7 @@ const toastConfig = {
         height: 70,
         borderRightColor: 'green',
         borderRightWidth: 7,
+        // top: '50%',
       }}
       contentContainerStyle={{paddingHorizontal: 15}}
       text1Style={{
@@ -97,7 +133,7 @@ const HomeStack = () => {
           headerTitle: () => (
             <Image
               source={require('./assets/Logoblue.png')}
-              style={{width: 200, height: 50, marginTop: 8}} // ปรับขนาดตามที่คุณต้องการ
+              style={{width: 200, height: 50, marginTop: 8}}
             />
           ),
         }}
@@ -138,7 +174,7 @@ const HomeStack = () => {
   );
 };
 
-const ProfileStack = () => {
+const ProfileStack = ({setIsLoggedIn}) => {
   const Stack = createNativeStackNavigator();
 
   return (
@@ -146,15 +182,17 @@ const ProfileStack = () => {
       screenOptions={{
         headerTintColor: '#000',
         headerTitleAlign: 'center',
+        headerShown: true,
       }}>
       <Stack.Screen
         options={{
           title: 'การตั้งค่า',
         }}
         name="Profile"
-        component={ProfileScreen}
-      />
-
+        // component={ProfileScreen}
+      >
+        {props => <ProfileScreen {...props} setIsLoggedIn={setIsLoggedIn} />}
+      </Stack.Screen>
       <Stack.Screen
         options={{
           title: 'ข้อมูลส่วนตัว',
@@ -162,7 +200,13 @@ const ProfileStack = () => {
         name="User"
         component={UserScreen}
       />
-      <Stack.Screen name="LoginUser" component={LoginNav} />
+      <Stack.Screen
+        options={{
+          headerShown: false,
+        }}
+        name="Loginuser"
+        component={LoginNav}
+      />
     </Stack.Navigator>
   );
 };
@@ -187,7 +231,7 @@ const ChatStack = ({setUnreadCount}) => {
   );
 };
 
-const TabNav = ({unreadCount, setUnreadCount}) => {
+const TabNav = ({unreadCount, setUnreadCount, setIsLoggedIn}) => {
   const Tab = createBottomTabNavigator();
   return (
     <Tab.Navigator
@@ -224,7 +268,7 @@ const TabNav = ({unreadCount, setUnreadCount}) => {
       />
       <Tab.Screen
         name="การตั้งค่า"
-        component={ProfileStack}
+        // component={ProfileStack}
         options={{
           tabBarIcon: ({color, size, focused}) => (
             <Ionicons
@@ -233,14 +277,15 @@ const TabNav = ({unreadCount, setUnreadCount}) => {
               color={focused ? '#87CEFA' : 'black'}
             />
           ),
-        }}
-      />
+        }}>
+        {props => <ProfileStack {...props} setIsLoggedIn={setIsLoggedIn} />}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 };
 
 //หน้าที่ไม่แสดง TabNav
-const MainStack = ({unreadCount, setUnreadCount}) => {
+const MainStack = ({unreadCount, setUnreadCount, setIsLoggedIn}) => {
   const Stack = createNativeStackNavigator();
 
   return (
@@ -259,9 +304,11 @@ const MainStack = ({unreadCount, setUnreadCount}) => {
             {...props}
             unreadCount={unreadCount}
             setUnreadCount={setUnreadCount}
+            setIsLoggedIn={setIsLoggedIn}
           />
         )}
       </Stack.Screen>
+      
       <Stack.Screen
         options={{
           title: 'บันทึกอาการผู้ป่วย',
@@ -274,6 +321,20 @@ const MainStack = ({unreadCount, setUnreadCount}) => {
         component={PatientForm2}
         options={{
           title: 'บันทึกอาการผู้ป่วย',
+        }}
+      />
+      <Stack.Screen
+        options={{
+          title: 'แก้ไขบันทึกอาการผู้ป่วย',
+        }}
+        name="PatientFormEdit"
+        component={PatientFormEdit}
+      />
+      <Stack.Screen
+        name="PatientFormEdit2"
+        component={PatientFormEdit2}
+        options={{
+          title: 'แก้ไขบันทึกอาการผู้ป่วย',
         }}
       />
       <Stack.Screen
@@ -290,7 +351,7 @@ const MainStack = ({unreadCount, setUnreadCount}) => {
         name="CaregiverEdit"
         component={CaregiverEdit}
       />
-      <Stack.Screen name="FormStack" component={FormStack} />
+      {/* <Stack.Screen name="FormStack" component={FormStack} /> */}
       <Stack.Screen
         options={{
           title: 'เปลี่ยนรหัสผ่าน',
@@ -303,36 +364,70 @@ const MainStack = ({unreadCount, setUnreadCount}) => {
         component={ChatSendScreen}
         options={({route}) => ({title: route.params.userName})}
       />
+      <Stack.Screen
+        name="SearchKeyword"
+        component={SearchKeyword}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        options={{
+          title: 'ยืนยันอีเมล',
+        }}
+        name="EmailVerification"
+        component={EmailVerification}
+      />
+      <Stack.Screen
+        options={{
+          title: 'กรอกรหัสยืนยัน',
+        }}
+        name="VerifyOtpEmail"
+        component={VerifyOtpEmail}
+      />
+      <Stack.Screen
+        options={{
+          title: 'เปลี่ยนอีเมล',
+        }}
+        name="UpdateEmail"
+        component={UpdateEmail}
+      />
+      <Stack.Screen
+        options={{
+          title: 'กรอกรหัสยืนยัน',
+        }}
+        name="UpdateOTP"
+        component={UpdateOTP}
+      />
     </Stack.Navigator>
   );
 };
 
-const FormStack = () => {
-  const Stack = createNativeStackNavigator();
+// const FormStack = () => {
+//   const Stack = createNativeStackNavigator();
 
-  return (
-    <Stack.Navigator
-      screenOptions={{
-        headerTintColor: '#000',
-        headerTitleAlign: 'center',
-      }}>
-      <Stack.Screen
-        name="PatientForm"
-        component={PatientForm}
-        options={{
-          title: 'บันทึกอาการผู้ป่วย',
-        }}
-      />
-      <Stack.Screen
-        name="PatientForm2"
-        component={PatientForm2}
-        options={{
-          title: 'บันทึกอาการผู้ป่วย',
-        }}
-      />
-    </Stack.Navigator>
-  );
-};
+//   return (
+//     <Stack.Navigator
+//       screenOptions={{
+//         headerTintColor: '#000',
+//         headerTitleAlign: 'center',
+//       }}>
+//       <Stack.Screen
+//         name="PatientForm"
+//         component={PatientForm}
+//         options={{
+//           title: 'บันทึกอาการผู้ป่วย',
+//         }}
+//       />
+//       <Stack.Screen
+//         name="PatientForm2"
+//         component={PatientForm2}
+//         options={{
+//           title: 'บันทึกอาการผู้ป่วย',
+//         }}
+//       />
+//     </Stack.Navigator>
+//   );
+// };
 const InformationStack = () => {
   const Stack = createNativeStackNavigator();
 
@@ -343,11 +438,11 @@ const InformationStack = () => {
 
   return (
     <Stack.Navigator
-    screenOptions={{
-      // headerShown: true,
-      headerTintColor: '#000',
-      headerTitleAlign: 'center',
-    }}>
+      screenOptions={{
+        // headerShown: true,
+        headerTintColor: '#000',
+        headerTitleAlign: 'center',
+      }}>
       <Stack.Screen
         name="Informationone"
         component={Informationone}
@@ -363,33 +458,35 @@ const InformationStack = () => {
         name="Home"
         component={TabNav}
       />
-        <Stack.Screen
+      <Stack.Screen
         name="Success"
         component={Success}
         options={{
           headerTitle: () => (
             <Image
               source={require('./assets/Logoblue.png')}
-              style={{width: 200, height: 50, marginTop: 8}} 
+              style={{width: 200, height: 50, marginTop: 8}}
             />
           ),
           headerLeft: null,
           headerBackVisible: false,
         }}
       />
-       <Stack.Screen
+      {/* <Stack.Screen
         options={{headerShown: false}}
         name="Profile"
         component={ProfileStack}
-      />
+      /> */}
     </Stack.Navigator>
   );
 };
-const LoginNav = () => {
+const LoginNav = ({getData}) => {
   const Stack = createNativeStackNavigator();
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
-      <Stack.Screen name="Login" component={LoginPage} />
+      <Stack.Screen name="Login">
+        {props => <LoginPage {...props} getData={getData} />}
+      </Stack.Screen>
       <Stack.Screen name="Home" component={TabNav} />
       <Stack.Screen name="Information" component={InformationStack} />
       <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
@@ -402,46 +499,48 @@ const LoginNav = () => {
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [addDataFirst, setAddDataFirst] = useState(null);
+  const [addDataFirst, setAddDataFirst] = useState(false);
 
   async function getData() {
+    console.log('กำลังดำเนินเรื่อง...');
     const data = await AsyncStorage.getItem('isLoggedIn');
     const addDataFirstValue = await AsyncStorage.getItem('addDataFirst');
-    console.log(data, 'at app.jsx');
-    console.log('addDataFirstจ้า:', JSON.parse(addDataFirstValue));
-    setIsLoggedIn(JSON.parse(data));
-    setAddDataFirst(JSON.parse(addDataFirstValue));
+    console.log(data, 'ทำงานแล้ว');
+    console.log('addDataFirst1:', addDataFirstValue); // เพิ่ม log เพื่อตรวจสอบข้อมูล
+    setIsLoggedIn(JSON.parse(data) || false);
+    setAddDataFirst(JSON.parse(addDataFirstValue) || false);
   }
 
   useEffect(() => {
-    getData();
-  }, []);
+    const initialize = async () => {
+      await getData(); // Fetch data on mount
+      setTimeout(() => {
+        SplashScreen.hide();
+      }, 900);
+    };
+    initialize();
+  }, []); 
 
   useEffect(() => {
-    const checkLoginStatus = async () => {
-      const data = await AsyncStorage.getItem('isLoggedIn');
-      const addDataFirstValue = await AsyncStorage.getItem('addDataFirst');
-      setIsLoggedIn(JSON.parse(data));
-      setAddDataFirst(JSON.parse(addDataFirstValue));
-    };
+    if (isLoggedIn) {
+      fetchUnreadCount(setUnreadCount);
+    }
+  }, [isLoggedIn]);
 
-    const interval = setInterval(checkLoginStatus, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
+//มันต้องรีแล้วจะใช้ได้ ข้อมูลที่ getdata() ไม่ขึ้นตอน login เสร็จ
+//ได้แล้ว 25/09/67 2.28
   return (
     <NavigationContainer>
-      {isLoggedIn ? (
-        addDataFirst ? (
-          <MainStack
-            unreadCount={unreadCount}
-            setUnreadCount={setUnreadCount}
-          />
-        ) : (
-          <InformationStack />
-        )
+      {isLoggedIn && addDataFirst ? (
+        <MainStack
+          unreadCount={unreadCount}
+          setUnreadCount={setUnreadCount}
+          setIsLoggedIn={setIsLoggedIn}
+        />
+      ) : isLoggedIn && !addDataFirst ? (
+        <InformationStack />
       ) : (
-        <LoginNav />
+        <LoginNav getData={getData} />
       )}
       <Toast config={toastConfig} />
     </NavigationContainer>

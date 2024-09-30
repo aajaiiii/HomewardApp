@@ -27,11 +27,14 @@ function HomeScreen(props) {
   const navigation = useNavigation();
   console.log(props);
   const [userData, setUserData] = useState('');
+  const [assessments, setAssessments] = useState([]);
+const [showPatientForm, setShowPatientForm] = useState(true);
+
   async function getData() {
     const token = await AsyncStorage.getItem('token');
     console.log(token);
     axios
-      .post('http://192.168.2.43:5000/userdata', {token: token})
+      .post('http://192.168.2.57:5000/userdata', {token: token})
       .then(res => {
         console.log(res.data);
         setUserData(res.data.data);
@@ -84,16 +87,51 @@ function HomeScreen(props) {
     navigation.navigate('LoginUser');
   }
 
+  const fetchPatientForms = async (userId) => {
+    try {
+      const response = await axios.get(`http://192.168.2.57:5000/getpatientforms/${userId}`);
+      return response.data.data; // อาเรย์ของ PatientForm
+    } catch (error) {
+      console.error('เกิดข้อผิดพลาดในการดึงข้อมูล PatientForm:', error);
+      return [];
+    }
+  };
+  const fetchAssessments = async (patientFormIds) => {
+    try {
+      const response = await axios.get(`http://192.168.2.57:5000/assessments`, {
+        params: { patientFormIds }
+      });
+      return response.data.data; // อาเรย์ของ Assessment
+    } catch (error) {
+      console.error('เกิดข้อผิดพลาดในการดึงข้อมูล Assessment:', error);
+      return [];
+    }
+  };
+  
+  useEffect(() => {
+    if (userData) {
+      const fetchData = async () => {
+        const patientForms = await fetchPatientForms(userData._id);
+        const patientFormIds = patientForms.map(form => form._id);
+        const assessments = await fetchAssessments(patientFormIds);
+        setAssessments(assessments);
+        
+        const hasCompletedTreatment = assessments.some(
+          assessment => assessment.status_name === 'จบการรักษา'
+        );
+        setShowPatientForm(!hasCompletedTreatment);
+      };
+  
+      fetchData();
+    }
+  }, [userData]);
+  
   return (
     <ScrollView
       keyboardShouldPersistTaps={'always'}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{paddingBottom: 40}}
       style={{backgroundColor: '#F7F7F7'}}>
-      {/* <View >
-        <Image style={styles.image} source={require('../assets/imagehome.png')}
-       />
-        </View> */}
       <Swiper style={styles.swiper}>
         <TouchableOpacity onPress={() => Linking.openURL(googleUrl)}>
           <Image
@@ -115,35 +153,39 @@ function HomeScreen(props) {
         </TouchableOpacity>
       </Swiper>
       <View style={styles.containerWrapper}>
-        <TouchableOpacity style={styles.container} onPress={Caremanual}>
-          <Image
-            style={styles.buttonImage}
-            source={require('../assets/training.png')}
-          />
-          <Text style={styles.text} title="Caremanual" onPress={Caremanual}>
-            คู่มือดูแลผู้ป่วย
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.container} onPress={PatientForm}>
-          <Image
-            style={styles.buttonImage}
-            source={require('../assets/personal-information.png')}
-          />
+  <TouchableOpacity style={styles.container} onPress={Caremanual}>
+    <Image
+      style={styles.buttonImage}
+      source={require('../assets/training.png')}
+    />
+    <Text style={styles.text} title="Caremanual" onPress={Caremanual}>
+      คู่มือดูแลผู้ป่วย
+    </Text>
+  </TouchableOpacity>
+  {showPatientForm && (
+    <TouchableOpacity style={styles.container} onPress={PatientForm}>
+      <Image
+        style={styles.buttonImage}
+        source={require('../assets/personal-information.png')}
+      />
+      <Text style={styles.text} title="PatientForm">
+        บันทึกอาการผู้ป่วย
+      </Text>
+    </TouchableOpacity>
+  )}
+  <TouchableOpacity style={styles.container} onPress={Assessment}>
+    <Image
+      style={styles.buttonImage}
+      source={require('../assets/calendar.png')}
+    />
+    <Text style={styles.text} title="Assessment">
+      ผลการประเมินอาการ
+    </Text>
+  </TouchableOpacity>
+</View>
 
-          <Text style={styles.text} title="PatientForm">
-            บันทึกอาการผู้ป่วย
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <TouchableOpacity style={styles.container1} onPress={Assessment}>
-        <Image
-          style={styles.buttonImage}
-          source={require('../assets/calendar.png')}
-        />
-        <Text style={styles.text} title="Caremanual">
-          ผลการประเมินอาการ
-        </Text>
-      </TouchableOpacity>
+
+     
     </ScrollView>
   );
 }
@@ -153,10 +195,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 20,
     borderRadius: 10,
-    marginHorizontal: 'auto',
-    marginVertical: 25,
-    width: 165,
-    height: 110,
+    marginHorizontal:7,
+    marginVertical: 10,
+    width: '45%',
+    height: 150,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
@@ -171,8 +213,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 20,
     borderRadius: 10,
-    marginLeft: 14,
-    width: 165,
+    margin: 10,
+    width: '45%',
     height: 110,
     alignItems: 'center',
     shadowColor: '#000',
@@ -207,8 +249,9 @@ const styles = StyleSheet.create({
   },
   containerWrapper: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    paddingHorizontal: 10,
   },
   buttonImage: {
     height: 40,

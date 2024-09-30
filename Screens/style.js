@@ -23,23 +23,16 @@ const style = StyleSheet.create({
         padding: 10,
       },
       inBut: {
-        width: '70%',
         backgroundColor: '#87CEFA',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 10,
         alignItems: 'center',
-        paddingHorizontal: 15,
-        paddingVertical: 1,
-        borderRadius: 50,
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        color:'#fff',
-        marginTop:10,
+        marginTop: 10,
       },
       textinBut:{
-        color:'#fff',
-        fontFamily: 'Arial',
+        color: '#FFF',
         fontSize: 16,
-        fontWeight: 'normal',
-        padding: 10,
         
       },
       textInputContainer: {

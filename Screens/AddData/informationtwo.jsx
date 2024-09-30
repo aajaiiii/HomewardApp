@@ -24,11 +24,13 @@ function Informationtwo() {
   const navigation = useNavigation();
   const [userData, setUserData] = useState('');
   const [caregiverInfo, setCaregiverInfo] = useState(null);
-  const [name, setName] = useState('');
-  const [surname, setSurname] = useState('');
+  const [caregivername, setcaregiverName] = useState('');
+  const [caregiversurname, setcaregiverSurname] = useState('');
   const [username, setUsername] = useState('');
-  const [tel, setTel] = useState('');
+  const [caregivertel, setcaregiverTel] = useState('');
   const [Relationship, setRelationship] = useState('');
+  const [customRelationship, setCustomRelationship] = useState('');
+  const [isCustomRelationship, setIsCustomRelationship] = useState(false);
   const route = useRoute();
   const {formData} = route.params;
 
@@ -52,16 +54,18 @@ function Informationtwo() {
     async function getData() {
       try {
         const token = await AsyncStorage.getItem('token');
-        const response = await axios.post('http://192.168.2.43:5000/userdata', { token });
+        const response = await axios.post('http://192.168.2.57:5000/userdata', { token });
         if (response.data.data) {
           setUserData(response.data.data);
         }
         const savedData = await loadFormData();
         if (savedData) {
-          setName(savedData.name || '');
-          setSurname(savedData.surname || '');
-          setTel(savedData.tel || '');
-          setRelationship(savedData.Relationship || '');
+          setcaregiverName(savedData.caregivername || '');
+          setcaregiverSurname(savedData.caregiversurname || '');
+          setcaregiverTel(savedData.caregivertel || '');
+          setRelationship(savedData.caregiverRelationship || '');
+          setIsCustomRelationship(savedData.caregiverRelationship === 'อื่น ๆ');
+          setCustomRelationship(savedData.customRelationship || '');
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -77,14 +81,15 @@ function Informationtwo() {
       try {
         if (userData) {
           const response = await axios.get(
-            `http://192.168.2.43:5000/getcaregiver/${userData._id}`,
+            `http://192.168.2.57:5000/getcaregiver/${userData._id}`,
           );
           setCaregiverInfo(response.data.data);
-          setName(response.data.data.name);
-          setSurname(response.data.data.surname);
-          setTel(response.data.data.tel);
+          setcaregiverName(response.data.data.name);
+          setcaregiverSurname(response.data.data.surname);
+          setcaregiverTel(response.data.data.tel);
           setRelationship(response.data.data.Relationship);
-          console.log(name);
+          setIsCustomRelationship(response.data.data.Relationship === 'อื่น ๆ');
+          setCustomRelationship(response.data.data.customRelationship || '');
         }
       } catch (error) {
         if (error.response && error.response.status === 404) {
@@ -102,10 +107,11 @@ function Informationtwo() {
   const goBack = async () => {
     const formdata1 = {
       user: formData.user,
-      name,
-      surname,
-      tel,
-      Relationship,
+      caregivername,
+      caregiversurname,
+      caregivertel,
+      Relationship: isCustomRelationship ? customRelationship : Relationship,
+
       ...formData,
     };
     await saveFormData(formdata1);
@@ -115,16 +121,16 @@ function Informationtwo() {
   const AddInfo = async () => {
     const formdata1 = {
       user: formData.user,
-      name,
-      surname,
-      tel,
-      Relationship,
+      caregivername,
+      caregiversurname,
+      caregivertel,
+      Relationship: isCustomRelationship ? customRelationship : Relationship,
       ...formData,
     };
 
     try {
       const response = await axios.post(
-        'http://192.168.2.43:5000/updateuserinfo',
+        'http://192.168.2.57:5000/updateuserinfo',
         formdata1,
       );
       if (response.data.status === 'Ok') {
@@ -158,45 +164,59 @@ function Informationtwo() {
             <Text style={style.textlabel}>ชื่อ</Text>
             <TextInput
               style={[style.textInputRead, style.text]}
-              onChangeText={text => setName(text)}
-              value={name}
+              onChangeText={text => setcaregiverName(text)}
+              value={caregivername}
             />
           </View>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Text style={style.textlabel}>นามสกุล</Text>
             <TextInput
               style={[style.textInputRead, style.text]}
-              onChange={e => setSurname(e.nativeEvent.text)}
-              value={surname}
+              onChange={e => setcaregiverSurname(e.nativeEvent.text)}
+              value={caregiversurname}
             />
           </View>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
-
-            <Text style={style.textlabel}>เกี่ยวข้องเป็น</Text>
-            <View style={style.pickerContainer}>
-              <Picker
-                style={[style.Picker, style.text]}
-                selectedValue={Relationship}
-                onValueChange={itemValue => setRelationship(itemValue)}>
-                <Picker.Item label="เลือกความสัมพันธ์" value="" />
-                <Picker.Item label="พ่อ" value="พ่อ" />
-                <Picker.Item label="แม่" value="แม่" />
-                <Picker.Item label="สามี" value="สามี" />
-                <Picker.Item label="ภรรยา" value="ภรรยา" />
-                <Picker.Item label="ลูก" value="ลูก" />
-                <Picker.Item
-                  label="ไม่มีความเกี่ยวข้อง"
-                  value="ไม่มีความเกี่ยวข้อง"
-                />
-              </Picker>
-            </View>
+          <Text style={style.textlabel}>เกี่ยวข้องเป็น</Text>
+          <View style={style.pickerContainer}>
+            <Picker
+              style={[style.Picker, style.text]}
+              selectedValue={isCustomRelationship ? 'อื่น ๆ' : Relationship}
+              onValueChange={itemValue => {
+                if (itemValue === 'อื่น ๆ') {
+                  setIsCustomRelationship(true);
+                } else {
+                  setIsCustomRelationship(false);
+                  setRelationship(itemValue);
+                }
+              }}>
+              <Picker.Item label="เลือกความสัมพันธ์" value="" />
+              <Picker.Item label="พ่อ" value="พ่อ" />
+              <Picker.Item label="แม่" value="แม่" />
+              <Picker.Item label="ลูก" value="ลูก" />
+              <Picker.Item label="สามี" value="สามี" />
+              <Picker.Item label="ภรรยา" value="ภรรยา" />
+              {/* <Picker.Item label="ไม่มีความเกี่ยวข้อง" value="ไม่มีความเกี่ยวข้อง" /> */}
+              <Picker.Item label="อื่น ๆ" value="อื่น ๆ" />
+            </Picker>
           </View>
+        </View>
+        {isCustomRelationship && (
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Text style={style.textlabel}>กรุณาระบุ</Text>
+            <TextInput
+              style={[style.textInputRead, style.text]}
+              onChange={e => setCustomRelationship(e.nativeEvent.text)}
+              value={customRelationship}
+            />
+          </View>
+        )}
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Text style={style.textlabel}>เบอร์โทรศัพท์</Text>
             <TextInput
               style={[style.textInputRead, style.text]}
-              onChange={e => setTel(e.nativeEvent.text)}
-              value={tel}
+              onChange={e => setcaregiverTel(e.nativeEvent.text)}
+              value={caregivertel}
             />
           </View>
         </View>

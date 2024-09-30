@@ -32,12 +32,11 @@ export default function UserEditScreen(props) {
   const route = useRoute();
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [initialBirthday, setInitialBirthday] = useState('');
-  const [inputHeight, setInputHeight] = useState(40); // ความสูงเริ่มต้นของ TextInput
+  const [inputHeight, setInputHeight] = useState(40);
 
   const handleContentSizeChange = event => {
     setInputHeight(event.nativeEvent.contentSize.height);
   };
-
 
   const handleDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || birthday;
@@ -49,11 +48,11 @@ export default function UserEditScreen(props) {
     const token = await AsyncStorage.getItem('token');
     console.log(token);
     axios
-      .post('http://192.168.2.43:5000/userdata', {token: token})
+      .post('http://192.168.2.57:5000/userdata', {token: token})
       .then(res => {
         console.log(res.data);
         setUserData(res.data.data);
-        
+
         console.log(userData);
       });
   }
@@ -61,7 +60,7 @@ export default function UserEditScreen(props) {
   useEffect(() => {
     getData();
   }, []);
-  
+
   useEffect(() => {
     const userData = route.params.data;
     setUsername(userData.username);
@@ -94,12 +93,12 @@ export default function UserEditScreen(props) {
     };
 
     console.log(formdata);
-    axios.post('http://192.168.2.43:5000/updateuserapp', formdata).then(res => {
+    axios.post('http://192.168.2.57:5000/updateuserapp', formdata).then(res => {
       console.log(res.data);
       if (res.data.status == 'Ok') {
         Toast.show({
           type: 'success',
-          text1: 'Updated',
+          text1: 'แก้ไขสำเร็จ',
           text2: 'แก้ไขข้อมูลทั่วไปแล้ว',
         });
         navigation.navigate('User', {refresh: true});
@@ -112,7 +111,7 @@ export default function UserEditScreen(props) {
       keyboardShouldPersistTaps={'always'}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{paddingBottom: 40}}
-      style={{ backgroundColor: '#F7F7F7'}}>
+      style={{backgroundColor: '#F7F7F7'}}>
       <View style={style.container}>
         <View>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -124,16 +123,15 @@ export default function UserEditScreen(props) {
               readOnly
             />
           </View>
-      
+
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Text style={style.text}>เลขประจำตัวประชาชน</Text>
-             <TextInput
+            <TextInput
               style={[style.text]}
               onChange={e => setIDCardNumber(e.nativeEvent.text)}
               defaultValue={ID_card_number}
               readOnly
-
-            /> 
+            />
             {/* <TextInput
               style={[style.textInputRead, style.text]}
               onChange={e => setIDCardNumber(e.nativeEvent.text)}
@@ -143,9 +141,10 @@ export default function UserEditScreen(props) {
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Text style={style.text}>อีเมล</Text>
             <TextInput
-              style={[style.textInputRead, style.text]}
+              style={[style.text]}
               onChange={e => setEmail(e.nativeEvent.text)}
-              value={email}
+              defaultValue={email}
+              readOnly
             />
           </View>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -166,37 +165,52 @@ export default function UserEditScreen(props) {
             />
           </View>
 
-<View style={{flexDirection: 'row', alignItems: 'center'}}>
-  <Text style={style.text}>เพศ</Text>
-  <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
-  <TouchableOpacity style={styles.radio} onPress={() => setGender('ชาย')}>
-    <View style={styles.radioButton}>
-      {gender === 'ชาย' && <View style={styles.radioButtonInner} />}
-    </View>
-    <Text style={styles.radioButtonText}>ชาย</Text>
-  </TouchableOpacity>
-  <TouchableOpacity style={styles.radio}  onPress={() => setGender('หญิง')}>
-    <View style={styles.radioButton}>
-      {gender === 'หญิง' && <View style={styles.radioButtonInner} />}
-    </View>
-    <Text style={styles.radioButtonText}>หญิง</Text>
-  </TouchableOpacity>
-  <TouchableOpacity style={styles.radio}   onPress={() => setGender('ไม่ระบุ')}>
-    <View style={styles.radioButton}>
-      {gender === 'ไม่ระบุ' && <View style={styles.radioButtonInner} />}
-    </View>
-    <Text style={styles.radioButtonText}>ไม่ระบุ</Text>
-  </TouchableOpacity>
-</View>
-
-</View>
-
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Text style={style.text}>เพศ</Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}>
+              <TouchableOpacity
+                style={styles.radio}
+                onPress={() => setGender('ชาย')}>
+                <View style={styles.radioButton}>
+                  {gender === 'ชาย' && <View style={styles.radioButtonInner} />}
+                </View>
+                <Text style={styles.radioButtonText}>ชาย</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.radio}
+                onPress={() => setGender('หญิง')}>
+                <View style={styles.radioButton}>
+                  {gender === 'หญิง' && (
+                    <View style={styles.radioButtonInner} />
+                  )}
+                </View>
+                <Text style={styles.radioButtonText}>หญิง</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.radio}
+                onPress={() => setGender('ไม่ระบุ')}>
+                <View style={styles.radioButton}>
+                  {gender === 'ไม่ระบุ' && (
+                    <View style={styles.radioButtonInner} />
+                  )}
+                </View>
+                <Text style={styles.radioButtonText}>ไม่ระบุ</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
 
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <Text style={style.text}>วันเกิด</Text>
+            <Text style={style.text}>วันเกิด</Text>
             <TouchableOpacity onPress={() => setShowDatePicker(true)}>
               <Text style={[style.textInputRead, style.text]}>
-                {birthday ? new Date(birthday).toLocaleDateString('en-GB') : 'Select Birthday'}
+                {birthday
+                  ? new Date(birthday).toLocaleDateString('en-GB')
+                  : 'Select Birthday'}
               </Text>
             </TouchableOpacity>
 
@@ -216,13 +230,15 @@ export default function UserEditScreen(props) {
             />
           )}
 
-
-
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Text style={style.text}>ที่อยู่</Text>
             <TextInput
               multiline={true}
-              style={[style.textInputAddress, style.text, { height: Math.max(40, inputHeight) }]}
+              style={[
+                style.textInputAddress,
+                style.text,
+                {height: Math.max(40, inputHeight)},
+              ]}
               onChange={e => setAddress(e.nativeEvent.text)}
               defaultValue={Address}
               textAlignVertical="top"
@@ -249,10 +265,10 @@ export default function UserEditScreen(props) {
   );
 }
 const styles = StyleSheet.create({
-  radio:{
-    flexDirection: 'row', 
+  radio: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 10
+    marginRight: 10,
   },
   radioButton: {
     width: 20,
@@ -274,5 +290,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'black',
   },
-
 });

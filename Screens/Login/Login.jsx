@@ -17,7 +17,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import Icon1 from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-function LoginPage({ setIsLoggedIn }) {
+function LoginPage({ getData}) {
   const navigation = useNavigation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -32,38 +32,50 @@ function LoginPage({ setIsLoggedIn }) {
     return unsubscribe;
   }, [navigation]);
 
-  function handleSubmit() {
+  async function handleSubmit() {
     console.log(username, password);
     const userData = {
       username: username,
       password,
     };
   
-    axios
-      .post('http://192.168.2.43:5000/loginuser', userData)
-      .then(res => {
-        console.log(res.data);
-        if (res.data.status == 'ok') {
-          AsyncStorage.setItem('token', res.data.data.token);
-          AsyncStorage.setItem('isLoggedIn', JSON.stringify(true));
-          AsyncStorage.setItem('addDataFirst', JSON.stringify(res.data.data.addDataFirst));
-          // console.log('อะไร',JSON.stringify(res.data.data.addDataFirst));
-          if (res.data.data.addDataFirst) {
-            navigation.navigate('Home');
-          } else {
-            navigation.navigate('Information');
-          }
+    try {
+      const res = await axios.post('http://192.168.2.57:5000/loginuser', userData);
+      // console.log(res.data);
+      if (res.data.status === 'ok') {
+        await AsyncStorage.setItem('token', res.data.data);
+        await AsyncStorage.setItem('isLoggedIn', JSON.stringify(true));
+        await AsyncStorage.setItem('addDataFirst', JSON.stringify(res.data.addDataFirst));
+        
+        await getData();
+
+        if (res.data.addDataFirst) {
+          navigation.navigate('TabNav');
+        } else {
+          navigation.navigate('Information');
         }
-      })
-      .catch(error => {
-        setError(error.response?.data?.error);
-      });
+      }
+    } catch (error) {
+      setError(error.response?.data?.error);
+    }
   }
+  
   
 
   const forgot = () => {
     navigation.navigate('ForgotPassword');
   };
+
+  // async function getData() {
+  //   const data = await AsyncStorage.getItem('isLoggedIn');
+    
+  //   console.log(data, 'at app.jsx');
+  
+  // }
+  // useEffect(()=>{
+  //   getData();
+  //   console.log("Hii");
+  // },[])
 
   return (
     <ScrollView

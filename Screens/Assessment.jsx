@@ -28,7 +28,7 @@ export default function Assessment(props) {
     const token = await AsyncStorage.getItem('token');
     console.log(token);
     axios
-      .post('http://192.168.2.43:5000/userdata', {token: token})
+      .post('http://192.168.2.57:5000/userdata', {token: token})
       .then(res => {
         console.log(res.data);
         setUserData(res.data.data);
@@ -51,7 +51,7 @@ export default function Assessment(props) {
     try {
       if (userData) {
         const response = await axios.get(
-          `http://192.168.2.43:5000/getpatientforms/${userData._id}`,
+          `http://192.168.2.57:5000/getpatientforms/${userData._id}`,
         );
         const sortedForms = sortForms(response.data.data, sortOrder);
         setPatientForms(sortedForms);
@@ -64,7 +64,7 @@ export default function Assessment(props) {
   const fetchAssessments = async () => {
     try {
       const response = await axios.get(
-        `http://192.168.2.43:5000/allAssessment`,
+        `http://192.168.2.57:5000/allAssessment`,
       );
       setAssessments(response.data.data);
     } catch (error) {
@@ -112,11 +112,11 @@ export default function Assessment(props) {
       minutes < 10 ? '0' + minutes : minutes
     } น.`;
   };
-  const hasAssessment = patientFormId => {
-    return assessments.some(
-      assessment => assessment.PatientForm === patientFormId,
-    );
-  };
+  // const hasAssessment = patientFormId => {
+  //   return assessments.some(
+  //     assessment => assessment.PatientForm === patientFormId,
+  //   );
+  // };
 
   const getAssessment = patientFormId => {
     return assessments.find(
@@ -153,6 +153,8 @@ export default function Assessment(props) {
         return styles.normalStatus;
       case 'ผิดปกติ':
         return styles.abnormalStatus;
+      case 'เคสฉุกเฉิน':
+          return styles.EmergencyStatus;
       case 'จบการรักษา':
         return styles.completedStatus;
       default:
@@ -209,6 +211,9 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     marginBottom: 16,
   },
+  statusText:{
+    fontSize: 16,
+  },
   sortOption: {
     fontSize: 14,
     color: '#333',
@@ -245,20 +250,23 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   normalStatus: {
-    color: 'green', // Color for normal status
+    color: 'green',
   },
   abnormalStatus: {
-    color: 'red', // Color for abnormal status
+    color: '#e7639a', 
+  },
+  EmergencyStatus:{
+    color: 'red', 
   },
   completedStatus: {
-    color: 'blue', // Color for completed status
+    color: 'blue',
   },
   defaultStatus: {
-    color: '#808080', // Default color if status is not recognized
+    color: '#808080',
   },
   statusLabel: {
     color: 'black',
-    fontSize: 14,
+    fontSize: 16,
   },
 
   noDataText: {

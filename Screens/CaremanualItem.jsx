@@ -7,13 +7,13 @@ import {
   ScrollView,
   TouchableOpacity,
   Modal,
-  Linking
+  Linking,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Material from 'react-native-vector-icons/MaterialCommunityIcons';
-import { PDFView } from 'react-native-pdf';
+import {PDFView} from 'react-native-pdf';
 import styles from './Login/style';
 import moment from 'moment';
 export default function Caremanualitem({route, navigation, props}) {
@@ -23,7 +23,7 @@ export default function Caremanualitem({route, navigation, props}) {
   const [file, setFile] = useState(null);
   const [detail, setDetail] = useState('');
   const {id} = route.params;
-  const [modalVisible, setModalVisible] = useState(false); // State สำหรับควบคุมการแสดง Modal
+  const [modalVisible, setModalVisible] = useState(false);
   const [updatedAt, setUpdatedAt] = useState('');
 
   useEffect(() => {
@@ -31,7 +31,7 @@ export default function Caremanualitem({route, navigation, props}) {
       try {
         const token = await AsyncStorage.getItem('token');
         const response = await axios.get(
-          `http://192.168.2.43:5000/getcaremanual/${id}`,
+          `http://192.168.2.57:5000/getcaremanual/${id}`,
           {headers: {Authorization: `Bearer ${token}`}},
         );
         const data = response.data;
@@ -88,7 +88,7 @@ export default function Caremanualitem({route, navigation, props}) {
       contentContainerStyle={{paddingBottom: 40}}>
       <View style={stylei.pagelogin}>
         <TouchableOpacity style={stylei.iconback} onPress={goBack}>
-          <Ionicons name={'arrow-back-outline'} size={22} color={'#fff'} />
+          <Ionicons name={'arrow-back-outline'} size={22} color={'#000'} />
         </TouchableOpacity>
         <Text style={stylei.heardCare}>{caremanual_name}</Text>
         <Text style={stylei.textCare}>อัปเดตล่าสุดเมื่อ: {updatedAt}</Text>
@@ -97,8 +97,8 @@ export default function Caremanualitem({route, navigation, props}) {
             <Image
               source={{uri: image}}
               style={{
-                width: 300,
-                height: 400,
+                width: 310,
+                height: 450,
                 marginLeft: 'auto',
                 marginRight: 'auto',
               }}
@@ -122,19 +122,19 @@ export default function Caremanualitem({route, navigation, props}) {
           </Modal>
 
           <TouchableOpacity
-  style={stylei.containerCarefile}
-  onPress={() => {
-    if (file) {
-      Linking.openURL(file);
-    } else {
-      console.error('File URL is not available.');
-    }
-  }}>
-  <Material name={'file-pdf-box'} color={'red'} size={24} />
-  <Text style={stylei.fileText}>เปิดไฟล์ PDF</Text>
-</TouchableOpacity>
+            style={stylei.containerCarefile}
+            onPress={() => {
+              if (file) {
+                Linking.openURL(file);
+              } else {
+                console.error('File URL is not available.');
+              }
+            }}>
+            <Material name={'file-pdf-box'} color={'red'} size={24} />
+            <Text style={stylei.fileText}>เปิดไฟล์ PDF</Text>
+          </TouchableOpacity>
 
-{/* 
+          {/* 
 <PDFView
   fadeInDuration={250.0}
   style={{ flex: 1 }}
@@ -142,7 +142,7 @@ export default function Caremanualitem({route, navigation, props}) {
   resourceType={'url'}
 /> */}
 
-{/* <PDFView
+          {/* <PDFView
   fadeInDuration={250.0}
   style={{ flex: 1 }}
   resource={file} 
@@ -168,7 +168,7 @@ const stylei = StyleSheet.create({
     fontWeight: '700',
     padding: 5,
     textAlign: 'center',
-    color: '#fff',
+    color: '#000',
   },
   textCare: {
     color: 'black',
@@ -178,7 +178,7 @@ const stylei = StyleSheet.create({
     paddingTop: 1,
     padding: 10,
     textAlign: 'center',
-    color: '#fff',
+    color: '#000',
   },
   containerCare: {
     backgroundColor: '#fff',

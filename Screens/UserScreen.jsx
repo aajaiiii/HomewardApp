@@ -22,6 +22,7 @@ function UserScreen(props) {
   const [caregiverInfo, setCaregiverInfo] = useState(null);
   const [userAge, setUserAge] = useState(0);
   const [userAgeInMonths, setUserAgeInMonths] = useState(0);
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
 
   useEffect(() => {
     if (isFocused) {
@@ -34,10 +35,11 @@ function UserScreen(props) {
     const token = await AsyncStorage.getItem('token');
     console.log(token);
     axios
-      .post('http://192.168.2.43:5000/userdata', {token: token})
+      .post('http://192.168.2.57:5000/userdata', {token: token})
       .then(res => {
         console.log(res.data);
         setUserData(res.data.data);
+        setIsEmailVerified(res.data.data.isEmailVerified);
         console.log(userData);
       });
   }
@@ -60,13 +62,12 @@ function UserScreen(props) {
     try {
       if (userData) {
         const response = await axios.get(
-          `http://192.168.2.43:5000/getcaregiver/${userData._id}`
+          `http://192.168.2.57:5000/getcaregiver/${userData._id}`,
         );
         setCaregiverInfo(response.data.data);
       }
     } catch (error) {
       if (error.response && error.response.status === 404) {
-        // Caregiver info not found
         setCaregiverInfo(null);
       } else {
         console.error('Error fetching caregiver info:', error);
@@ -75,7 +76,6 @@ function UserScreen(props) {
   };
 
   const currentDate = new Date();
-
 
   useEffect(() => {
     if (userData && userData.birthday) {
@@ -128,17 +128,35 @@ function UserScreen(props) {
               </Text>
             </View>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Text style={style.text}>อีเมล :</Text>
-              <Text style={[style.text, style.textWidth]}>
-                {userData.email}
-              </Text>
-            </View>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <Text style={style.text}>เลขประจำตัวประชาชน :</Text>
               <Text style={[style.text, style.textWidth]}>
                 {userData.ID_card_number}
               </Text>
             </View>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <Text style={style.text}>อีเมล :</Text>
+              <Text style={[style.text, style.textWidth]}>
+                {userData.email}
+              </Text>
+              {isEmailVerified ? (
+                <Icon
+                  name="edit"
+                  color="black"
+                  style={styles.IconUserSC}
+                  onPress={() => {
+                    navigation.navigate('UpdateEmail', {data: userData});
+                  }}
+                />
+              ) : (
+                <Text
+                  onPress={() => {
+                    navigation.navigate('EmailVerification', {data: userData});
+                  }}>
+                  ยืนยันอีเมล
+                </Text>
+              )}
+            </View>
+
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <Text style={style.text}>ชื่อ-นามสกุล :</Text>
               <Text style={[style.text, style.textWidth]}>
@@ -183,7 +201,6 @@ function UserScreen(props) {
         )}
       </View>
 
-
       <View style={style.container}>
         {caregiverInfo ? (
           <>
@@ -225,18 +242,18 @@ function UserScreen(props) {
           </>
         ) : (
           <View
-          style={{
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          <Text style={styles.texter}>ข้อมูลผู้ดูแล</Text>
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => {
-              navigation.navigate('CaregiverAdd', {userId: userData._id});
+            style={{
+              justifyContent: 'center',
+              alignItems: 'center',
             }}>
-            <Text style={styles.addButtonText}>เพิ่มข้อมูลผู้ดูแล</Text>
-          </TouchableOpacity>
+            <Text style={styles.texter}>ข้อมูลผู้ดูแล</Text>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => {
+                navigation.navigate('CaregiverAdd', {userId: userData._id});
+              }}>
+              <Text style={styles.addButtonText}>เพิ่มข้อมูลผู้ดูแล</Text>
+            </TouchableOpacity>
           </View>
         )}
       </View>
@@ -256,12 +273,12 @@ const styles = StyleSheet.create({
   IconUserSC: {
     fontSize: 20,
   },
-  addButtonText:{
+  addButtonText: {
     backgroundColor: '#87CEFA',
-    padding:10,
-    margin:5,
-    color:'#fff',
-    fontWeight:'bold'
-  }
+    padding: 10,
+    margin: 5,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
 });
 export default UserScreen;

@@ -47,7 +47,7 @@ function Informationone({route, props}) {
     const token = await AsyncStorage.getItem('token');
     console.log(token);
     axios
-      .post('http://192.168.2.43:5000/userdata', {token: token})
+      .post('http://192.168.2.57:5000/userdata', {token: token})
       .then(res => {
         console.log(res.data);
         setUserData(res.data.data);
@@ -209,7 +209,7 @@ function Informationone({route, props}) {
             <Text style={[style.textInputRead, style.text]}>
               {birthday
                 ? new Date(birthday).toLocaleDateString('en-GB')
-                : 'Select Birthday'}
+                : 'เลือกวันเกิด'}
             </Text>
             <TouchableOpacity onPress={() => setShowDatePicker(true)}>
               <Ionicons

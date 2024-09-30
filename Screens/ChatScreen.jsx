@@ -7,12 +7,14 @@ import {
   ScrollView,
   TouchableOpacity,
   Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import {useNavigation} from '@react-navigation/native';
 
-function ChatScreen({ setUnreadCount }) {
+function ChatScreen({setUnreadCount}) {
   const [allMpersonnel, setAllMpersonnel] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
   const navigation = useNavigation();
@@ -21,16 +23,20 @@ function ChatScreen({ setUnreadCount }) {
   const [recipientModel, setRecipientModel] = useState('');
   const [currentRecipient, setCurrentRecipient] = useState(null);
   const [data, setData] = useState('');
-
+  const [filteredUsers, setFilteredUsers] = useState([]);
   async function getData() {
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await axios.post('http://192.168.2.43:5000/userdata', {
+      const response = await axios.post('http://192.168.2.57:5000/userdata', {
         token: token,
       });
-      console.log(response.data);
-      setUserData(response.data.data);
-      fetchAllUsers(response.data.data._id); // ส่ง userId มาด้วย
+      const userData = response?.data?.data;
+      if (!userData || !userData._id) {
+        throw new Error('User data is missing or invalid');
+      }
+      console.log(userData);
+    setUserData(userData);
+    fetchAllUsers(userData._id);
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
@@ -45,14 +51,14 @@ function ChatScreen({ setUnreadCount }) {
   const fetchAllUsers = async userId => {
     try {
       const response = await fetch(
-        `http://192.168.2.43:5000/allMpersonnelchat1?userId=${userId}`, // ส่ง userId ผ่าน query string
+        `http://192.168.2.57:5000/allMpersonnelchat1?userId=${userId}`, 
       );
       const data = await response.json();
 
       const usersWithLastMessage = await Promise.all(
         data.data.map(async user => {
           const lastMessageResponse = await fetch(
-            `http://192.168.2.43:5000/lastmessage/${user._id}?loginUserId=${userId}`, // ส่ง userId และ loginUserId ผ่าน query string
+            `http://192.168.2.57:5000/lastmessage/${user._id}?loginUserId=${userId}`,
           );
           const lastMessageData = await lastMessageResponse.json();
           return {...user, lastMessage: lastMessageData.lastMessage};
@@ -114,19 +120,37 @@ function ChatScreen({ setUnreadCount }) {
     return text.substring(0, maxLength) + '...';
   };
 
+  const SearchKeyword = keyword => {
+    setSearchKeyword(keyword);
+  };
+
+  useEffect(() => {
+    const filteredUsers = allMpersonnel.filter(user => {
+      const fullName = `${user.name} ${user.surname}`;
+      return fullName.toLowerCase().includes(searchKeyword.toLowerCase());
+    });
+    setFilteredUsers(filteredUsers);
+  }, [searchKeyword, allMpersonnel]);
+  
   return (
+    <KeyboardAvoidingView
+    style={styles.viewStyle}
+    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
     <View style={styles.viewStyle}>
       <View style={styles.searchBar}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="ค้นหา"
-          value={searchKeyword}
-          onChangeText={setSearchKeyword}
-        />
+      <TouchableOpacity onPress={() => navigation.navigate('SearchKeyword')}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="ค้นหา"
+              value={searchKeyword}
+              onChangeText={SearchKeyword}
+              editable={false} // ทำให้ TextInput ไม่สามารถแก้ไขได้
+            />
+          </TouchableOpacity>
       </View>
       {/* <Text>{countUnreadUsers()}</Text> */}
       <ScrollView style={styles.userList}>
-        {allMpersonnel.map(user => (
+        {filteredUsers.map(user => (
           <TouchableOpacity
             key={user._id}
             style={styles.userItem}
@@ -143,7 +167,7 @@ function ChatScreen({ setUnreadCount }) {
                       ? styles.lastMessageUnread
                       : styles.lastMessage
                   }>
-                  {user.lastMessage.sender._id === userData._id
+                  {user.lastMessage?.sender?._id === userData._id
                     ? 'คุณ'
                     : user.lastMessage.sender.name}
                   :{' '}
@@ -166,13 +190,15 @@ function ChatScreen({ setUnreadCount }) {
         ))}
       </ScrollView>
     </View>
+    </KeyboardAvoidingView>
+
   );
 }
 
 const styles = StyleSheet.create({
   viewStyle: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#F7F7F7',
   },
   searchBar: {
     width: '100%',

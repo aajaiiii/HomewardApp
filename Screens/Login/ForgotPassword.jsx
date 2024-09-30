@@ -13,7 +13,7 @@ export default function ForgotPassword({ navigation }) {
 
   const requestOtp = async () => {
     try {
-      const response = await axios.post('http://192.168.2.43:5000/forgot-passworduser', { email });
+      const response = await axios.post('http://192.168.2.57:5000/forgot-passworduser', { email });
       setMessage(response.data);
       navigation.navigate('VerifyOtp', { email });
     } catch (error) {
@@ -29,6 +29,7 @@ export default function ForgotPassword({ navigation }) {
     <ScrollView
       contentContainerStyle={{ flexGrow: 1 }}
       keyboardShouldPersistTaps={'always'}
+      style={{ backgroundColor: '#F7F7F7'}}
     >
       <View style={styles.pageforgot}>
         <TouchableOpacity style={stylei.iconback} onPress={goBack}>
@@ -37,26 +38,28 @@ export default function ForgotPassword({ navigation }) {
         <View style={styles.logoContainer}>
           <Image style={styles.logo} source={require('../../assets/Logoblue.png')} />
         </View>
+
         <View style={stylei.container}>
           <Text style={stylei.text_header}>ลืมรหัสผ่าน</Text>
           <Text style={stylei.text}>กรุณากรอกอีเมลเพื่อเปลี่ยนรหัสผ่าน</Text>
-          <View style={styles.action}>
+          <View style={stylei.innerContainer}>
+
+          <View style={stylei.textInputContainer}>
             <Fontisto name="email" color="#87CEFA" style={styles.smallIcon} />
             <TextInput
               placeholder="อีเมล"
               value={email}
-              style={styles.textInput}
+              style={stylei.textInput}
               onChange={e => setEmail(e.nativeEvent.text)}
             />
           </View>
-          <View style={styles.button}>
-            <TouchableOpacity style={stylei.inBut} onPress={requestOtp}>
+          </View>
+            <TouchableOpacity style={stylei.button} onPress={requestOtp}>
               <View>
-                <Text style={styles.textSign}>ส่ง OTP</Text>
+                <Text style={stylei.buttonText}>ส่ง OTP</Text>
               </View>
             </TouchableOpacity>
-            {message ? <Text style={{ marginTop: 20 }}>{message}</Text> : null}
-          </View>
+            {/* {message ? <Text style={{ marginTop: 20 }}>{message}</Text> : null} */}
         </View>
       </View>
     </ScrollView>
@@ -89,17 +92,17 @@ const stylei = StyleSheet.create({
     justifyContent: 'center',
     // marginTop:50,
   },
-  inBut: {
-    width: '70%',
+  button: {
     backgroundColor: '#87CEFA',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
     alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 50,
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    color: '#fff',
-    marginTop: 5,
+    marginTop: 10,
+  },
+  buttonText: {
+    color: '#FFF',
+    fontSize: 16,
   },
   text_header: {
     fontSize: 20,
@@ -110,5 +113,24 @@ const stylei = StyleSheet.create({
   text: {
     textAlign: 'center',
     fontSize: 16,
+  },
+  textInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#DCDCDC',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    marginBottom: 2,
+    height:45,
+  },
+  innerContainer: {
+    marginTop: 20,
+  },
+  textInput: {
+    flex: 1,
+    height: 40,
+    fontSize: 16,
+    color: '#333',
   },
 });

@@ -60,12 +60,12 @@ export default function UpdatePassword(props) {
       };
   
       setLoading(true);
-      axios.post('http://192.168.2.43:5000/updatepassuser', formData).then(res => {
+      axios.post('http://192.168.2.57:5000/updatepassuser', formData).then(res => {
         setLoading(false);
         if (res.data.status === 'Ok') {
           Toast.show({
             type: 'success',
-            text1: 'Updated',
+            text1: 'แก้ไขสำเร็จ',
             text2: 'แก้ไขรหัสผ่านแล้ว',
           });
           navigation.navigate('Profile', { refresh: true });
@@ -92,15 +92,14 @@ export default function UpdatePassword(props) {
       <ScrollView
       keyboardShouldPersistTaps={'always'}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{paddingBottom: 40}}
-      style={{ backgroundColor: '#F7F7F7'}}>
-      <View style={style.container}>
-
+      contentContainerStyle={stylespass.container}
+      style={stylespass.background}>
+      <View style={stylespass.innerContainer}>
         <View>
           <View>
             <Text style={style.text}>รหัสผ่านเก่า</Text>
-            <View style={style.textInputContainer}>
-            <TextInput style={style.text}
+            <View style={stylespass.textInputContainer}>
+            <TextInput style={stylespass.text}
               onChangeText={text => setPassword(text)}
               secureTextEntry
             />
@@ -110,9 +109,9 @@ export default function UpdatePassword(props) {
 
           <View>
             <Text style={style.text}>รหัสผ่านใหม่</Text>
-            <View style={style.textInputContainer}>
+            <View style={stylespass.textInputContainer}>
             <TextInput
-            style={style.text}
+            style={stylespass.text}
               onChangeText={text => setNewPassword(text)}
               secureTextEntry
             />
@@ -122,9 +121,9 @@ export default function UpdatePassword(props) {
           
           <View>
             <Text style={style.text}>ยืนยันรหัสผ่านใหม่</Text>
-            <View style={style.textInputContainer}>
+            <View style={stylespass.textInputContainer}>
             <TextInput
-            style={style.text}
+            style={stylespass.textInput}
               onChangeText={text => setConfirmNewPassword(text)}
               secureTextEntry
             />
@@ -146,6 +145,33 @@ export default function UpdatePassword(props) {
     </ScrollView>
   );
 }const stylespass = StyleSheet.create({
+  container: {
+    paddingBottom: 40,
+    paddingHorizontal: 20,
+    backgroundColor: '#F7F7F7',
+  },
+  background: {
+    backgroundColor: '#F7F7F7',
+  },
+  textInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#DCDCDC',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    marginBottom: 2,
+    height:45,
+  },
+  innerContainer: {
+    marginTop: 20,
+  },
+  textInput: {
+    flex: 1,
+    height: 40,
+    fontSize: 16,
+    color: '#333',
+  },
   errorText: {
     color: 'red',
     marginTop: 5,

@@ -62,7 +62,7 @@ export default function PatientForm2(props) {
     const fetchData = async () => {
       const token = await AsyncStorage.getItem('token');
       axios
-        .post('http://192.168.2.43:5000/userdata', { token: token })
+        .post('http://192.168.2.57:5000/userdata', { token: token })
         .then(res => {
           setUserData(res.data.data);
         });
@@ -86,14 +86,14 @@ export default function PatientForm2(props) {
   }, [formData]);
 
   const AddpatientForm = async () => {
-    if (formData.symptoms.includes('') || formData.symptoms.includes('new_symptom')) {
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: 'กรุณาเลือกอาการให้ครบถ้วน',
-      });
-      return;
-    }
+    // if (formData.symptoms.includes('') || formData.symptoms.includes('new_symptom')) {
+    //   Toast.show({
+    //     type: 'error',
+    //     text1: 'Error',
+    //     text2: 'กรุณาเลือกอาการให้ครบถ้วน',
+    //   });
+    //   return;
+    // }
     const formdata1 = {
       Symptoms: formData.symptoms,
       SBP,
@@ -111,13 +111,13 @@ export default function PatientForm2(props) {
 
     try {
       const response = await axios.post(
-        'http://192.168.2.43:5000/addpatientform',
+        'http://192.168.2.57:5000/addpatientform',
         formdata1,
       );
       if (response.data.status === 'ok') {
         Toast.show({
           type: 'success',
-          text1: 'Successful',
+          text1: 'บันทึกสำเร็จ',
           text2: 'บันทึกอาการแล้ว',
         });
         await AsyncStorage.removeItem('patientForm');
@@ -159,7 +159,7 @@ export default function PatientForm2(props) {
       contentContainerStyle={{ paddingBottom: 40 }}
       style={{ backgroundColor: '#F7F7F7' }}>
       <View style={[styleform.container, { flex: 1 }]}>
-        <Text style={styleform.sectionHeader}>Vital signs</Text>
+        <Text style={styleform.sectionHeader}>สัญญาณชีพ</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
           <View style={stylep.texttitle}>
             <Text style={stylep.text}>ความดันตัวบน(mmHg)</Text>
@@ -167,6 +167,7 @@ export default function PatientForm2(props) {
               style={[style.textInputRead, style.text]}
               onChangeText={text => setSBP(text)}
               value={SBP}
+              keyboardType="numeric"
             />
           </View>
           <View style={stylep.texttitle}>
@@ -175,6 +176,7 @@ export default function PatientForm2(props) {
               style={[style.textInputRead, style.text]}
               onChangeText={text => setDBP(text)}
               value={DBP}
+              keyboardType="numeric"
             />
           </View>
         </View>
@@ -185,6 +187,7 @@ export default function PatientForm2(props) {
               style={[style.textInputRead, style.text]}
               onChange={e => setPulseRate(e.nativeEvent.text)}
               value={PulseRate}
+              keyboardType="numeric"
             />
           </View>
           <View style={stylep.texttitle}>
@@ -193,6 +196,7 @@ export default function PatientForm2(props) {
               style={[style.textInputRead, style.text]}
               onChange={e => setRespiration(e.nativeEvent.text)}
               value={Respiration}
+              keyboardType="numeric"
             />
           </View>
         </View>
@@ -203,6 +207,7 @@ export default function PatientForm2(props) {
               style={[style.textInputRead, style.text]}
               onChange={e => setTemperature(e.nativeEvent.text)}
               value={Temperature}
+              keyboardType="numeric"
             />
           </View>
           <View style={stylep.texttitle}>
@@ -251,6 +256,7 @@ export default function PatientForm2(props) {
               style={[style.textInputRead, style.text, { width: 175 }]}
               onChange={e => setDTX(e.nativeEvent.text)}
               value={DTX}
+              keyboardType="numeric"
             />
           </View>
         </View>

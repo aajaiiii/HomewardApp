@@ -11,9 +11,13 @@ import {useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import style from './style';
+import {useNavigation, useIsFocused} from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Feather';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 export default function Assessmentitem(props) {
   const route = useRoute();
+  const navigation = useNavigation();
   console.log(props);
   const selectedItem = route.params.selectedItem;
   const [userData, setUserData] = useState('');
@@ -21,12 +25,20 @@ export default function Assessmentitem(props) {
   const [mpersonnel, setMPersonnel] = useState('');
   const [userAge, setUserAge] = useState(0);
   const [userAgeInMonths, setUserAgeInMonths] = useState(0);
+  const isFocused = useIsFocused();
+  
+  useEffect(() => {
+    if (isFocused) {
+      getData();
+      fetchAssessment();
+    }
+  }, [isFocused]);
 
   async function getData() {
     const token = await AsyncStorage.getItem('token');
     console.log(token);
     axios
-      .post('http://192.168.2.43:5000/userdata', {token: token})
+      .post('http://192.168.2.57:5000/userdata', {token: token})
       .then(res => {
         console.log(res.data);
         setUserData(res.data.data);
@@ -96,7 +108,7 @@ export default function Assessmentitem(props) {
     try {
       if (selectedItem) {
         const response = await axios.get(
-          `http://192.168.2.43:5000/getassessment/${selectedItem._id}`,
+          `http://192.168.2.57:5000/getassessment/${selectedItem._id}`,
         );
         const assessmentData = response.data.data;
         setAssessment(assessmentData);
@@ -120,7 +132,7 @@ export default function Assessmentitem(props) {
     try {
       if (assessment && assessment.MPersonnel) {
         const response = await axios.get(
-          `http://192.168.2.43:5000/getmpersonnel/${assessment.MPersonnel}`,
+          `http://192.168.2.57:5000/getmpersonnel/${assessment.MPersonnel}`,
         );
         setMPersonnel(response.data);
         console.log('แพทย์', response.data);
@@ -144,6 +156,12 @@ export default function Assessmentitem(props) {
         return styles.statusDefault;
     }
   };
+  const handleEditSymptoms = () => {
+    navigation.navigate('PatientFormEdit',{ id: selectedItem._id });
+  };
+
+  
+
   return (
     <ScrollView
       keyboardShouldPersistTaps={'always'}
@@ -184,65 +202,79 @@ export default function Assessmentitem(props) {
             
           )}
         </View>
-
         <View style={styles.section}>
+        <View style={styles.rowhead}>
           <Text style={styles.sectionHeader}>อาการและอาการที่แสดง</Text>
+          {!assessment && (
+            <TouchableOpacity 
+              style={styles.editButton} 
+              onPress={handleEditSymptoms}
+            >
+            <Icon
+            name="edit"
+            color="black"
+            style={styles.icon}
+          />
+            </TouchableOpacity>
+          )}
+          </View>
           {selectedItem.Symptoms && selectedItem.Symptoms.map((symptom, index) => (
             <View style={styles.row} key={index}>
               <Text style={styles.labelText}>{`อาการที่ ${index + 1}: `}</Text>
-              <Text style={styles.infoText}>{symptom}</Text>
+              <Text style={styles.infoText}>{symptom ? symptom : '-'}</Text>
             </View>
           ))}
           <Text></Text>
-          <Text style={styles.sectionHeader}>Vital signs</Text>
+          <Text style={styles.sectionHeader}>สัญญาณชีพ</Text>
           <View style={styles.row}>
             <Text style={styles.labelText}>ความดันตัวบน:</Text>
-            <Text style={styles.infoText}>{selectedItem.SBP}</Text>
+            <Text style={styles.infoText}>{selectedItem.SBP ? selectedItem.SBP : '-'}</Text>
             <Text style={styles.infoText}>mmHg</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.labelText}>ความดันตัวล่าง:</Text>
-            <Text style={styles.infoText}>{selectedItem.DBP}</Text>
+            <Text style={styles.infoText}>{selectedItem.DBP ? selectedItem.DBP : '-'}</Text>
             <Text style={styles.infoText}>mmHg</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.labelText}>ชีพจร: </Text>
-            <Text style={styles.infoText}>{selectedItem.PulseRate}</Text>
+            <Text style={styles.infoText}>{selectedItem.PulseRate ? selectedItem.PulseRate : '-'}</Text>
             <Text style={styles.infoText}>ครั้ง/นาที</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.labelText}>อุณหภูมิ: </Text>
-            <Text style={styles.infoText}>{selectedItem.Temperature}</Text>
+            <Text style={styles.infoText}>{selectedItem.Temperature ? selectedItem.Temperature : '-'}</Text>
             <Text style={styles.infoText}>°C</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.labelText}>ระดับน้ำตาลในเลือด:</Text>
-            <Text style={styles.infoText}>{selectedItem.DTX}</Text>
+            <Text style={styles.infoText}>{selectedItem.DTX ? selectedItem.DTX : '-'}</Text>
             <Text style={styles.infoText}>mg/dL</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.labelText}>การหายใจ:</Text>
-            <Text style={styles.infoText}>{selectedItem.Respiration}</Text>
+            <Text style={styles.infoText}>{selectedItem.Respiration ? selectedItem.Respiration : '-'}</Text>
             <Text style={styles.infoText}>ครั้ง/นาที</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.labelText}>ความรุนแรงของอาการ:</Text>
-            <Text style={styles.infoText}>{selectedItem.LevelSymptom}</Text>
+            <Text style={styles.infoText}>{selectedItem.LevelSymptom ? selectedItem.LevelSymptom : '-'}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.labelText}>ระดับความเจ็บปวด:</Text>
-            <Text style={styles.infoText}>{selectedItem.Painscore}</Text>
+            <Text style={styles.infoText}>{selectedItem.Painscore ? selectedItem.Painscore : '-'}</Text>
           </View>
           <View >
             <Text style={styles.labelText}>
               สิ่งที่อยากให้ทีมแพทย์ช่วยเหลือเพิ่มเติม:
             </Text>
-            <Text style={styles.infoText}>{selectedItem.request_detail}</Text>
+            <Text style={styles.infoText}>{selectedItem.request_detail ? selectedItem.request_detail : '-'}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.labelText}>ผู้บันทึก:</Text>
-            <Text style={styles.infoText}>{selectedItem.Recorder}</Text>
+            <Text style={styles.infoText}>{selectedItem.Recorder ? selectedItem.Recorder : '-'}</Text>
           </View>
+
         </View>
 
         {assessment && (
@@ -254,7 +286,7 @@ export default function Assessmentitem(props) {
             </TouchableOpacity>
             <View style={{flexDirection: 'row', alignItems: 'center',marginBottom: 5,}}>
               <Text style={styles.labelText}>PPS:</Text>
-              <Text style={styles.infoTextFetched}>{assessment.PPS}</Text>
+              <Text style={styles.infoTextFetched}>{assessment.PPS ? assessment.PPS : '-'}</Text>
             </View>
             {/* <View style={{flexDirection: 'row', alignItems: 'center',marginBottom: 5,}}>
             <Text style={styles.labelText}>รายละเอียด:</Text>
@@ -262,21 +294,21 @@ export default function Assessmentitem(props) {
             </View> */}
             <View style={{flexDirection: 'row', alignItems: 'center',marginBottom: 5,}}>
             <Text style={styles.labelText}>คำแนะนำจากแพทย์:</Text>
-            <Text style={styles.infoTextFetched}>{assessment.suggestion}</Text>
+            <Text style={styles.infoTextFetched}>{assessment.suggestion ? assessment.suggestion : '-'}</Text>
             </View>
             {mpersonnel && (
             <View style={{flexDirection: 'row', alignItems: 'center',marginBottom: 5,}}>
             <Text style={styles.labelText}>ผู้ประเมิน:</Text>
               <Text style={styles.infoTextFetched}>
-                {mpersonnel.nametitle} {mpersonnel.name}{' '}
-                {mpersonnel.surname}
+                {mpersonnel.nametitle ? mpersonnel.nametitle : '-'} {mpersonnel.name ? mpersonnel.name : '-'}{' '}
+                {mpersonnel.surname ? mpersonnel.surname : '-'}
               </Text>
               </View>
            
             )}
               <View style={{flexDirection: 'row', alignItems: 'center',marginBottom: 5,}}>
             <Text style={styles.labelText}>วันที่ประเมิน:</Text>
-            <Text style={styles.infoTextFetched}>{formatDate(assessment.createdAt)}</Text>
+            <Text style={styles.infoTextFetched}>{assessment.createdAt ? formatDate(assessment.createdAt) : '-'}</Text>
             </View>
           </View>
         )}
@@ -285,7 +317,18 @@ export default function Assessmentitem(props) {
   );
 }
 
+
 const styles = StyleSheet.create({
+  rowhead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+ icon:{
+  fontSize: 20,
+  marginLeft:10,
+  paddingBottom: 5,
+  marginBottom: 10,
+ },
   container: {
     padding: 16,
     backgroundColor: '#F7F7F7',
@@ -326,6 +369,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ddd',
     paddingBottom: 5,
     color: '#333',
+    marginRight:10
   },
   infoText: {
     fontSize: 14,

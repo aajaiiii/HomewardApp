@@ -90,7 +90,7 @@ export default function PatientForm({ route }) {
   async function getData() {
     const token = await AsyncStorage.getItem('token');
     axios
-      .post('http://192.168.2.43:5000/userdata', { token: token })
+      .post('http://192.168.2.57:5000/userdata', { token: token })
       .then(res => {
         setUserData(res.data.data);
       });
@@ -104,7 +104,7 @@ export default function PatientForm({ route }) {
     const getSymptoms = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
-        const response = await axios.get('http://192.168.2.43:5000/allSymptom', {
+        const response = await axios.get('http://192.168.2.57:5000/allSymptom', {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = response.data;
@@ -128,7 +128,7 @@ export default function PatientForm({ route }) {
     const formdata = { name: newSymptom };
 
     try {
-      const response = await axios.post('http://192.168.2.43:5000/addsymptom', formdata);
+      const response = await axios.post('http://192.168.2.57:5000/addsymptom', formdata);
       console.log(response.data);
       if (response.data.status === 'ok') {
         const updatedSymptoms = [...symptoms, { name: newSymptom }];
@@ -323,6 +323,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 5,
     padding: 10,
+    fontSize: 16,
     marginBottom: 10,
   },
   inputText: {
@@ -354,6 +355,7 @@ const styles = StyleSheet.create({
   },
   labelitem:{
     color: '#000',
+    fontSize: 16,
   },
   cancelButton: {
     color: 'red',

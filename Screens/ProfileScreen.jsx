@@ -16,25 +16,49 @@ import styles from './Login/style';
 import Icon from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
+
 function ProfileScreen({ setIsLoggedIn }) {
   const [userData, setUserData] = useState('');
   const navigation = useNavigation();
 
-  async function getData() {
-    const token = await AsyncStorage.getItem('token');
-    console.log(token);
-    axios
-      .post('http://192.168.2.43:5000/userdata', { token: token })
-      .then((res) => {
-        console.log(res.data);
-        setUserData(res.data.data);
-      });
-  }
 
+  async function getData() {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        const res = await axios.post('http://192.168.2.57:5000/userdata', { token });
+        console.log('of',res.data);
+        setUserData(res.data.data);
+      } else {
+        Alert.alert('Error', 'Token not found');
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      Alert.alert('Error', 'Failed to load user data');
+    }
+  }
   useEffect(() => {
     getData();
   }, []);
 
+
+  async function checkAsyncStorage() {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const isLoggedIn = await AsyncStorage.getItem('isLoggedIn');
+      const addDataFirst = await AsyncStorage.getItem('addDataFirst');
+      
+      console.log('Token:', token);
+      console.log('isLoggedIn:', isLoggedIn);
+      console.log('addDataFirst:', addDataFirst);
+    } catch (error) {
+      console.error('Error reading AsyncStorage:', error);
+    }
+  }
+  useEffect(() => {
+    checkAsyncStorage();
+  }, []);
+  
   function logout() {
     Alert.alert(
       'ยืนยันการออกจากระบบ',
@@ -47,16 +71,39 @@ function ProfileScreen({ setIsLoggedIn }) {
         },
         {
           text: 'ตกลง',
-          onPress: () => {
-            AsyncStorage.clear().then(() => {
-              setIsLoggedIn(false);
-              navigation.navigate('LoginUser');
-            });
+          onPress: async () => {
+            try {
+              // ลบข้อมูลทั้งหมดที่เกี่ยวข้อง
+              await AsyncStorage.setItem('isLoggedIn', 'false'); // เปลี่ยนเป็น 'false' แทน ''
+              await AsyncStorage.setItem('token', '');
+              await AsyncStorage.setItem('addDataFirst', '');
+          
+              // ตรวจสอบว่า AsyncStorage ถูกลบแล้วหรือไม่
+              const token = await AsyncStorage.getItem('token');
+              const isLoggedIn = await AsyncStorage.getItem('isLoggedIn');
+              const addDataFirst = await AsyncStorage.getItem('addDataFirst');
+              
+              console.log('Token after removal:', token); // ควรเป็น null
+              console.log('isLoggedIn after removal:', isLoggedIn); // ควรเป็น null
+              console.log('addDataFirst after removal:', addDataFirst); // ควรเป็น null
+              
+              // ถ้าทุกอย่างถูกลบแล้ว ไปที่หน้า Login
+              if (!token && isLoggedIn === 'false' && !addDataFirst) {
+                setIsLoggedIn(false);
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Loginuser' }],
+                });
+              }
+            } catch (error) {
+              console.error('Error removing data:', error);
+            }
           },
         },
       ]
     );
   }
+  
 
 
   return (
@@ -68,6 +115,8 @@ function ProfileScreen({ setIsLoggedIn }) {
       <View style={style.container}>
         <TouchableOpacity 
          onPress={() => {
+          // navigation.navigate('MainStack', { screen: 'User', params: { data: userData } });
+
           navigation.navigate('User', {data: userData});
         }}
         style={{flexDirection: 'row', alignItems: 'center'}
@@ -102,7 +151,7 @@ function ProfileScreen({ setIsLoggedIn }) {
       </View>
       <TouchableOpacity style={styless.containerlogout} onPress={logout}>
    
-        <Text style={styless.textex} onPress={logout}>
+        <Text style={styless.textex}>
           ออกจากระบบ
         </Text>
       </TouchableOpacity>

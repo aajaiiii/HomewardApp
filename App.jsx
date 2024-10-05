@@ -502,7 +502,7 @@ function App() {
   const [addDataFirst, setAddDataFirst] = useState(false);
 
   async function getData() {
-    console.log('กำลังดำเนินเรื่อง...');
+    // console.log('กำลังดำเนินเรื่อง...');
     const data = await AsyncStorage.getItem('isLoggedIn');
     const addDataFirstValue = await AsyncStorage.getItem('addDataFirst');
     console.log(data, 'ทำงานแล้ว');
@@ -522,10 +522,23 @@ function App() {
   }, []); 
 
   useEffect(() => {
+    let intervalId;
+  
     if (isLoggedIn) {
-      fetchUnreadCount(setUnreadCount);
+      fetchUnreadCount(setUnreadCount); 
+      intervalId = setInterval(() => {
+        fetchUnreadCount(setUnreadCount); 
+      }, 3000); 
     }
+  
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
   }, [isLoggedIn]);
+  
+  
 
 //มันต้องรีแล้วจะใช้ได้ ข้อมูลที่ getdata() ไม่ขึ้นตอน login เสร็จ
 //ได้แล้ว 25/09/67 2.28

@@ -167,6 +167,9 @@ function ChatSendScreen() {
   };
 
   const handleSubmit = async () => {
+    if (!message.trim() && !uploadedImage) {
+      return;
+    }
     try {
       const formData = new FormData();
       formData.append('message', message);
@@ -396,7 +399,7 @@ function ChatSendScreen() {
             placeholder="พิมพ์ข้อความ..."
           />
 
-          {(message || selectedImageUri) && (
+          {(message.trim()|| selectedImageUri) && (
             <TouchableOpacity onPress={handleSubmit}>
               <Feather name="send" size={24} color="black" />
             </TouchableOpacity>

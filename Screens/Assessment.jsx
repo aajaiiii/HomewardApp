@@ -10,12 +10,15 @@ import {
   FlatList,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import styless from './style';
 import {format} from 'date-fns';
+import LinearGradient from 'react-native-linear-gradient';
+import {useFocusEffect} from '@react-navigation/native';
+
 export default function Assessment(props) {
   const navigation = useNavigation();
   const [userData, setUserData] = useState('');
@@ -23,12 +26,55 @@ export default function Assessment(props) {
   const [assessments, setAssessments] = useState([]);
   const [sortOrder, setSortOrder] = useState('latest');
   console.log(props);
+  useFocusEffect(
+    React.useCallback(() => {
+      // ซ่อน TabBar เมื่อเข้าหน้านี้
+      navigation.getParent()?.setOptions({
+        tabBarStyle: { display: 'none' },
+      });
+      // return () => {
+      //   // แสดง TabBar กลับมาเมื่อออกจากหน้านี้
+      //   navigation.getParent()?.setOptions({
+      //     tabBarStyle: { display: 'flex' }, // ปรับ 'flex' ให้ TabBar กลับมาแสดง
+      //   });
+      // };
+    }, [navigation])
+  );
+  
 
+  useEffect(() => {
+    // ฟัง event ของการกดปุ่ม Header Back (Navigate Up)
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      if (e.data.action.type === 'POP') {
+        // แสดง TabBar เมื่อกดปุ่ม Navigate Up
+        navigation.getParent()?.setOptions({
+          tabBarStyle: {  position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            elevation: 0,
+            backgroundColor: '#fff',
+            borderTopColor: 'transparent',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 6,
+            height: 60,  },        });
+      } else {
+        // ซ่อน TabBar ถ้ากลับด้วยวิธีอื่นๆ เช่น navigation.goBack()
+        navigation.getParent()?.setOptions({
+          tabBarStyle: { display: 'none' },
+        });
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation]);
   async function getData() {
     const token = await AsyncStorage.getItem('token');
     console.log(token);
     axios
-      .post('http://192.168.2.57:5000/userdata', {token: token})
+      .post('http://10.53.57.175:5000/userdata', {token: token})
       .then(res => {
         console.log(res.data);
         setUserData(res.data.data);
@@ -51,7 +97,7 @@ export default function Assessment(props) {
     try {
       if (userData) {
         const response = await axios.get(
-          `http://192.168.2.57:5000/getpatientforms/${userData._id}`,
+          `http://10.53.57.175:5000/getpatientforms/${userData._id}`,
         );
         const sortedForms = sortForms(response.data.data, sortOrder);
         setPatientForms(sortedForms);
@@ -64,7 +110,7 @@ export default function Assessment(props) {
   const fetchAssessments = async () => {
     try {
       const response = await axios.get(
-        `http://192.168.2.57:5000/allAssessment`,
+        `http://10.53.57.175:5000/allAssessment`,
       );
       setAssessments(response.data.data);
     } catch (error) {
@@ -167,6 +213,12 @@ export default function Assessment(props) {
   };
 
   return (
+    <LinearGradient
+    // colors={['#00A9E0', '#5AB9EA', '#E0FFFF', '#FFFFFF']}
+    colors={['#fff', '#fff']}
+   
+    style={{flex: 1}}  // ให้ครอบคลุมทั้งหน้าจอ
+  >
     <View style={styles.container}>
       <View style={styles.sortOptions}>
         <TouchableOpacity onPress={() => toggleSortOrder('latest')}>
@@ -198,13 +250,15 @@ export default function Assessment(props) {
         <Text style={styles.noDataText}>ยังไม่มีการบันทึกอาการ</Text>
       )}
     </View>
+    </LinearGradient>
   );
 }
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#F7F7F7',
+    // paddingBottom: 70
+    // backgroundColor: '#F7F7F7',
   },
   sortOptions: {
     flexDirection: 'row',
@@ -216,19 +270,19 @@ const styles = StyleSheet.create({
   },
   sortOption: {
     fontSize: 14,
-    color: '#333',
+    color: '#000',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#5AB9EA',
     marginRight: 5,
   },
   activeSort: {
-    backgroundColor: '#87CEFA',
+    backgroundColor: '#5AB9EA',
     color: '#fff',
     borderWidth: 1,
-    borderColor: '#87CEFA',
+    borderColor: '#fff',
   },
   // list: {
   //     paddingBottom: 5,
@@ -272,6 +326,8 @@ const styles = StyleSheet.create({
   noDataText: {
     fontSize: 16,
     textAlign: 'center',
-    color: '#6c757d',
+    // color: '#6c757d',
+    color: '#fff',
+
   },
 });

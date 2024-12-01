@@ -19,9 +19,12 @@ import {useRoute} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Feather from 'react-native-vector-icons/Feather';
 import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
+import { useFocusEffect } from '@react-navigation/native';
+import {useNavigation, useIsFocused} from '@react-navigation/native';
 
 function ChatSendScreen() {
   const route = useRoute();
+  const navigation = useNavigation();
   const {userName, recipientId, recipientModel, currentRecipient} = route.params;
   const [message, setMessage] = useState('');
   const [recipientChats, setRecipientChats] = useState([]);
@@ -35,7 +38,62 @@ function ChatSendScreen() {
   const [modalImageUri, setModalImageUri] = useState('');
   const [autoScroll, setAutoScroll] = useState(true);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      // ซ่อน TabBar เมื่อเข้าหน้านี้
+      navigation.getParent()?.setOptions({
+        tabBarStyle: { display: 'none' },
+      });
+      return () => {
+        // แสดง TabBar กลับมาเมื่อออกจากหน้านี้
+        navigation.getParent()?.setOptions({
+          tabBarStyle: {  position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            elevation: 0,
+            backgroundColor: '#fff',
+            borderTopColor: 'transparent',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 6,
+            height: 60,  }, // ปรับ 'flex' ให้ TabBar กลับมาแสดง
+        });
+      };
+    }, [navigation])
+  );
 
+  const isImageFile = (url) => {
+    return (
+      url.endsWith(".jpg?alt=media") ||
+      url.endsWith(".png?alt=media") ||
+      url.endsWith(".jpeg?alt=media") ||
+      url.endsWith(".gif?alt=media")
+    );
+  };
+  function shortenFileName(fileName, maxLength = 15) {
+    if (fileName.length <= maxLength) {
+      return fileName; // หากความยาวน้อยกว่าหรือเท่ากับ maxLength ให้คืนค่าชื่อไฟล์เดิม
+    }
+
+    const extensionIndex = fileName.lastIndexOf(".");
+    const extension = fileName.slice(extensionIndex); // รับส่วนต่อท้าย (เช่น .pdf)
+
+    const nameWithoutExtension = fileName.slice(0, extensionIndex); // ชื่อไฟล์โดยไม่มีนามสกุล
+    const shortenedName = nameWithoutExtension.slice(0, maxLength - 3) + "..."; // ตัดชื่อไฟล์และเพิ่ม ...
+
+    return shortenedName + extension; // คืนค่าชื่อไฟล์ที่ตัดพร้อมนามสกุล
+  }
+
+  
+  const formatFileSize = (sizeInBytes) => {
+    const sizeInKB = sizeInBytes / 1024;
+    return sizeInKB > 1024
+      ? (sizeInKB / 1024).toFixed(2) + " MB"
+      : sizeInKB.toFixed(2) + " KB";
+  };
+  
   const selectImage = () => {
     const options = {
       mediaType: 'photo',
@@ -121,7 +179,7 @@ function ChatSendScreen() {
     const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
-        const response = await axios.post('http://192.168.2.57:5000/userdata', {
+        const response = await axios.post('http://10.53.57.175:5000/userdata', {
           token: token,
         });
         const userData = response.data.data;
@@ -149,7 +207,7 @@ function ChatSendScreen() {
         `แชท12: ${recipientId}, recipientModel: ${recipientModel}, sender: ${sender}, senderModel: ${senderModel}`,
       );
       const response = await axios.get(
-        `http://192.168.2.57:5000/chat/${recipientId}/${recipientModel}/${sender}/${senderModel}`,
+        `http://10.53.57.175:5000/chat/${recipientId}/${recipientModel}/${sender}/${senderModel}`,
       );
       // console.log('Response Data:', response.data);
 
@@ -167,7 +225,7 @@ function ChatSendScreen() {
   };
 
   const handleSubmit = async () => {
-    if (!message.trim() && !uploadedImage) {
+    if (!message.trim() && !selectedImageUri) {
       return;
     }
     try {
@@ -186,7 +244,7 @@ function ChatSendScreen() {
       }
 
       const response = await axios.post(
-        'http://192.168.2.57:5000/sendchat',
+        'http://10.53.57.175:5000/sendchat',
         formData,
         {
           headers: {
@@ -270,97 +328,131 @@ function ChatSendScreen() {
         onScroll={handleScroll}
         scrollEventThrottle={16} >
         {recipientChats.map((chat, index) => (
-          <View key={index}>
-            {(index === 0 ||
-              new Date(chat.createdAt).getDate() !==
-                new Date(recipientChats[index - 1].createdAt).getDate()) && (
-              <Text style={styles.dateText}>{formatDate(chat.createdAt)}</Text>
-            )}
-            <View
-              style={[
-                styles.messageContainer,
-                chat.sender._id === data._id
-                  ? styles.sentContainer
-                  : styles.receivedContainer,
-              ]}>
-             
-              {chat.sender._id === data._id ? (
-                <>
-                  <View style={styles.statustime}>
-                    {chat.isRead && (
-                      <Text style={[styles.date, styles.Read]}>อ่านแล้ว</Text>
-                    )}
-                    <Text style={[styles.date, styles.sentDate]}>
-                      {formatTime(chat.createdAt)}
-                    </Text>
-                  </View>
-                  {chat.image ? (
-                    <TouchableOpacity
-                      onPress={() => {
-                        setModalImageUri(chat.image); 
-                        setModalVisible(true);
-                      }}>
-                      <View style={[styles.received]}>
-                        <Image
-                          source={{uri: chat.image}}
-                          style={{width: 200, height: 200}}
-                        />
-                      </View>
-                    </TouchableOpacity>
-                  ) : (
-                          <View style={[styles.chatMessage, styles.sent]}>
-                      {isValidUrl(chat.message) ? (
-                        <TouchableOpacity onPress={() => Linking.openURL(chat.message)}>
-                          <Text style={[styles.messageContent, styles.sentText, { textDecorationLine: 'underline' }]}>
-                            {chat.message}
-                          </Text>
-                        </TouchableOpacity>
-                      ) : (
-                        <Text style={[styles.messageContent, styles.sentText]}>
-                          {chat.message}
-                        </Text>
-                      )}
-                    </View>
-                  )}
-                </>
-              ) : (
-                <>
-                  {chat.image ? (
-                    <TouchableOpacity
-                      onPress={() => {
-                        setModalImageUri(chat.image); 
-                        setModalVisible(true);
-                      }}>
-                      <View style={[styles.received]}>
-                        <Image
-                          source={{uri: chat.image}}
-                          style={{width: 200, height: 200}}
-                        />
-                      </View>
-                    </TouchableOpacity>
-                  ) : (
-                    <View style={[styles.chatMessage, styles.received]}>
-                    {isValidUrl(chat.message) ? (
-                      <TouchableOpacity onPress={() => Linking.openURL(chat.message)}>
-                        <Text style={[styles.messageContent, styles.receivedText, { textDecorationLine: 'underline' }]}>
-                          {chat.message}
-                        </Text>
-                      </TouchableOpacity>
-                    ) : (
-                      <Text style={[styles.messageContent, styles.receivedText]}>
-                        {chat.message}
-                      </Text>
-                    )}
-                  </View>
-                  )}
-
-                  <Text style={[styles.date, styles.receivedDate]}>
-                    {formatTime(chat.createdAt)}
-                  </Text>
-                </>
-              )}
-            </View>
-          </View>
+         <View key={index}>
+         {(index === 0 ||
+           new Date(chat.createdAt).getDate() !==
+             new Date(recipientChats[index - 1].createdAt).getDate()) && (
+           <Text style={styles.dateText}>{formatDate(chat.createdAt)}</Text>
+         )}
+         <View
+           style={[
+             styles.messageContainer,
+             chat.sender._id === data._id
+               ? styles.sentContainer
+               : styles.receivedContainer,
+           ]}>
+          
+           {chat.sender._id === data._id ? (
+             <>
+               <View style={styles.statustime}>
+                 {chat.isRead && (
+                   <Text style={[styles.date, styles.Read]}>อ่านแล้ว</Text>
+                 )}
+                 <Text style={[styles.date, styles.sentDate]}>
+                   {formatTime(chat.createdAt)}
+                 </Text>
+               </View>
+               {chat.image ? (
+                 isImageFile(chat.image) ? (
+                   <TouchableOpacity
+                     onPress={() => {
+                       setModalImageUri(chat.image); 
+                       setModalVisible(true);
+                     }}>
+                     <View style={[styles.received]}>
+                       <Image
+                         source={{uri: chat.image}}
+                         style={{width: 200, height: 200}}
+                       />
+                     </View>
+                   </TouchableOpacity>
+                 ) : (
+                   <TouchableOpacity
+                     onPress={() => Linking.openURL(chat.image)}
+                     style={styles.fileContainer}>
+                     <Ionicons name="document-text" size={24} color="black" />
+                     <View style={styles.fileInfo}>
+                       <Text style={styles.fileName}>
+                         {shortenFileName(chat.imageName)} {/* Adjust name logic as needed */}
+                       </Text>
+                       <Text style={styles.fileSize}>
+                         {formatFileSize(chat.fileSize)} {/* Size formatting */}
+                       </Text>
+                     </View>
+                   </TouchableOpacity>
+                 )
+               ) : (
+                 <View style={[styles.chatMessage, styles.sent]}>
+                   {isValidUrl(chat.message) ? (
+                     <TouchableOpacity onPress={() => Linking.openURL(chat.message)}>
+                       <Text style={[styles.messageContent, styles.sentText, {textDecorationLine: 'underline'}]}>
+                         {chat.message}
+                       </Text>
+                     </TouchableOpacity>
+                   ) : (
+                     <Text style={[styles.messageContent, styles.sentText]}>
+                       {chat.message}
+                     </Text>
+                   )}
+                 </View>
+               )}
+             </>
+           ) : (
+             <>
+               {chat.image ? (
+                 isImageFile(chat.image) ? (
+                   <TouchableOpacity
+                     onPress={() => {
+                       setModalImageUri(chat.image); 
+                       setModalVisible(true);
+                     }}>
+                     <View style={[styles.received]}>
+                       <Image
+                         source={{uri: chat.image}}
+                         style={{width: 200, height: 200}}
+                       />
+                     </View>
+                   </TouchableOpacity>
+                 ) : (
+                   <TouchableOpacity
+                     onPress={() => Linking.openURL(chat.image)}
+                     style={styles.fileContainer}>
+                     <Ionicons name="document-text" size={24} color="black" />
+                     <View style={styles.fileInfo}>
+                       <Text style={styles.fileName}>
+                         {shortenFileName(chat.imageName)} {/* Adjust name logic as needed */}
+                       </Text>
+                       <Text style={styles.fileSize}>
+                         {formatFileSize(chat.fileSize)} {/* Size formatting */}
+                       </Text>
+                     </View>
+                   </TouchableOpacity>
+                 )
+               ) : (
+                 <View style={[styles.chatMessage, styles.received]}>
+                   {isValidUrl(chat.message) ? (
+                     <TouchableOpacity onPress={() => Linking.openURL(chat.message)}>
+                       <Text style={[styles.messageContent, styles.receivedText, {textDecorationLine: 'underline'}]}>
+                         {chat.message}
+                       </Text>
+                     </TouchableOpacity>
+                   ) : (
+                     <Text style={[styles.messageContent, styles.receivedText]}>
+                       {chat.message}
+                     </Text>
+                   )}
+                 </View>
+               )}
+       
+               <Text style={[styles.date, styles.receivedDate]}>
+                 {formatTime(chat.createdAt)}
+               </Text>
+             </>
+           )}
+         </View>
+       </View>
+       
+       
         ))}
       </ScrollView>
 
@@ -384,10 +476,10 @@ function ChatSendScreen() {
         style={styles.chatForm}>
         <View style={{flexDirection: 'row', alignItems: 'center', flex: 1, padding:5}}>
           <TouchableOpacity onPress={selectImage} style={{margin:3}}>
-            <Ionicons name="image" size={24} color="black" />
+            <Ionicons name="image" size={24} color="white" />
           </TouchableOpacity>
           <TouchableOpacity onPress={takePhoto} style={{margin:3}}>
-            <Ionicons name="camera" size={28} color="black" />
+            <Ionicons name="camera" size={28} color="white" />
           </TouchableOpacity>
           <TextInput
             style={[styles.input, , {height: Math.max(40, inputHeight)}]}
@@ -401,7 +493,7 @@ function ChatSendScreen() {
 
           {(message.trim()|| selectedImageUri) && (
             <TouchableOpacity onPress={handleSubmit}>
-              <Feather name="send" size={24} color="black" />
+              <Feather name="send" size={24} color="white" />
             </TouchableOpacity>
           )}
         </View>
@@ -439,7 +531,7 @@ const styles = StyleSheet.create({
     maxWidth: '75%',
   },
   sent: {
-    backgroundColor: '#87CEFA',
+    backgroundColor: '#5AB9EA',
     alignSelf: 'flex-end',
     borderBottomRightRadius: 0,
   },
@@ -474,7 +566,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   sentText: {
-    color: '#000',
+    color: '#fff',
   },
   receivedText: {
     color: '#000',
@@ -482,7 +574,7 @@ const styles = StyleSheet.create({
   chatForm: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#87CEFA',
+    backgroundColor: '#5AB9EA',
     paddingHorizontal: 10,
     paddingVertical: 5,
     // marginBottom: 10,
@@ -498,7 +590,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
   },
   sendButton: {
-    backgroundColor: '#87CEFA',
+    backgroundColor: '#5AB9EA',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
@@ -506,7 +598,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sendButtonText: {
-    color: '#FFF',
+    color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -537,6 +629,25 @@ const styles = StyleSheet.create({
     marginLeft: 45,
     marginRight: 10,
   },
+  fileContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: '#e4e6eb',
+  },
+  fileInfo: {
+    marginLeft: 10,
+  },
+  fileName: {
+    fontSize: 16,
+    color: '#000',
+  },
+  fileSize: {
+    fontSize: 12,
+    color: '#666',
+  },
+  
 });
 
 export default ChatSendScreen;

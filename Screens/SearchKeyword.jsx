@@ -10,6 +10,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import {useFocusEffect} from '@react-navigation/native';
 
 const STORAGE_KEY = '@recent_searches';
 
@@ -21,10 +22,72 @@ export default function SearchKeyword() {
   const [showRecentSearches, setShowRecentSearches] = useState(true);
   const navigation = useNavigation();
 
+  useFocusEffect(
+    React.useCallback(() => {
+      // ซ่อน TabBar เมื่อเข้าหน้านี้
+      navigation.getParent()?.setOptions({
+        tabBarStyle: { display: 'none' },
+      });
+      // return () => {
+      //   // แสดง TabBar กลับมาเมื่อออกจากหน้านี้
+      //   navigation.getParent()?.setOptions({
+      //     tabBarStyle: { display: 'flex' }, // ปรับ 'flex' ให้ TabBar กลับมาแสดง
+      //   });
+      // };
+    }, [navigation])
+  );
+  useEffect(() => {
+    // ฟัง event ของการกดปุ่ม Header Back (Navigate Up)
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      if (e.data.action.type === 'POP') {
+        // แสดง TabBar เมื่อกดปุ่ม Navigate Up
+        navigation.getParent()?.setOptions({
+          tabBarStyle: { 
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            elevation: 0,
+            backgroundColor: '#fff',
+            borderTopColor: 'transparent',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 6,
+            height: 60,
+            display: 'flex', // ปรับให้ TabBar แสดง
+          },
+        });
+      } else {
+        // ซ่อน TabBar ถ้ากลับด้วยวิธีอื่นๆ เช่น navigation.goBack()
+        navigation.getParent()?.setOptions({
+          tabBarStyle: { 
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            elevation: 0,
+            backgroundColor: '#fff',
+            borderTopColor: 'transparent',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 6,
+            height: 60,
+            display: 'flex', // ปรับให้ TabBar แสดง
+          },       
+         });
+      }
+    });
+  
+    return unsubscribe;
+  }, [navigation]);
+  
+
   const fetchAllUsers = async () => {
     try {
       const response = await fetch(
-        'http://192.168.2.57:5000/allMpersonnelchat1',
+        'http://10.53.57.175:5000/allMpersonnelchat1',
       );
       const data = await response.json();
       setAllMpersonnel(data.data);
@@ -201,13 +264,15 @@ export default function SearchKeyword() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F7F7',
+    backgroundColor: '#Fff',
   },
   searchBar: {
     width: '100%',
     padding: 10,
     backgroundColor: '#fff',
-    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e1e1e1',
+    flexDirection: 'row', // Align items horizontally
     alignItems: 'center',
   },
   recent:{
@@ -220,17 +285,17 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    height: 40,
-    borderColor: '#ddd',
+    height: 45,
+    borderColor: '#e0e0e0',
     borderWidth: 1,
-    paddingHorizontal: 8,
-    borderRadius: 10,
-    backgroundColor: '#fff',
+    paddingHorizontal: 15,
+    borderRadius: 25,
+    backgroundColor: '#ffff', // Light background for input
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   clearButton: {
     paddingHorizontal: 10,

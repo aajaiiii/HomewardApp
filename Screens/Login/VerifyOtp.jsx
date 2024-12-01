@@ -43,7 +43,7 @@ const VerifyOtp = ({route, navigation}) => {
   };
   const verifyOtp = async () => {
     try {
-      const response = await axios.post('http://192.168.2.57:5000/verify-otp', {
+      const response = await axios.post('http://10.53.57.175:5000/verify-otp', {
         email,
         otp,
       });
@@ -56,7 +56,7 @@ const VerifyOtp = ({route, navigation}) => {
 
   const requestOtp = async () => {
     try {
-      const response = await axios.post('http://192.168.2.57:5000/forgot-passworduser', { email });
+      const response = await axios.post('http://10.53.57.175:5000/forgot-passworduser', { email });
       setMessage(response.data);
       setTimer(300);
       setIsOtpExpired(false);
@@ -161,7 +161,7 @@ const stylei = StyleSheet.create({
     justifyContent: 'center',
   },
   button1: {
-    backgroundColor: '#87CEFA',
+    backgroundColor: '#5AB9EA',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 10,
@@ -169,7 +169,7 @@ const stylei = StyleSheet.create({
     marginTop: 10,
   },
   button: {
-    backgroundColor: '#87CEFA',
+    backgroundColor: '#5AB9EA',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 10,

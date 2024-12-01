@@ -47,7 +47,7 @@ function Informationone({route, props}) {
     const token = await AsyncStorage.getItem('token');
     console.log(token);
     axios
-      .post('http://192.168.2.57:5000/userdata', {token: token})
+      .post('http://10.53.57.175:5000/userdata', {token: token})
       .then(res => {
         console.log(res.data);
         setUserData(res.data.data);
@@ -314,7 +314,7 @@ const styleinfo = StyleSheet.create({
   next: {
     backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#87CEFA',
+    borderColor: '#5AB9EA',
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 70,
@@ -327,7 +327,7 @@ const styleinfo = StyleSheet.create({
     elevation: 3,
   },
   textnext: {
-    color: '#87CEFA',
+    color: '#5AB9EA',
     fontWeight: 'bold',
   },
 });
@@ -346,7 +346,7 @@ const style = StyleSheet.create({
   },
   inBut: {
     width: '70%',
-    backgroundColor: '#87CEFA',
+    backgroundColor: '#5AB9EA',
     alignItems: 'center',
     paddingHorizontal: 15,
     paddingVertical: 1,
@@ -405,6 +405,7 @@ const style = StyleSheet.create({
     borderRadius: 20,
   },
   texthead: {
+    textAlign:'center',
     color: 'black',
     fontSize: 18,
     padding: 7,

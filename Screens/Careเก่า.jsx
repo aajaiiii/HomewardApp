@@ -46,10 +46,10 @@ import UpdateEmail from './Screens/email/updateemail';
 const fetchUnreadCount = async (setUnreadCount) => {
   try {
     const token = await AsyncStorage.getItem('token');
-    const response = await axios.post('http://192.168.2.57:5000/userdata', { token });
+    const response = await axios.post('https://us-central1-homeward-422311.cloudfunctions.net/api/userdata', { token });
     const userId = response.data.data._id;
 console.log('ได้อะไร',userId)
-    const usersResponse = await axios.get(`http://192.168.2.57:5000/allMpersonnelchat1?userId=${userId}`);
+    const usersResponse = await axios.get(`https://us-central1-homeward-422311.cloudfunctions.net/api/allMpersonnelchat1?userId=${userId}`);
     const users = usersResponse.data.data;
 
     const unreadUsers = users.filter(user => {
@@ -591,7 +591,7 @@ export default App;
 //     };
   
 //     try {
-//       const res = await axios.post('http://192.168.2.57:5000/loginuser', userData);
+//       const res = await axios.post('https://us-central1-homeward-422311.cloudfunctions.net/api/loginuser', userData);
 //       // console.log(res.data);
 //       if (res.data.status === 'ok') {
 //         await AsyncStorage.setItem('token', res.data.data);

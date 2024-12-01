@@ -54,7 +54,7 @@ function Informationtwo() {
     async function getData() {
       try {
         const token = await AsyncStorage.getItem('token');
-        const response = await axios.post('http://192.168.2.57:5000/userdata', { token });
+        const response = await axios.post('http://10.53.57.175:5000/userdata', { token });
         if (response.data.data) {
           setUserData(response.data.data);
         }
@@ -81,7 +81,7 @@ function Informationtwo() {
       try {
         if (userData) {
           const response = await axios.get(
-            `http://192.168.2.57:5000/getcaregiver/${userData._id}`,
+            `http://10.53.57.175:5000/getcaregiver/${userData._id}`,
           );
           setCaregiverInfo(response.data.data);
           setcaregiverName(response.data.data.name);
@@ -130,12 +130,13 @@ function Informationtwo() {
 
     try {
       const response = await axios.post(
-        'http://192.168.2.57:5000/updateuserinfo',
+        'http://10.53.57.175:5000/updateuserinfo',
         formdata1,
       );
       if (response.data.status === 'Ok') {
         await AsyncStorage.removeItem('CaregiverInfo');
-        navigation.navigate('Success', { refresh: true });      }
+        // await AsyncStorage.setItem('addDataFirst', JSON.stringify(true));
+        navigation.navigate('Success');      }
     } catch (error) {
       console.error('Error adding Information:', error);
       Toast.show({
@@ -265,7 +266,7 @@ const stylep = StyleSheet.create({
     marginTop: 10,
   },
   textOk: {
-    backgroundColor: '#87CEFA',
+    backgroundColor: '#5AB9EA',
     alignItems: 'center',
     paddingVertical: 10,
     borderRadius: 10,
@@ -280,7 +281,7 @@ const stylep = StyleSheet.create({
   textCC: {
     backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#87CEFA',
+    borderColor: '#5AB9EA',
     alignItems: 'center',
     paddingVertical: 10,
     borderRadius: 10,
@@ -297,7 +298,7 @@ const stylep = StyleSheet.create({
     fontWeight: 'bold',
   },
   cancelButtonText: {
-    color: '#87CEFA',
+    color: '#5AB9EA',
     fontWeight: 'bold',
   },
 });
@@ -316,7 +317,7 @@ const style = StyleSheet.create({
     },
     inBut: {
       width: '70%',
-      backgroundColor: '#87CEFA',
+      backgroundColor: '#5AB9EA',
       alignItems: 'center',
       paddingHorizontal: 15,
       paddingVertical: 1,
@@ -375,6 +376,7 @@ const style = StyleSheet.create({
       borderRadius: 20,
     },
     texthead: {
+      textAlign:'center',
       color: 'black',
       fontSize: 18,
       padding: 7,

@@ -13,7 +13,7 @@ export default function ForgotPassword({ navigation }) {
 
   const requestOtp = async () => {
     try {
-      const response = await axios.post('http://192.168.2.57:5000/forgot-passworduser', { email });
+      const response = await axios.post('http://10.53.57.175:5000/forgot-passworduser', { email });
       setMessage(response.data);
       navigation.navigate('VerifyOtp', { email });
     } catch (error) {
@@ -45,7 +45,7 @@ export default function ForgotPassword({ navigation }) {
           <View style={stylei.innerContainer}>
 
           <View style={stylei.textInputContainer}>
-            <Fontisto name="email" color="#87CEFA" style={styles.smallIcon} />
+            <Fontisto name="email" color="#5AB9EA" style={styles.smallIcon} />
             <TextInput
               placeholder="อีเมล"
               value={email}
@@ -93,7 +93,7 @@ const stylei = StyleSheet.create({
     // marginTop:50,
   },
   button: {
-    backgroundColor: '#87CEFA',
+    backgroundColor: '#5AB9EA',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 10,

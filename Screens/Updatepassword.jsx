@@ -8,7 +8,9 @@ import {
     Modal,
   } from 'react-native';
   import {useNavigation} from '@react-navigation/native';
-  import {useEffect, useState} from 'react';
+  import React, {useState, useEffect} from 'react';
+  import { useFocusEffect } from '@react-navigation/native';
+
   import AsyncStorage from '@react-native-async-storage/async-storage';
   import axios from 'axios';
   import style from './style';
@@ -17,6 +19,7 @@ import {
   import Toast from 'react-native-toast-message';
   import Icon from 'react-native-vector-icons/Feather';
   import Ionicons from 'react-native-vector-icons/Ionicons';
+  import LinearGradient from 'react-native-linear-gradient';
 
 
 export default function UpdatePassword(props) {
@@ -29,6 +32,32 @@ export default function UpdatePassword(props) {
     const route = useRoute();
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+
+    useFocusEffect(
+      React.useCallback(() => {
+        // ซ่อน TabBar เมื่อเข้าหน้านี้
+        navigation.getParent()?.setOptions({
+          tabBarStyle: { display: 'none' },
+        });
+        return () => {
+          // แสดง TabBar กลับมาเมื่อออกจากหน้านี้
+          navigation.getParent()?.setOptions({
+            tabBarStyle: {  position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              elevation: 0,
+              backgroundColor: '#fff',
+              borderTopColor: 'transparent',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: -2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 6,
+              height: 60,  }, // ปรับ 'flex' ให้ TabBar กลับมาแสดง
+          });
+        };
+      }, [navigation])
+    );
 
     useEffect(() => {
       const unsubscribe = navigation.addListener('focus', () => {
@@ -60,7 +89,7 @@ export default function UpdatePassword(props) {
       };
   
       setLoading(true);
-      axios.post('http://192.168.2.57:5000/updatepassuser', formData).then(res => {
+      axios.post('http://10.53.57.175:5000/updatepassuser', formData).then(res => {
         setLoading(false);
         if (res.data.status === 'Ok') {
           Toast.show({
@@ -89,17 +118,24 @@ export default function UpdatePassword(props) {
   
 
       return (
+        <LinearGradient
+        // colors={['#00A9E0', '#5AB9EA', '#E0FFFF', '#FFFFFF']}
+        colors={['#fff', '#fff']}
+
+        style={{flex: 1}} // ให้ครอบคลุมทั้งหน้าจอ
+      >
       <ScrollView
       keyboardShouldPersistTaps={'always'}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={stylespass.container}
+      // contentContainerStyle={stylespass.container}
       style={stylespass.background}>
-      <View style={stylespass.innerContainer}>
+      <View style={style.container}>
         <View>
           <View>
             <Text style={style.text}>รหัสผ่านเก่า</Text>
             <View style={stylespass.textInputContainer}>
-            <TextInput style={stylespass.text}
+            <TextInput   style={stylespass.textInput}
+
               onChangeText={text => setPassword(text)}
               secureTextEntry
             />
@@ -111,8 +147,8 @@ export default function UpdatePassword(props) {
             <Text style={style.text}>รหัสผ่านใหม่</Text>
             <View style={stylespass.textInputContainer}>
             <TextInput
-            style={stylespass.text}
-              onChangeText={text => setNewPassword(text)}
+            style={stylespass.textInput}
+            onChangeText={text => setNewPassword(text)}
               secureTextEntry
             />
             </View>
@@ -143,6 +179,7 @@ export default function UpdatePassword(props) {
         </View>
       </View>
     </ScrollView>
+    </LinearGradient>
   );
 }const stylespass = StyleSheet.create({
   container: {
@@ -151,7 +188,7 @@ export default function UpdatePassword(props) {
     backgroundColor: '#F7F7F7',
   },
   background: {
-    backgroundColor: '#F7F7F7',
+    backgroundColor: 'transparent',
   },
   textInputContainer: {
     flexDirection: 'row',

@@ -7,13 +7,14 @@ import {
   TextInput,
 } from 'react-native';
 import {useNavigation, useIsFocused, useRoute} from '@react-navigation/native';
-import {useEffect, useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import style from './style';
 import styleform from './styleform';
 import RNPickerSelect from 'react-native-picker-select';
 import Toast from 'react-native-toast-message';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function PatientFormEdit2(props) {
   const [userData, setUserData] = useState('');
@@ -34,6 +35,33 @@ export default function PatientFormEdit2(props) {
   const isFocused = useIsFocused();
   const [inputHeight, setInputHeight] = useState(40);
   const [patientForm,setpatientForm]= useState('');
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // ซ่อน TabBar เมื่อเข้าหน้านี้
+      navigation.getParent()?.setOptions({
+        tabBarStyle: { display: 'none' },
+      });
+      return () => {
+        // แสดง TabBar กลับมาเมื่อออกจากหน้านี้
+        navigation.getParent()?.setOptions({
+          tabBarStyle: {  position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            elevation: 0,
+            backgroundColor: '#fff',
+            borderTopColor: 'transparent',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 6,
+            height: 60,  }, // ปรับ 'flex' ให้ TabBar กลับมาแสดง
+        });
+      };
+    }, [navigation])
+  );
+
   const handleContentSizeChange = event => {
     setInputHeight(event.nativeEvent.contentSize.height);
   };
@@ -60,7 +88,7 @@ export default function PatientFormEdit2(props) {
       const token = await AsyncStorage.getItem('token');
       if (token) {
         try {
-          const res = await axios.post('http://192.168.2.57:5000/userdata', {
+          const res = await axios.post('http://10.53.57.175:5000/userdata', {
             token,
           });
           setUserData(res.data.data);
@@ -71,7 +99,7 @@ export default function PatientFormEdit2(props) {
   
       try {
         const response = await axios.get(
-          `http://192.168.2.57:5000/getpatientform/${id}`,
+          `http://10.53.57.175:5000/getpatientform/${id}`,
         );
         if (response.data.status === 'ok') {
           const patientForm = response.data.patientForm;
@@ -152,10 +180,24 @@ export default function PatientFormEdit2(props) {
     console.log('Update Form Data565:', formdata1); 
     try {
       const response = await axios.put(
-        `http://192.168.2.57:5000/updatepatientform/${id}`,
+        `http://10.53.57.175:5000/updatepatientform/${id}`,
         formdata1,
       );
       if (response.data.status === 'ok') {
+        // navigation.getParent()?.setOptions({
+        //   tabBarStyle: {   position: 'absolute',
+        //     bottom: 0,
+        //     left: 0,
+        //     right: 0,
+        //     elevation: 0,
+        //     backgroundColor: '#fff',
+        //     borderTopColor: 'transparent',
+        //     shadowColor: '#000',
+        //     shadowOffset: { width: 0, height: -2 },
+        //     shadowOpacity: 0.1,
+        //     shadowRadius: 6,
+        //     height: 60,  },
+        // });
         Toast.show({
           type: 'success',
           text1: 'แก้ไขสำเร็จ',
@@ -164,7 +206,7 @@ export default function PatientFormEdit2(props) {
         await AsyncStorage.removeItem('patientForm');
 
         const updatedPatientForm = await axios.get(
-          `http://192.168.2.57:5000/getpatientform/${id}`
+          `http://10.53.57.175:5000/getpatientform/${id}`
         );
         
         navigation.navigate('Assessmentitem', {
@@ -208,11 +250,11 @@ export default function PatientFormEdit2(props) {
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{paddingBottom: 40}}
       style={{backgroundColor: '#F7F7F7'}}>
-      <View style={[styleform.container, {flex: 1}]}>
+      <View style={[stylep.container, {flex: 1}]}>
         <Text style={styleform.sectionHeader}>สัญญาณชีพ</Text>
         <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
           <View style={stylep.texttitle}>
-            <Text style={stylep.text}>ความดันตัวบน(mmHg)</Text>
+            <Text style={stylep.text}>ความดันบน(mmHg)</Text>
             <TextInput
               style={[style.textInputRead, style.text]}
               onChangeText={text => setSBP(text)}
@@ -221,7 +263,7 @@ export default function PatientFormEdit2(props) {
             />
           </View>
           <View style={stylep.texttitle}>
-            <Text style={stylep.text}>ความดันตัวล่าง(mmHg)</Text>
+            <Text style={stylep.text}>ความดันล่าง(mmHg)</Text>
             <TextInput
               style={[style.textInputRead, style.text]}
               onChangeText={text => setDBP(text)}
@@ -357,6 +399,20 @@ export default function PatientFormEdit2(props) {
 }
 
 const stylep = StyleSheet.create({
+  container: {
+    padding: 15,
+    marginVertical: 10,
+    marginHorizontal: 10,
+    backgroundColor: 'white',
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
+  },
   text: {
     color: 'black',
     fontFamily: 'Arial',
@@ -386,14 +442,14 @@ const stylep = StyleSheet.create({
     marginTop: 10,
   },
   textOk: {
-    backgroundColor: '#87CEFA',
+    backgroundColor: '#5AB9EA',
     alignItems: 'center',
     paddingVertical: 10,
     borderRadius: 10,
     flex: 1,
     marginHorizontal: 5,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 2,
     elevation: 3,
@@ -401,14 +457,14 @@ const stylep = StyleSheet.create({
   textCC: {
     backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#87CEFA',
+    borderColor: '#5AB9EA',
     alignItems: 'center',
     paddingVertical: 10,
     borderRadius: 10,
     flex: 1,
     marginHorizontal: 5,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 2,
     elevation: 3,
@@ -418,7 +474,7 @@ const stylep = StyleSheet.create({
     fontWeight: 'bold',
   },
   cancelButtonText: {
-    color: '#87CEFA',
+    color: '#5AB9EA',
     fontWeight: 'bold',
   },
 });

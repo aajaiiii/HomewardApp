@@ -21,7 +21,7 @@ const ResetPasswordScreen = ({route, navigation}) => {
   const resetPassword = async () => {
     try {
       const response = await axios.post(
-        'http://192.168.2.57:5000/reset-password',
+        'http://10.53.57.175:5000/reset-password',
         {email, newPassword, confirmpassword: confirmPassword},
       );
       if (response.data === 'เปลี่ยนรหัสสำเร็จ') {
@@ -114,7 +114,7 @@ const stylei = StyleSheet.create({
     justifyContent: 'center',
   },
   button: {
-    backgroundColor: '#87CEFA',
+    backgroundColor: '#5AB9EA',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 10,

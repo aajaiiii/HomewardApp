@@ -27,7 +27,7 @@ function ChatScreen({setUnreadCount}) {
   async function getData() {
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await axios.post('http://192.168.2.57:5000/userdata', {
+      const response = await axios.post('http://10.53.57.175:5000/userdata', {
         token: token,
       });
       const userData = response?.data?.data;
@@ -51,14 +51,14 @@ function ChatScreen({setUnreadCount}) {
   const fetchAllUsers = async userId => {
     try {
       const response = await fetch(
-        `http://192.168.2.57:5000/allMpersonnelchat1?userId=${userId}`, 
+        `http://10.53.57.175:5000/allMpersonnelchat1?userId=${userId}`, 
       );
       const data = await response.json();
 
       const usersWithLastMessage = await Promise.all(
         data.data.map(async user => {
           const lastMessageResponse = await fetch(
-            `http://192.168.2.57:5000/lastmessage/${user._id}?loginUserId=${userId}`,
+            `http://10.53.57.175:5000/lastmessage/${user._id}?loginUserId=${userId}`,
           );
           const lastMessageData = await lastMessageResponse.json();
           return {...user, lastMessage: lastMessageData.lastMessage};
@@ -73,7 +73,7 @@ function ChatScreen({setUnreadCount}) {
         );
       });
       setAllMpersonnel(sortedUsers);
-      setUnreadCount(countUnreadUsers(sortedUsers));
+      // setUnreadCount(countUnreadUsers(sortedUsers));
     } catch (error) {
       console.error('Error fetching all users:', error);
     }
@@ -172,8 +172,10 @@ function ChatScreen({setUnreadCount}) {
                     : user.lastMessage.sender.name}
                   :{' '}
                   {user.lastMessage.image
-                    ? 'ส่งรูปภาพ'
-                    : truncateText(user.lastMessage.message, 10)}
+      ? /\.(jpg|jpeg|png|gif)$/.test(user.lastMessage.image)
+        ? 'ส่งรูปภาพ'
+        : 'ส่งไฟล์แนบ'
+      : truncateText(user.lastMessage.message, 10)}
                   <Text style={styles.timeText}>
                     {' '}
                     {formatTime(user.lastMessage.createdAt)}
@@ -198,25 +200,27 @@ function ChatScreen({setUnreadCount}) {
 const styles = StyleSheet.create({
   viewStyle: {
     flex: 1,
-    backgroundColor: '#F7F7F7',
+    backgroundColor: '#Fff',
   },
   searchBar: {
     width: '100%',
     padding: 10,
     backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e1e1e1',
   },
   searchInput: {
-    height: 40,
-    borderColor: '#ddd',
+    height: 45,
+    borderColor: '#e0e0e0',
     borderWidth: 1,
-    paddingHorizontal: 8,
-    borderRadius: 10,
-    backgroundColor: '#fff',
+    paddingHorizontal: 15,
+    borderRadius: 25,
+    backgroundColor: '#f1f2f6', // Light background for input
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 3, // for Android shadow
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2, // Subtle shadow for a lifted effect
   },
   userList: {
     width: '100%',

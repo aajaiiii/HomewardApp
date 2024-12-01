@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function VerifyOtpEmail({route, navigation}) {
   const [otp, setOtp] = useState('');
@@ -17,6 +18,33 @@ export default function VerifyOtpEmail({route, navigation}) {
   const {username, email} = route.params || {};
   const [timer, setTimer] = useState(300);
   const [isOtpExpired, setIsOtpExpired] = useState(false);
+
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // ซ่อน TabBar เมื่อเข้าหน้านี้
+      navigation.getParent()?.setOptions({
+        tabBarStyle: { display: 'none' },
+      });
+      return () => {
+        // แสดง TabBar กลับมาเมื่อออกจากหน้านี้
+        navigation.getParent()?.setOptions({
+          tabBarStyle: {  position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            elevation: 0,
+            backgroundColor: '#fff',
+            borderTopColor: 'transparent',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 6,
+            height: 60,  }, // ปรับ 'flex' ให้ TabBar กลับมาแสดง
+        });
+      };
+    }, [navigation])
+  );
 
   useEffect(() => {
     let countdown;
@@ -45,7 +73,7 @@ export default function VerifyOtpEmail({route, navigation}) {
     }
 
     axios
-      .post('http://192.168.2.57:5000/verify-otp3', {
+      .post('http://10.53.57.175:5000/verify-otp3', {
         username,
         otp,
         newEmail: email,
@@ -56,6 +84,20 @@ export default function VerifyOtpEmail({route, navigation}) {
             type: 'success',
             text1: 'ยืนยันอีเมลสำเร็จ',
             text2: 'การยืนยันอีเมลของคุณสำเร็จแล้ว',
+          });
+          navigation.getParent()?.setOptions({
+            tabBarStyle: {   position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              elevation: 0,
+              backgroundColor: '#fff',
+              borderTopColor: 'transparent',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: -2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 6,
+              height: 60,  },
           });
           navigation.navigate('User', {refresh: true});
         } else {
@@ -76,7 +118,7 @@ export default function VerifyOtpEmail({route, navigation}) {
     }
 
     axios
-      .post('http://192.168.2.57:5000/send-otp3', {username, email})
+      .post('http://10.53.57.175:5000/send-otp3', {username, email})
       .then(res => {
         if (res.data.success) {
           setSuccessMessage('ส่ง OTP ใหม่เรียบร้อย');
@@ -187,7 +229,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   button: {
-    backgroundColor: '#87CEFA',
+    backgroundColor: '#5AB9EA',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 10,

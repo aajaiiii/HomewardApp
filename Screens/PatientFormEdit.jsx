@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   Text,
@@ -16,6 +16,7 @@ import axios from 'axios';
 import Icon from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import styleform from './styleform';
+import { useFocusEffect } from '@react-navigation/native';
 
 const CustomPicker = ({ items, onValueChange, placeholder, selectedValue }) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -88,10 +89,55 @@ export default function PatientFormEdit() {
   const [userAge, setUserAge] = useState(0);
   const [userAgeInMonths, setUserAgeInMonths] = useState(0);
   const [selectedSymptoms, setSelectedSymptoms] = useState(['']);
+
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // ซ่อน TabBar เมื่อเข้าหน้านี้
+      navigation.getParent()?.setOptions({
+        tabBarStyle: { display: 'none' },
+      });
+      // return () => {
+      //   // แสดง TabBar กลับมาเมื่อออกจากหน้านี้
+      //   navigation.getParent()?.setOptions({
+      //     tabBarStyle: { display: 'flex' }, // ปรับ 'flex' ให้ TabBar กลับมาแสดง
+      //   });
+      // };
+    }, [navigation])
+  );
+  useEffect(() => {
+    // ฟัง event ของการกดปุ่ม Header Back (Navigate Up)
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      if (e.data.action.type === 'POP') {
+        // แสดง TabBar เมื่อกดปุ่ม Navigate Up
+        navigation.getParent()?.setOptions({
+          tabBarStyle: {  position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            elevation: 0,
+            backgroundColor: '#fff',
+            borderTopColor: 'transparent',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 6,
+            height: 60,  },        });
+      } else {
+        // ซ่อน TabBar ถ้ากลับด้วยวิธีอื่นๆ เช่น navigation.goBack()
+        navigation.getParent()?.setOptions({
+          tabBarStyle: { display: 'none' },
+        });
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+  
   async function getData() {
     const token = await AsyncStorage.getItem('token');
     axios
-      .post('http://192.168.2.57:5000/userdata', { token: token })
+      .post('http://10.53.57.175:5000/userdata', { token: token })
       .then(res => {
         setUserData(res.data.data);
       });
@@ -104,7 +150,7 @@ export default function PatientFormEdit() {
   useEffect(() => {
     const fetchPatientForm = async () => {
       try {
-        const response = await axios.get(`http://192.168.2.57:5000/getpatientform/${id}`);
+        const response = await axios.get(`http://10.53.57.175:5000/getpatientform/${id}`);
         const data = response.data.patientForm;
         if (data && data.Symptoms) {
           setSymptomsArray(data.Symptoms.map(symptom => ({ name: symptom })));
@@ -124,7 +170,7 @@ export default function PatientFormEdit() {
     const getSymptoms = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
-        const response = await axios.get('http://192.168.2.57:5000/allSymptom', {
+        const response = await axios.get('http://10.53.57.175:5000/allSymptom', {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = response.data;
@@ -148,7 +194,7 @@ export default function PatientFormEdit() {
     const formdata = { name: newSymptom };
 
     try {
-      const response = await axios.post('http://192.168.2.57:5000/addsymptom', formdata);
+      const response = await axios.post('http://10.53.57.175:5000/addsymptom', formdata);
       console.log(response.data);
       if (response.data.status === 'ok') {
         const updatedSymptoms = [...symptoms, { name: newSymptom }];
@@ -249,8 +295,23 @@ export default function PatientFormEdit() {
 
         {symptomsArray.map((symptom, index) => (
           <View key={index}>
-            <Text style={styles.text}>อาการที่ {index + 1}</Text>
-            <CustomPicker
+                          <View style={styles.symptomHeader}>
+
+            <Text style={styles.symptomTitle}>อาการที่ {index + 1}</Text>
+           
+            {index > 0 && (
+              <TouchableOpacity
+                onPress={() => removeSymptom(index)}
+                style={styles.removeButton}>
+                   <Ionicons
+                    name="close"
+                    color="white"
+                    size={12} 
+                  />
+              </TouchableOpacity>
+            )}
+          </View>
+             <CustomPicker
               items={[
                 ...symptoms
                   .filter(sym => !symptomsArray.some(item => item.name === sym.name))
@@ -266,22 +327,14 @@ export default function PatientFormEdit() {
               selectedValue={selectedSymptoms[index]}
               index={index}
             />
-            {index > 0 && (
-              <TouchableOpacity
-                onPress={() => removeSymptom(index)}
-                style={{ position: 'absolute', top: 5, right: 10 }}>
-                <Text style={{ color: 'black', fontSize: 16 }}>x</Text>
-              </TouchableOpacity>
-            )}
           </View>
         ))}
 
-        <TouchableOpacity onPress={() => setSymptomsArray([...symptomsArray, { name: '' }])}>
-          <Text style={{ color: '#007BFF', marginTop: 10, marginLeft: 5 }}>
-            + เพิ่มอาการ
-          </Text>
-        </TouchableOpacity>
-
+<TouchableOpacity
+            onPress={() => setSymptomsArray([...symptomsArray, {name: ''}])}
+            style={styles.addButton}>
+            <Text style={styles.addButtonText}>+ เพิ่มอาการ</Text>
+          </TouchableOpacity>
         {showNewSymptomInput && (
           <Modal>
             <View style={styles.modalContainer}>
@@ -323,18 +376,24 @@ export default function PatientFormEdit() {
 }
 const styles = StyleSheet.create({
     container: {
-      padding: 10,
+      padding: 15,
       marginVertical: 10,
       marginHorizontal: 10,
       backgroundColor: 'white',
-      borderRadius: 10,
+      borderRadius: 15,
       borderWidth: 1,
       borderColor: '#ddd',
+      shadowColor: '#000',
+      shadowOffset: {width: 0, height: 2},
+      shadowOpacity: 0.3,
+      shadowRadius: 6,
+      elevation: 5,
     },
     text: {
       fontSize: 16,
-      color: 'black',
-      marginBottom: 5,
+    color: '#333',
+    marginBottom: 5,
+    lineHeight: 22,
     },
     searchInput: {
       height: 40,
@@ -348,91 +407,100 @@ const styles = StyleSheet.create({
     input: {
       borderWidth: 1,
       borderColor: '#ccc',
-      borderRadius: 5,
-      padding: 10,
+      borderRadius: 10,
+      paddingVertical: 12,
+      paddingHorizontal: 20,
       fontSize: 16,
+      marginTop: 10,
       marginBottom: 10,
     },
     inputText: {
       fontSize: 16,
-      color: '#000',
+      color: '#2D3748',
     },
     modalContainer: {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: '#fff',
+      padding: 20,
     },
     modalContent: {
-      width: 300,
+      width: '90%',
       padding: 20,
       backgroundColor: 'white',
-      borderRadius: 10,
+      borderRadius: 15,
       shadowColor: '#000',
       shadowOffset: {width: 0, height: 2},
-      shadowOpacity: 0.8,
-      shadowRadius: 2,
-      elevation: 5,
+      shadowOpacity: 0.5,
+      shadowRadius: 10,
+      elevation: 10,
     },
     item: {
       fontSize: 16,
       padding: 15,
       borderBottomWidth: 1,
       borderBottomColor: '#ddd',
+      backgroundColor: '#fff',
     },
-    labelitem:{
+    labelitem: {
       color: '#000',
       fontSize: 16,
     },
     cancelButton: {
-      color: 'red',
+      color: '#fff',
       marginTop: 10,
-      padding: 8,
+      padding: 10,
       fontSize: 16,
       textAlign: 'center',
+      backgroundColor: '#d9534f',
     },
     buttonText: {
       color: '#fff',
       fontWeight: 'bold',
+      fontSize: 16,
     },
     textInput: {
-      height: 40,
-      borderColor: '#ccc',
+      height: 45,
+      borderColor: '#ddd',
       borderWidth: 1,
-      borderRadius: 5,
+      borderRadius: 10,
+      paddingLeft: 15,
       paddingLeft: 10,
       marginBottom: 20,
+      backgroundColor: '#f9f9f9',
+      fontSize: 16,
     },
     buttonContent: {
       flexDirection: 'row',
       justifyContent: 'space-between',
     },
     textOk: {
-      backgroundColor: '#87CEFA',
+      backgroundColor: '#5AB9EA',
       alignItems: 'center',
-      paddingVertical: 10,
+      paddingVertical: 12,
       borderRadius: 10,
       flex: 1,
       marginHorizontal: 5,
       shadowColor: '#000',
       shadowOffset: {width: 0, height: 2},
-      shadowOpacity: 0.8,
-      shadowRadius: 2,
+      shadowOpacity: 0.3,
+      shadowRadius: 5,
       elevation: 3,
     },
     textCC: {
       backgroundColor: '#fff',
       borderWidth: 1,
-      borderColor: '#87CEFA',
+      borderColor: '#5AB9EA',
       alignItems: 'center',
-      paddingVertical: 10,
+      paddingVertical: 12,
       borderRadius: 10,
       flex: 1,
       marginHorizontal: 5,
       shadowColor: '#000',
       shadowOffset: {width: 0, height: 2},
-      shadowOpacity: 0.8,
-      shadowRadius: 2,
+      shadowOpacity: 0.3,
+      shadowRadius: 5,
       elevation: 3,
     },
     cancelButtonText: {
@@ -450,7 +518,7 @@ const styles = StyleSheet.create({
     next: {
       backgroundColor: '#fff',
       borderWidth: 1,
-      borderColor: '#87CEFA',
+      borderColor: '#5AB9EA',
       alignItems: 'center',
       paddingVertical: 10,
       paddingHorizontal: 70,
@@ -463,10 +531,10 @@ const styles = StyleSheet.create({
       elevation: 3,
     },
     textnext: {
-      color: '#87CEFA',
+      color: '#5AB9EA',
       fontWeight: 'bold',
     },
-    modalContainersearch:{
+    modalContainersearch: {
       color: 'black',
       flex: 1,
     },
@@ -488,11 +556,61 @@ const styles = StyleSheet.create({
       shadowRadius: 5,
       elevation: 3,
     },
-   
-    noResultsText:{
-      textAlign:'center',
+  
+    noResultsText: {
+      textAlign: 'center',
       fontSize: 16,
-    }
+      marginTop: 15,
+    },
+    addButton: {
+      backgroundColor: '#5AB9EA',
+      paddingVertical: 8,
+      paddingHorizontal: 20,
+      borderRadius: 10,
+      marginTop: 10,
+      marginLeft: 5,
+      shadowColor: '#000',
+      shadowOffset: {width: 0, height: 2},
+      shadowOpacity: 0.3,
+      shadowRadius: 5,
+      elevation: 3, 
+    },
+    addButtonText: {
+      color: '#fff',
+      fontSize: 16,
+      fontWeight: 'bold',
+      textAlign: 'center',
+    },
+    symptomCard: {
+      backgroundColor: '#fff', 
+      borderRadius: 12, 
+      padding: 15, 
+      marginVertical: 10, 
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.3,
+      shadowRadius: 6,
+      elevation: 5, 
+      position: 'relative',
+    },
+    symptomHeader: {
+      flexDirection: 'row', 
+      justifyContent: 'space-between', 
+      alignItems: 'center',
+    },
+    symptomTitle: {
+      fontSize: 16,
+      color: '#2D3748',
+      fontWeight: 'bold', 
+    },
+    removeButton: {
+      backgroundColor: '#FF6F61', 
+      borderRadius: 50, 
+      padding: 5, 
+      margin:5,
+    
+    },
+  
   });
   
   

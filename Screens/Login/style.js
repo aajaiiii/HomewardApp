@@ -15,8 +15,8 @@ const styles = StyleSheet.create({
   },
   pagelogin:{
     // backgroundColor: '#19A7CE',
-    // backgroundColor: '#4691D3',
-        backgroundColor: '#87CEFA',
+    backgroundColor: '#5AB9EA',
+        // backgroundColor: '#5AB9EA',
   },
   logoContainer: {
     justifyContent: 'center',
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     paddingHorizontal: 15,
     borderWidth: 1,
-    borderColor: '#87CEFA',
+    borderColor: '#5AB9EA',
     borderRadius: 50,
   },
   textInput: {
@@ -74,14 +74,16 @@ const styles = StyleSheet.create({
   },
   inBut: {
     width: '70%',
-    backgroundColor: '#87CEFA',
+    backgroundColor: '#5AB9EA',
     alignItems: 'center',
     paddingHorizontal: 15,
     paddingVertical: 15,
     borderRadius: 50,
   },
   inBut2: {
-    backgroundColor: '#87CEFA',
+    // backgroundColor: '#5AB9EA',
+    backgroundColor: '#5AB9EA',
+
     height: 65,
     width: 65,
     borderRadius: 15,
@@ -117,7 +119,7 @@ const styles = StyleSheet.create({
   },
   radioButton_title: {
     fontSize: 20,
-    color: '#87CEFA',
+    color: '#5AB9EA',
   },
   radioButton_text: {
     fontSize: 16,

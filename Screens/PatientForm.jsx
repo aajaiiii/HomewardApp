@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,29 +10,34 @@ import {
   Modal,
   FlatList,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import styleform from './styleform';
+import LinearGradient from 'react-native-linear-gradient';
+import { useFocusEffect } from '@react-navigation/native';
 
-const CustomPicker = ({ items, onValueChange, placeholder, selectedValue }) => {
+const CustomPicker = ({items, onValueChange, placeholder, selectedValue}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredItems, setFilteredItems] = useState(items);
 
+  
   useEffect(() => {
     setFilteredItems(
       items.filter(item =>
-        item.label.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+        item.label.toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
     );
   }, [searchQuery, items]);
 
   return (
     <View>
-      <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.input}>
+      <TouchableOpacity
+        onPress={() => setModalVisible(true)}
+        style={styles.input}>
         <Text style={styles.inputText}>
           {selectedValue ? selectedValue : placeholder}
         </Text>
@@ -53,7 +58,7 @@ const CustomPicker = ({ items, onValueChange, placeholder, selectedValue }) => {
             <FlatList
               data={filteredItems}
               keyExtractor={item => item.value}
-              renderItem={({ item }) => (
+              renderItem={({item}) => (
                 <TouchableOpacity
                   style={styles.item}
                   onPress={() => {
@@ -76,21 +81,69 @@ const CustomPicker = ({ items, onValueChange, placeholder, selectedValue }) => {
   );
 };
 
-export default function PatientForm({ route }) {
+export default function PatientForm({route}) {
   const [userData, setUserData] = useState('');
   const navigation = useNavigation();
   const [symptoms, setSymptoms] = useState([]);
   const [newSymptom, setNewSymptom] = useState('');
   const [showNewSymptomInput, setShowNewSymptomInput] = useState(false);
-  const [symptomsArray, setSymptomsArray] = useState([{ name: '' }]);
+  const [symptomsArray, setSymptomsArray] = useState([{name: ''}]);
   const [userAge, setUserAge] = useState(0);
   const [userAgeInMonths, setUserAgeInMonths] = useState(0);
   const [selectedSymptoms, setSelectedSymptoms] = useState(['']);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      // ซ่อน TabBar เมื่อเข้าหน้านี้
+      navigation.getParent()?.setOptions({
+        tabBarStyle: { display: 'none' },
+      });
+      // return () => {
+      //   // แสดง TabBar กลับมาเมื่อออกจากหน้านี้
+      //   navigation.getParent()?.setOptions({
+      //     tabBarStyle: { display: 'flex' }, // ปรับ 'flex' ให้ TabBar กลับมาแสดง
+      //   });
+      // };
+    }, [navigation])
+  );
+  
+
+  useEffect(() => {
+    // ฟัง event ของการกดปุ่ม Header Back (Navigate Up)
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      if (e.data.action.type === 'POP') {
+        // แสดง TabBar เมื่อกดปุ่ม Navigate Up
+        navigation.getParent()?.setOptions({
+          tabBarStyle: {  position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            elevation: 0,
+            backgroundColor: '#fff',
+            borderTopColor: 'transparent',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 6,
+            height: 60,  },        });
+      } else {
+        // ซ่อน TabBar ถ้ากลับด้วยวิธีอื่นๆ เช่น navigation.goBack()
+        navigation.getParent()?.setOptions({
+          tabBarStyle: { display: 'none' },
+        });
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
   async function getData() {
     const token = await AsyncStorage.getItem('token');
     axios
-      .post('http://192.168.2.57:5000/userdata', { token: token })
+      .post(
+        'http://10.53.57.175:5000/userdata',
+        {token: token},
+      )
       .then(res => {
         setUserData(res.data.data);
       });
@@ -104,9 +157,12 @@ export default function PatientForm({ route }) {
     const getSymptoms = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
-        const response = await axios.get('http://192.168.2.57:5000/allSymptom', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          'http://10.53.57.175:5000/allSymptom',
+          {
+            headers: {Authorization: `Bearer ${token}`},
+          },
+        );
         const data = response.data;
         setSymptoms(data.data);
       } catch (error) {
@@ -121,21 +177,29 @@ export default function PatientForm({ route }) {
       alert('กรุณากรอกอาการใหม่');
       return;
     }
-    if (symptoms.some(symptom => symptom.name.toLowerCase() === newSymptom.trim().toLowerCase())) {
+    if (
+      symptoms.some(
+        symptom =>
+          symptom.name.toLowerCase() === newSymptom.trim().toLowerCase(),
+      )
+    ) {
       alert('อาการที่คุณเพิ่มมีอยู่แล้ว');
       return;
     }
-    const formdata = { name: newSymptom };
+    const formdata = {name: newSymptom};
 
     try {
-      const response = await axios.post('http://192.168.2.57:5000/addsymptom', formdata);
+      const response = await axios.post(
+        'http://10.53.57.175:5000/addsymptom',
+        formdata,
+      );
       console.log(response.data);
       if (response.data.status === 'ok') {
-        const updatedSymptoms = [...symptoms, { name: newSymptom }];
+        const updatedSymptoms = [...symptoms, {name: newSymptom}];
         setSymptoms(updatedSymptoms);
         const index = symptomsArray.length - 1;
         const updatedSymptomsArray = [...symptomsArray];
-        updatedSymptomsArray[index] = { name: newSymptom };
+        updatedSymptomsArray[index] = {name: newSymptom};
         setSymptomsArray(updatedSymptomsArray);
         const updatedSelectedSymptoms = [...selectedSymptoms];
         updatedSelectedSymptoms[index] = newSymptom;
@@ -153,16 +217,19 @@ export default function PatientForm({ route }) {
       symptoms: symptomsArray.map(symptom => symptom.name),
       user: userData._id,
     };
-    navigation.navigate('PatientForm2', { formData: formdata });
+    navigation.navigate('PatientForm2', {formData: formdata});
   };
 
   const removeSymptom = indexToRemove => {
-    const updatedSymptomsArray = symptomsArray.filter((_, index) => index !== indexToRemove);
+    const updatedSymptomsArray = symptomsArray.filter(
+      (_, index) => index !== indexToRemove,
+    );
     setSymptomsArray(updatedSymptomsArray);
-    const updatedSelectedSymptoms = selectedSymptoms.filter((_, index) => index !== indexToRemove);
+    const updatedSelectedSymptoms = selectedSymptoms.filter(
+      (_, index) => index !== indexToRemove,
+    );
     setSelectedSymptoms(updatedSelectedSymptoms);
   };
-
 
   const currentDate = new Date();
 
@@ -173,7 +240,10 @@ export default function PatientForm({ route }) {
       const monthDiff = currentDate.getMonth() - userBirthday.getMonth();
       setUserAgeInMonths(monthDiff >= 0 ? monthDiff : 12 + monthDiff);
 
-      if (monthDiff < 0 || (monthDiff === 0 && currentDate.getDate() < userBirthday.getDate())) {
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && currentDate.getDate() < userBirthday.getDate())
+      ) {
         setUserAge(ageDiff - 1);
       } else {
         setUserAge(ageDiff);
@@ -183,7 +253,7 @@ export default function PatientForm({ route }) {
 
   const handleValueChange = (value, index) => {
     const updatedSymptomsArray = [...symptomsArray];
-    updatedSymptomsArray[index] = { name: value };
+    updatedSymptomsArray[index] = {name: value};
     setSymptomsArray(updatedSymptomsArray);
     const updatedSelectedSymptoms = [...selectedSymptoms];
     updatedSelectedSymptoms[index] = value;
@@ -195,119 +265,147 @@ export default function PatientForm({ route }) {
     }
   };
   return (
-    <ScrollView
-      keyboardShouldPersistTaps={'always'}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 40 }}
-      style={{ backgroundColor: '#F7F7F7' }}>
-      <View style={[styles.container, { flex: 1, textAlign: 'center' }]}>
-        <Text style={styleform.sectionHeader}>ข้อมูลผู้ป่วย</Text>
-        <Text style={[styles.text]}>
-          ชื่อ-นามสกุล: {userData.name} {userData.surname}
-        </Text>
-        {userData && userData.birthday ? (
+    <LinearGradient
+      // colors={['#00A9E0', '#5AB9EA', '#E0FFFF', '#FFFFFF']}
+      // colors={['#5AB9EA', '#87CEFA']}
+      colors={['#fff', '#fff']}
+      style={{flex: 1}} // ให้ครอบคลุมทั้งหน้าจอ
+    >
+      <ScrollView
+        keyboardShouldPersistTaps={'always'}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{paddingBottom: 40}}
+        style={{backgroundColor: 'transparent'}}>
+        <View style={[styles.container, {flex: 1, textAlign: 'center'}]}>
+          <Text style={styleform.sectionHeader}>ข้อมูลผู้ป่วย</Text>
           <Text style={[styles.text]}>
-            อายุ: {userAge} ปี {userAgeInMonths} เดือน เพศ {userData.gender}
+            ชื่อ-นามสกุล: {userData.name} {userData.surname}
           </Text>
-        ) : (
-          <Text style={[styles.text]}>
-            0 ปี 0 เดือน เพศ {userData.gender}
-          </Text>
-        )}
-      </View>
+          {userData && userData.birthday ? (
+            <Text style={[styles.text]}>
+              อายุ: {userAge} ปี {userAgeInMonths} เดือน เพศ {userData.gender}
+            </Text>
+          ) : (
+            <Text style={[styles.text]}>
+              0 ปี 0 เดือน เพศ {userData.gender}
+            </Text>
+          )}
+        </View>
 
-      <View style={[styles.container, { flex: 1 }]}>
-        <Text style={styleform.sectionHeader}>อาการและอาการแสดง</Text>
+        <View style={[styles.container, {flex: 1}]}>
+          <Text style={styleform.sectionHeader}>อาการและอาการแสดง</Text>
 
-        {symptomsArray.map((symptom, index) => (
-          <View key={index}>
-            <Text style={styles.text}>อาการที่ {index + 1}</Text>
-            <CustomPicker
-              items={[
-                ...symptoms
-                  .filter(sym => !symptomsArray.some(item => item.name === sym.name))
-                  .sort((a, b) => a.name.localeCompare(b.name))
-                  .map(symptom => ({
-                    label: symptom.name,
-                    value: symptom.name,
-                  })),
-                { label: '+ เพิ่มอาการใหม่', value: 'new_symptom' },
-              ]}
-              onValueChange={(value) => handleValueChange(value, index)}
-              placeholder="เลือกอาการ"
-              selectedValue={selectedSymptoms[index]}
-              index={index}
-            />
-            {index > 0 && (
-              <TouchableOpacity
-                onPress={() => removeSymptom(index)}
-                style={{ position: 'absolute', top: 5, right: 10 }}>
-                <Text style={{ color: 'black', fontSize: 16 }}>x</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        ))}
+          {symptomsArray.map((symptom, index) => (
+            
+            <View key={index}>
+              <View style={styles.symptomHeader}>
+              <Text style={styles.symptomTitle}>อาการที่ {index + 1}</Text>
+              {index > 0 && (
+                <TouchableOpacity
+                  onPress={() => removeSymptom(index)}
+                  style={styles.removeButton}>
+                  <Ionicons
+                    name="close"
+                    color="white" // White for contrast on a colored background
+                    size={12} 
+                  />
+                  {/* <Text style={{ color: 'black', fontSize: 16 }}>x</Text> */}
+                </TouchableOpacity>
+              )}
+              </View>
+              <CustomPicker
+                items={[
+                  ...symptoms
+                    .filter(
+                      sym =>
+                        !symptomsArray.some(item => item.name === sym.name),
+                    )
+                    //เรียงตามตัวอักษร อังกฤษ-ไทย
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map(symptom => ({
+                      label: symptom.name,
+                      value: symptom.name,
+                    })),
+                  {label: '+ เพิ่มอาการใหม่', value: 'new_symptom'},
+                ]}
+                onValueChange={value => handleValueChange(value, index)}
+                placeholder="เลือกอาการ"
+                selectedValue={selectedSymptoms[index]}
+                index={index}
+              />
+             
+            </View>
+          ))}
 
-        <TouchableOpacity onPress={() => setSymptomsArray([...symptomsArray, { name: '' }])}>
-          <Text style={{ color: '#007BFF', marginTop: 10, marginLeft: 5 }}>
-            + เพิ่มอาการ
-          </Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setSymptomsArray([...symptomsArray, {name: ''}])}
+            style={styles.addButton}>
+            <Text style={styles.addButtonText}>+ เพิ่มอาการ</Text>
+          </TouchableOpacity>
 
-        {showNewSymptomInput && (
-          <Modal>
-            <View style={styles.modalContainer}>
-              <View style={styles.modalContent}>
-                <TextInput
-                  style={styles.textInput}
-                  placeholder="กรอกอาการใหม่"
-                  value={newSymptom}
-                  onChangeText={text => setNewSymptom(text)}
-                />
-                <View style={styles.buttonContent}>
-                  <TouchableOpacity
-                    style={styles.textCC}
-                    onPress={() => {
-                      setShowNewSymptomInput(false);
-                      setNewSymptom('');
-                      handleValueChange('', symptomsArray.length - 1);  // Reset the placeholder
-                    }}>
-                    <Text style={styles.cancelButtonText}>ยกเลิก</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.textOk} onPress={AddSymptom}>
-                    <Text style={styles.buttonText}>เพิ่ม</Text>
-                  </TouchableOpacity>
+          {showNewSymptomInput && (
+            <Modal>
+              <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="กรอกอาการใหม่"
+                    value={newSymptom}
+                    onChangeText={text => setNewSymptom(text)}
+                  />
+                  <View style={styles.buttonContent}>
+                    <TouchableOpacity
+                      style={styles.textCC}
+                      onPress={() => {
+                        setShowNewSymptomInput(false);
+                        setNewSymptom('');
+                        handleValueChange('', symptomsArray.length - 1); // Reset the placeholder
+                      }}>
+                      <Text style={styles.cancelButtonText}>ยกเลิก</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.textOk}
+                      onPress={AddSymptom}>
+                      <Text style={styles.buttonText}>เพิ่ม</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
+            </Modal>
+          )}
+        </View>
+        <View style={styles.buttonnext}>
+          <TouchableOpacity onPress={Nextpage} style={styles.next}>
+            <View>
+              <Text style={styles.textnext}>ถัดไป</Text>
             </View>
-          </Modal>
-        )}
-      </View>
-      <View style={styles.buttonnext}>
-        <TouchableOpacity onPress={Nextpage} style={styles.next}>
-          <View>
-            <Text style={styles.textnext}>ถัดไป</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
+    padding: 15,
     marginVertical: 10,
     marginHorizontal: 10,
     backgroundColor: 'white',
-    borderRadius: 10,
+    borderRadius: 15,
     borderWidth: 1,
     borderColor: '#ddd',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
   },
   text: {
     fontSize: 16,
-    color: 'black',
+    color: '#333',
     marginBottom: 5,
+    lineHeight: 22,
   },
   searchInput: {
     height: 40,
@@ -321,91 +419,106 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 10,
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
     fontSize: 16,
+    marginTop: 5,
     marginBottom: 10,
+    backgroundColor: '#fff',
+    // shadowColor: '#000',
+    // shadowOffset: {width: 0, height: 2},
+    // shadowOpacity: 0.2,
+    // shadowRadius: 5,
+    // elevation: 3,
   },
   inputText: {
     fontSize: 16,
-    color: '#000',
+    color: '#2D3748',
   },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
+    padding: 20,
   },
   modalContent: {
-    width: 300,
+    width: '90%',
     padding: 20,
     backgroundColor: 'white',
-    borderRadius: 10,
+    borderRadius: 15,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
-    elevation: 5,
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 10,
   },
   item: {
     fontSize: 16,
     padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
+    backgroundColor: '#fff',
   },
-  labelitem:{
+  labelitem: {
     color: '#000',
     fontSize: 16,
   },
   cancelButton: {
-    color: 'red',
+    color: '#fff',
     marginTop: 10,
-    padding: 8,
+    padding: 10,
     fontSize: 16,
     textAlign: 'center',
+    backgroundColor: '#d9534f',
   },
   buttonText: {
     color: '#fff',
     fontWeight: 'bold',
+    fontSize: 16,
   },
   textInput: {
-    height: 40,
-    borderColor: '#ccc',
+    height: 45,
+    borderColor: '#ddd',
     borderWidth: 1,
-    borderRadius: 5,
+    borderRadius: 10,
+    paddingLeft: 15,
     paddingLeft: 10,
     marginBottom: 20,
+    backgroundColor: '#f9f9f9',
+    fontSize: 16,
   },
   buttonContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   textOk: {
-    backgroundColor: '#87CEFA',
+    backgroundColor: '#5AB9EA',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderRadius: 10,
     flex: 1,
     marginHorizontal: 5,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
     elevation: 3,
   },
   textCC: {
     backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#87CEFA',
+    borderColor: '#5AB9EA',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderRadius: 10,
     flex: 1,
     marginHorizontal: 5,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
     elevation: 3,
   },
   cancelButtonText: {
@@ -423,7 +536,7 @@ const styles = StyleSheet.create({
   next: {
     backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#87CEFA',
+    borderColor: '#5AB9EA',
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 70,
@@ -436,10 +549,10 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   textnext: {
-    color: '#87CEFA',
+    color: '#5AB9EA',
     fontWeight: 'bold',
   },
-  modalContainersearch:{
+  modalContainersearch: {
     color: 'black',
     flex: 1,
   },
@@ -461,10 +574,59 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 3,
   },
- 
-  noResultsText:{
-    textAlign:'center',
-    fontSize: 16,
-  }
-});
 
+  noResultsText: {
+    textAlign: 'center',
+    fontSize: 16,
+    marginTop: 15,
+  },
+  addButton: {
+    backgroundColor: '#5AB9EA',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginTop: 5,
+    marginLeft: 5,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 3, 
+  },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  symptomCard: {
+    backgroundColor: '#fff', 
+    borderRadius: 12, 
+    padding: 15, 
+    marginVertical: 10, 
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5, 
+    position: 'relative',
+  },
+  symptomHeader: {
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center',
+  },
+  symptomTitle: {
+    fontSize: 16,
+    color: '#2D3748',
+    fontWeight: 'bold', 
+  },
+  removeButton: {
+    backgroundColor: '#FF6F61', 
+    borderRadius: 50, 
+    padding: 5, 
+    margin:5,
+  
+  },
+
+});

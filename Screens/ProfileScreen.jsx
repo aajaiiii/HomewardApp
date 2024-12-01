@@ -15,6 +15,9 @@ import style from './style';
 import styles from './Login/style';
 import Icon from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
+import LinearGradient from 'react-native-linear-gradient';
 
 
 function ProfileScreen({ setIsLoggedIn }) {
@@ -26,7 +29,7 @@ function ProfileScreen({ setIsLoggedIn }) {
     try {
       const token = await AsyncStorage.getItem('token');
       if (token) {
-        const res = await axios.post('http://192.168.2.57:5000/userdata', { token });
+        const res = await axios.post('http://10.53.57.175:5000/userdata', { token });
         console.log('of',res.data);
         setUserData(res.data.data);
       } else {
@@ -107,11 +110,19 @@ function ProfileScreen({ setIsLoggedIn }) {
 
 
   return (
+    <LinearGradient
+    // colors={['#5AB9EA', '#87CEFA']}
+    // colors={['#00A9E0', '#5AB9EA', '#E0FFFF', '#FFFFFF']}
+    colors={['#fff', '#fff']}
+    style={{flex: 1}} // ให้ครอบคลุมทั้งหน้าจอ
+  >
+        <View style={{ flex: 1, justifyContent: 'space-between' }}>
+
     <ScrollView
       keyboardShouldPersistTaps={'always'}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{paddingBottom: 40}}
-      style={{ backgroundColor: '#F7F7F7'}}>
+      style={{backgroundColor: 'transparent'}}>
       <View style={style.container}>
         <TouchableOpacity 
          onPress={() => {
@@ -148,14 +159,24 @@ function ProfileScreen({ setIsLoggedIn }) {
           />
           <Text style={styless.textprofile}>ติดต่อเรา</Text>
         </TouchableOpacity>
+        <TouchableOpacity onPress={logout} style={{flexDirection: 'row', alignItems: 'center'}}>
+          <MaterialIcons
+            name="logout"
+            color="red"
+            style={styles.smallIcon}
+          />
+          <Text style={styless.textex}>ออกจากระบบ</Text>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styless.containerlogout} onPress={logout}>
+      {/* <TouchableOpacity style={styless.containerlogout} onPress={logout}>
    
         <Text style={styless.textex}>
           ออกจากระบบ
         </Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </ScrollView>
+    </View>
+    </LinearGradient>
   );
 }
 const styless = StyleSheet.create({
@@ -168,14 +189,16 @@ const styless = StyleSheet.create({
   },
   
   textex: {
-    color: 'black',
-    textAlign: 'center',
+    color:'#d9534f',
     fontFamily: 'Arial',
     fontSize: 16,
     fontWeight: 'normal',
+    padding: 8,
   },
   containerlogout: {
-    backgroundColor: '#DCDCDC',
+    // backgroundColor: '#d9534f',
+    backgroundColor: '#FF6A6A',
+    // backgroundColor: '#D3D3D3',
     padding: 10,
     borderRadius: 10,
     margin: 15,

@@ -8,7 +8,7 @@ import {
     ScrollView,
   } from 'react-native';
   import {useNavigation} from '@react-navigation/native';
-  import {useEffect, useState} from 'react';
+  import React, {useState, useEffect} from 'react';
   import AsyncStorage from '@react-native-async-storage/async-storage';
   import axios from 'axios';
   // import style from '../style';
@@ -16,6 +16,8 @@ import {
   import Icon from 'react-native-vector-icons/Fontisto';
   import Ionicons from 'react-native-vector-icons/Ionicons';
   import {useRoute} from '@react-navigation/native';
+  import { useFocusEffect } from '@react-navigation/native';
+
   export default function UpdateEmail() {
     // const location = useLocation();
     // const data = location.state?.data;
@@ -24,11 +26,56 @@ import {
     const [email, setEmail] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const route = useRoute();
+
+    useFocusEffect(
+      React.useCallback(() => {
+        // ซ่อน TabBar เมื่อเข้าหน้านี้
+        navigation.getParent()?.setOptions({
+          tabBarStyle: { display: 'none' },
+        });
+        // return () => {
+        //   // แสดง TabBar กลับมาเมื่อออกจากหน้านี้
+        //   navigation.getParent()?.setOptions({
+        //     tabBarStyle: { display: 'flex' }, // ปรับ 'flex' ให้ TabBar กลับมาแสดง
+        //   });
+        // };
+      }, [navigation])
+    );
+    
+    useEffect(() => {
+      // ฟัง event ของการกดปุ่ม Header Back (Navigate Up)
+      const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+        if (e.data.action.type === 'POP') {
+          // แสดง TabBar เมื่อกดปุ่ม Navigate Up
+          navigation.getParent()?.setOptions({
+            tabBarStyle: {  position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              elevation: 0,
+              backgroundColor: '#fff',
+              borderTopColor: 'transparent',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: -2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 6,
+              height: 60,  },          });
+        } else {
+          // ซ่อน TabBar ถ้ากลับด้วยวิธีอื่นๆ เช่น navigation.goBack()
+          navigation.getParent()?.setOptions({
+            tabBarStyle: { display: 'none' },
+          });
+        }
+      });
+  
+      return unsubscribe;
+    }, [navigation]);
+    
     //   async function getData() {
     //     const token = await AsyncStorage.getItem('token');
     //     console.log(token);
     //     axios
-    //       .post('http://192.168.2.57:5000/userdata', {token: token})
+    //       .post('http://10.53.57.175:5000/userdata', {token: token})
     //       .then(res => {
     //         console.log(res.data);
     //         setUserData(res.data.data);
@@ -62,7 +109,7 @@ import {
   
       // setLoading(true);
       axios
-        .post('http://192.168.2.57:5000/send-otp3', formData)
+        .post('http://10.53.57.175:5000/send-otp3', formData)
         .then(res => {
           //   setLoading(false);
           if (res.data.success) {
@@ -139,7 +186,7 @@ import {
       color: '#333',
     },
     button: {
-      backgroundColor: '#87CEFA',
+      backgroundColor: '#5AB9EA',
       paddingVertical: 12,
       paddingHorizontal: 20,
       borderRadius: 10,

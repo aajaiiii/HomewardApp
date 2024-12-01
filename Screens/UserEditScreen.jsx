@@ -7,7 +7,8 @@ import {
   TextInput,
   Modal,
 } from 'react-native';
-import {useEffect, useState} from 'react';
+import React, {useState, useEffect} from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import {useRoute} from '@react-navigation/native';
@@ -15,6 +16,7 @@ import {useNavigation} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import style from './style';
+import LinearGradient from 'react-native-linear-gradient';
 
 export default function UserEditScreen(props) {
   console.log(props);
@@ -33,6 +35,34 @@ export default function UserEditScreen(props) {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [initialBirthday, setInitialBirthday] = useState('');
   const [inputHeight, setInputHeight] = useState(40);
+  const [userData, setUserData] = useState('');
+
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // ซ่อน TabBar เมื่อเข้าหน้านี้
+      navigation.getParent()?.setOptions({
+        tabBarStyle: { display: 'none' },
+      });
+      return () => {
+        // แสดง TabBar กลับมาเมื่อออกจากหน้านี้
+        navigation.getParent()?.setOptions({
+          tabBarStyle: {  position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            elevation: 0,
+            backgroundColor: '#fff',
+            borderTopColor: 'transparent',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 6,
+            height: 60,  }, // ปรับ 'flex' ให้ TabBar กลับมาแสดง
+        });
+      };
+    }, [navigation])
+  );
 
   const handleContentSizeChange = event => {
     setInputHeight(event.nativeEvent.contentSize.height);
@@ -48,7 +78,7 @@ export default function UserEditScreen(props) {
     const token = await AsyncStorage.getItem('token');
     console.log(token);
     axios
-      .post('http://192.168.2.57:5000/userdata', {token: token})
+      .post('http://10.53.57.175:5000/userdata', {token: token})
       .then(res => {
         console.log(res.data);
         setUserData(res.data.data);
@@ -93,7 +123,7 @@ export default function UserEditScreen(props) {
     };
 
     console.log(formdata);
-    axios.post('http://192.168.2.57:5000/updateuserapp', formdata).then(res => {
+    axios.post('http://10.53.57.175:5000/updateuserapp', formdata).then(res => {
       console.log(res.data);
       if (res.data.status == 'Ok') {
         Toast.show({
@@ -107,11 +137,17 @@ export default function UserEditScreen(props) {
   };
 
   return (
+    <LinearGradient
+    // colors={['#00A9E0', '#5AB9EA', '#E0FFFF', '#FFFFFF']}
+    // colors={['#5AB9EA', '#87CEFA']}
+    colors={['#fff', '#fff']}
+    style={{flex: 1}} // ให้ครอบคลุมทั้งหน้าจอ
+  >
     <ScrollView
       keyboardShouldPersistTaps={'always'}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{paddingBottom: 40}}
-      style={{backgroundColor: '#F7F7F7'}}>
+      style={{backgroundColor: 'transparent'}}>
       <View style={style.container}>
         <View>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -262,6 +298,7 @@ export default function UserEditScreen(props) {
         </View>
       </View>
     </ScrollView>
+    </LinearGradient>
   );
 }
 const styles = StyleSheet.create({

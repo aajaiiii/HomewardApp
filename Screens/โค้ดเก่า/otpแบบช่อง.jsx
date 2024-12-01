@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   StyleSheet,
   Text,
@@ -9,43 +9,18 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import Toast from 'react-native-toast-message';
-import { useFocusEffect } from '@react-navigation/native';
 
-export default function UpdateOTP({route, navigation}) {
-  const [otp, setOtp] = useState('');
+export default function VerifyOtpEmail({route, navigation}) {
+  const {username, email} = route.params || {};
+  const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const {username, email} = route.params || {};
   const [timer, setTimer] = useState(300);
   const [isOtpExpired, setIsOtpExpired] = useState(false);
-  useFocusEffect(
-    React.useCallback(() => {
-      // ซ่อน TabBar เมื่อเข้าหน้านี้
-      navigation.getParent()?.setOptions({
-        tabBarStyle: { display: 'none' },
-      });
-      return () => {
-        // แสดง TabBar กลับมาเมื่อออกจากหน้านี้
-        navigation.getParent()?.setOptions({
-          tabBarStyle: {  position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            elevation: 0,
-            backgroundColor: '#fff',
-            borderTopColor: 'transparent',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: -2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 6,
-            height: 60,  }, // ปรับ 'flex' ให้ TabBar กลับมาแสดง
-        });
-      };
-    }, [navigation])
-  );
 
-  
-  
+  // Create refs for each TextInput
+  const inputRefs = useRef([]);
+
   useEffect(() => {
     let countdown;
     if (timer > 0) {
@@ -66,14 +41,26 @@ export default function UpdateOTP({route, navigation}) {
     return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
   };
 
+  const handleOtpChange = (index, value) => {
+    const newOtpDigits = [...otpDigits];
+    newOtpDigits[index] = value;
+    setOtpDigits(newOtpDigits);
+
+    // Move to the next input if the current one is filled
+    if (value.length === 1 && index < 5) {
+      inputRefs.current[index + 1].focus();
+    }
+  };
+
   const verifyOtp = () => {
     if (isOtpExpired) {
       setErrorMessage('OTP หมดอายุ');
       return;
     }
 
+    const otp = otpDigits.join('');
     axios
-      .post('http://10.53.57.175:5000/verify-otp3', {
+      .post('https://us-central1-homeward-422311.cloudfunctions.net/api/verify-otp3', {
         username,
         otp,
         newEmail: email,
@@ -82,23 +69,8 @@ export default function UpdateOTP({route, navigation}) {
         if (response.data.success) {
           Toast.show({
             type: 'success',
-            text1: 'เปลี่ยนอีเมลสำเร็จ',
-            text2: 'อีเมลของคุณได้ถูกเปลี่ยนแปลงเรียบร้อยแล้ว',
-          });
-
-          navigation.getParent()?.setOptions({
-            tabBarStyle: {   position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              elevation: 0,
-              backgroundColor: '#fff',
-              borderTopColor: 'transparent',
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: -2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 6,
-              height: 60,  },
+            text1: 'ยืนยันอีเมลสำเร็จ',
+            text2: 'การยืนยันอีเมลของคุณสำเร็จแล้ว',
           });
           navigation.navigate('User', {refresh: true});
         } else {
@@ -119,7 +91,7 @@ export default function UpdateOTP({route, navigation}) {
     }
 
     axios
-      .post('http://10.53.57.175:5000/send-otp3', {username, email})
+      .post('https://us-central1-homeward-422311.cloudfunctions.net/api/send-otp3', {username, email})
       .then(res => {
         if (res.data.success) {
           setSuccessMessage('ส่ง OTP ใหม่เรียบร้อย');
@@ -144,15 +116,23 @@ export default function UpdateOTP({route, navigation}) {
       <View style={styles.innerContainer}>
         <Text style={styles.headerText}>คุณจะได้รับรหัสยืนยันตัวตนที่:</Text>
         <Text style={styles.emailText}>{email}</Text>
-        <View style={styles.textInputContainer}>
-          <TextInput
-            style={styles.textInput}
-            onChangeText={setOtp}
-            placeholder="กรอกรหัสยืนยัน"
-            keyboardType="numeric"
-            maxLength={6} 
-          />
+
+        {/* OTP input boxes */}
+        <View style={styles.otpContainer}>
+          {otpDigits.map((digit, index) => (
+            <TextInput
+              key={index}
+              ref={ref => (inputRefs.current[index] = ref)}
+              style={styles.otpBox}
+              value={digit}
+              onChangeText={value => handleOtpChange(index, value)}
+              keyboardType="numeric"
+              maxLength={1}
+              returnKeyType="next"
+            />
+          ))}
         </View>
+
         {timer > 0 && (
           <Text style={styles.timerText}>
             กรุณากรอก OTP ภายในเวลา {formatTime(timer)}
@@ -202,21 +182,19 @@ const styles = StyleSheet.create({
     color: '#555',
     marginBottom: 20,
   },
-  textInputContainer: {
+  otpContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  otpBox: {
+    width: 45,
+    height: 45,
     borderWidth: 1,
     borderColor: '#DCDCDC',
     borderRadius: 10,
-    paddingHorizontal: 12,
-    marginBottom: 20,
-    height:45,
-
-  },
-  textInput: {
-    flex: 1,
-    height: 40,
-    fontSize: 16,
+    textAlign: 'center',
+    fontSize: 20,
     color: '#333',
   },
   timerText: {

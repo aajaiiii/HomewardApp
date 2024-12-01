@@ -63,7 +63,7 @@ export default function Caremanualitem({route, navigation, props}) {
       try {
         const token = await AsyncStorage.getItem('token');
         const response = await axios.get(
-          `http://10.53.57.175:5000/getcaremanual/${id}`,
+          `http://192.168.0.159:5000/getcaremanual/${id}`,
           {headers: {Authorization: `Bearer ${token}`}},
         );
         const data = response.data;
@@ -73,6 +73,7 @@ export default function Caremanualitem({route, navigation, props}) {
         setFile(data.file);
         setUpdatedAt(formatDate(data.updatedAt));
         setCreatedAt(formatDate(data.createdAt));
+
       } catch (error) {
         console.error('Error fetching care manual item data:', error);
       }
@@ -133,16 +134,17 @@ export default function Caremanualitem({route, navigation, props}) {
       colors={['#FFFFFF', '#FFFFFF']}
       style={{flex: 1}} // ให้ครอบคลุมทั้งหน้าจอ
     >
-      {/* <View style={stylei.headerContainer}>
-        <TouchableOpacity style={stylei.iconback} onPress={goBack}>
-          <Ionicons name={'arrow-back-outline'} size={22} color={'#fff'} />
-        </TouchableOpacity>
-        <View style={stylei.headerTextContainer}>
-          <Text style={stylei.heardCare}>{caremanual_name}</Text>
-          <Text style={stylei.textCare}>อัปเดตล่าสุดเมื่อ: {updatedAt}</Text>
-          <Text style={stylei.textCare}>สร้างเมื่อ: {createAt}</Text>
-        </View>
-      </View> */}
+          <View style={stylei.headerContainer}>
+      <TouchableOpacity style={stylei.iconback} onPress={goBack}>
+        <Ionicons name={'arrow-back-outline'} size={22} color={'#fff'} />
+      </TouchableOpacity>
+      <View style={stylei.headerTextContainer}>
+    {/* <Text style={stylei.heardCare}>{caremanual_name}</Text> */}
+    {/* <Text style={stylei.textCare}>อัปเดตล่าสุดเมื่อ: {updatedAt}</Text> */}
+    <Text style={stylei.textCare}>สร้างเมื่อ: {createAt}</Text>
+
+  </View>
+    </View>
 
       <ScrollView
         keyboardShouldPersistTaps={'always'}
@@ -166,8 +168,8 @@ export default function Caremanualitem({route, navigation, props}) {
                     // marginLeft: 'auto',
                     // marginRight: 'auto',
                     width: '100%',
-                    height: 980,
-                    resizeMode: 'contain',
+    height: 1000, 
+    resizeMode: 'contain',  
                   }}
                 />
               ) : (
@@ -194,22 +196,41 @@ export default function Caremanualitem({route, navigation, props}) {
               </View>
             </Modal>
 
-            {file && (
-              <TouchableOpacity
-                style={stylei.containerCarefile}
-                onPress={() => Linking.openURL(file)}>
-                <Material name={'file-pdf-box'} color={'red'} size={24} />
-                <Text style={stylei.fileText}>เปิดไฟล์ PDF</Text>
-              </TouchableOpacity>
-            )}
+            <TouchableOpacity
+              style={stylei.containerCarefile}
+              onPress={() => {
+                if (file) {
+                  Linking.openURL(file);
+                } else {
+                  console.error('File URL is not available.');
+                }
+              }}>
+              <Material name={'file-pdf-box'} color={'red'} size={24} />
+              <Text style={stylei.fileText}>เปิดไฟล์ PDF</Text>
+            </TouchableOpacity>
 
-            {detail && (
-              <View>
-                <Text style={stylei.text}>รายละเอียด : {detail}</Text>
-              </View>
-            )}
+            {/* 
+<PDFView
+  fadeInDuration={250.0}
+  style={{ flex: 1 }}
+  resource={file} 
+  resourceType={'url'}
+/> */}
+
+            {/* <PDFView
+  fadeInDuration={250.0}
+  style={{ flex: 1 }}
+  resource={file} 
+  resourceType={'url'}
+/> */}
+            <View>
+              <Text style={stylei.text}>รายละเอียด : {detail}</Text>
+            </View>
           </View>
         </View>
+        {/* <View style={stylei.containerCare}> */}
+
+        {/* </View> */}
       </ScrollView>
     </LinearGradient>
   );
@@ -217,7 +238,7 @@ export default function Caremanualitem({route, navigation, props}) {
 
 const stylei = StyleSheet.create({
   headerContainer: {
-    flexDirection: 'row',
+    flexDirection: 'row', 
     alignItems: 'center',
     justifyContent: 'space-between', // Ensure the title and back button are spaced correctly
     height: 58, // Standard header height
@@ -231,19 +252,18 @@ const stylei = StyleSheet.create({
     elevation: 4, // Add some shadow to match the header
   },
   headerTextContainer: {
-    marginLeft: 5,
-    flex: 1,
-  },
-  heardCare: {
-    color: '#fff',
-    fontSize: 20, // Standard header font size
-    fontWeight: 'bold', // Make sure it's bold like the navigation header
-  },
-  textCare: {
-    color: '#fff',
-    fontSize: 16, // Smaller font size for subtitle
-    paddingTop: 5,
-  },
+    marginLeft: 5, 
+    flex: 1,  },
+    heardCare: {
+      color: '#fff',
+      fontSize: 20, // Standard header font size
+      fontWeight: 'bold', // Make sure it's bold like the navigation header
+    },
+    textCare: {
+      color: '#fff',
+      fontSize: 16, // Smaller font size for subtitle
+      paddingTop: 5,  
+    },
   containerCare: {
     backgroundColor: '#fff',
     padding: 15,
@@ -267,7 +287,7 @@ const stylei = StyleSheet.create({
   containerCarefile: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 5,
+    marginTop: 20,
     // borderWidth: 1,
     // borderColor: '#ccc',
     // borderRadius: 5,
@@ -308,10 +328,11 @@ const stylei = StyleSheet.create({
   },
   loginContainer: {
     backgroundColor: '#fff',
-    marginTop: 0,
+    marginTop:38,
     borderTopLeftRadius: 50,
     borderTopRightRadius: 50,
     // paddingHorizontal: 20,
+    paddingVertical: 10,
     height: '100%',
     flexDirection: 'column',
   },
@@ -320,5 +341,6 @@ const stylei = StyleSheet.create({
     // backgroundColor: '#4691D3',
     // backgroundColor: '#87CEFA',
     backgroundColor: '#fff',
+
   },
 });

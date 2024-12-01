@@ -40,7 +40,7 @@ function LoginPage({ getData}) {
     };
   
     try {
-      const res = await axios.post('http://192.168.2.57:5000/loginuser', userData);
+      const res = await axios.post('http://192.168.0.149:5000/loginuser', userData);
       // console.log(res.data);
       if (res.data.status === 'ok') {
         await AsyncStorage.setItem('token', res.data.data);

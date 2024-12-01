@@ -1,20 +1,35 @@
 import {StyleSheet} from 'react-native';
 const fontFamily = 'Roboto';
 const style = StyleSheet.create({
+
+    // container: {
+    //     backgroundColor: '#fff',
+    //     padding: 20,
+    //     borderRadius: 10,
+    //     margin: 15,
+    //     shadowColor: '#000',
+    //     shadowOffset: {
+    //       width: 0,
+    //       height: 4,
+    //     },
+    //     shadowOpacity: 0.5,
+    //     shadowRadius: 4.65,
+    //     elevation: 3,
+    //   },
     container: {
-        backgroundColor: '#fff',
-        padding: 20,
-        borderRadius: 10,
-        margin: 15,
-        shadowColor: '#000',
-        shadowOffset: {
-          width: 0,
-          height: 4,
-        },
-        shadowOpacity: 0.5,
-        shadowRadius: 4.65,
-        elevation: 3,
-      },
+      padding: 15,
+      marginVertical: 15,
+      marginHorizontal: 15,
+      backgroundColor: 'white',
+      borderRadius: 15,
+      borderWidth: 1,
+      borderColor: '#ddd',
+      shadowColor: '#000',
+      shadowOffset: {width: 0, height: 2},
+      shadowOpacity: 0.3,
+      shadowRadius: 6,
+      elevation: 5,
+    },
       text:{
         color: 'black',
         fontFamily: 'Arial',
@@ -23,7 +38,8 @@ const style = StyleSheet.create({
         padding: 10,
       },
       inBut: {
-        backgroundColor: '#87CEFA',
+        // backgroundColor: '#87CEFA',
+        backgroundColor: '#00A9E0',
         paddingVertical: 12,
         paddingHorizontal: 20,
         borderRadius: 10,

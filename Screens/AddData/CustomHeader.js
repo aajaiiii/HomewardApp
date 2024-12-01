@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
     marginHorizontal:5,
   },
   activeLine: {
-    backgroundColor: '#87CEFA',
+    backgroundColor: '#5AB9EA',
   },
 });
 

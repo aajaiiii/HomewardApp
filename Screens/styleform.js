@@ -81,7 +81,7 @@ const styleform = StyleSheet.create({
       //   textAlign:'center'
       // },
       sectionHeader: {
-        fontSize: 18,
+        fontSize: 16,
         textAlign:'center',
         fontWeight: 'bold',
         marginBottom: 10,

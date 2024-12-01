@@ -8,7 +8,7 @@ import {
   TextInput,
 } from 'react-native';
 import {useNavigation, useIsFocused} from '@react-navigation/native';
-import {useEffect, useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import style from './style';
@@ -18,6 +18,9 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import RNPickerSelect from 'react-native-picker-select';
 import {useRoute} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
+import LinearGradient from 'react-native-linear-gradient';
+import { useFocusEffect } from '@react-navigation/native';
+
 export default function PatientForm2(props) {
   console.log(props);
   const [userData, setUserData] = useState('');
@@ -36,6 +39,32 @@ export default function PatientForm2(props) {
   const { formData } = route.params;
   const isFocused = useIsFocused();
   const [inputHeight, setInputHeight] = useState(40); // Initial height of TextInput
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // ซ่อน TabBar เมื่อเข้าหน้านี้
+      navigation.getParent()?.setOptions({
+        tabBarStyle: { display: 'none' },
+      });
+      return () => {
+        // แสดง TabBar กลับมาเมื่อออกจากหน้านี้
+        navigation.getParent()?.setOptions({
+          tabBarStyle: {  position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            elevation: 0,
+            backgroundColor: '#fff',
+            borderTopColor: 'transparent',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 6,
+            height: 60,  }, // ปรับ 'flex' ให้ TabBar กลับมาแสดง
+        });
+      };
+    }, [navigation])
+  );
 
   const handleContentSizeChange = event => {
     setInputHeight(event.nativeEvent.contentSize.height);
@@ -62,7 +91,7 @@ export default function PatientForm2(props) {
     const fetchData = async () => {
       const token = await AsyncStorage.getItem('token');
       axios
-        .post('http://192.168.2.57:5000/userdata', { token: token })
+        .post('http://10.53.57.175:5000/userdata', { token: token })
         .then(res => {
           setUserData(res.data.data);
         });
@@ -111,7 +140,7 @@ export default function PatientForm2(props) {
 
     try {
       const response = await axios.post(
-        'http://192.168.2.57:5000/addpatientform',
+        'http://10.53.57.175:5000/addpatientform',
         formdata1,
       );
       if (response.data.status === 'ok') {
@@ -121,6 +150,20 @@ export default function PatientForm2(props) {
           text2: 'บันทึกอาการแล้ว',
         });
         await AsyncStorage.removeItem('patientForm');
+        navigation.getParent()?.setOptions({
+          tabBarStyle: {   position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            elevation: 0,
+            backgroundColor: '#fff',
+            borderTopColor: 'transparent',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 6,
+            height: 60,  },
+        });
         navigation.navigate('Home', { refresh: true });
       }
     } catch (error) {
@@ -153,16 +196,24 @@ export default function PatientForm2(props) {
   };
 
   return (
+    <LinearGradient
+    // colors={['#5AB9EA', '#87CEFA']}
+    colors={['#fff', '#fff']}
+
+    style={{flex: 1}} // ให้ครอบคลุมทั้งหน้าจอ
+  >
     <ScrollView
       keyboardShouldPersistTaps={'always'}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{ paddingBottom: 40 }}
-      style={{ backgroundColor: '#F7F7F7' }}>
-      <View style={[styleform.container, { flex: 1 }]}>
+      style={{backgroundColor: 'transparent'}}>
+      <View style={[style.container, { flex: 1 }]}>
         <Text style={styleform.sectionHeader}>สัญญาณชีพ</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
           <View style={stylep.texttitle}>
-            <Text style={stylep.text}>ความดันตัวบน(mmHg)</Text>
+            <Text style={stylep.text}>ความดันบน(mmHg)</Text>
+            {/* <Text style={stylep.text}>(mmHg)</Text> */}
+
             <TextInput
               style={[style.textInputRead, style.text]}
               onChangeText={text => setSBP(text)}
@@ -171,7 +222,7 @@ export default function PatientForm2(props) {
             />
           </View>
           <View style={stylep.texttitle}>
-            <Text style={stylep.text}>ความดันตัวล่าง(mmHg)</Text>
+            <Text style={stylep.text}>ความดันล่าง(mmHg)</Text>
             <TextInput
               style={[style.textInputRead, style.text]}
               onChangeText={text => setDBP(text)}
@@ -301,10 +352,25 @@ export default function PatientForm2(props) {
         </TouchableOpacity>
       </View>
     </ScrollView>
+    </LinearGradient>
   );
 }
 
 const stylep = StyleSheet.create({
+  container: {
+    padding: 15,
+    marginVertical: 10,
+    marginHorizontal: 10,
+    backgroundColor: 'white',
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
+  },
   text: {
     color: 'black',
     fontFamily: 'Arial',
@@ -334,7 +400,7 @@ const stylep = StyleSheet.create({
     marginTop: 10,
   },
   textOk: {
-    backgroundColor: '#87CEFA',
+    backgroundColor: '#5AB9EA',
     alignItems: 'center',
     paddingVertical: 10,
     borderRadius: 10,
@@ -349,7 +415,7 @@ const stylep = StyleSheet.create({
   textCC: {
     backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#87CEFA',
+    borderColor: '#5AB9EA',
     alignItems: 'center',
     paddingVertical: 10,
     borderRadius: 10,
@@ -366,7 +432,7 @@ const stylep = StyleSheet.create({
     fontWeight: 'bold',
   },
   cancelButtonText: {
-    color: '#87CEFA',
+    color: '#5AB9EA',
     fontWeight: 'bold',
   },
 });

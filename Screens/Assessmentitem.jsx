@@ -14,6 +14,9 @@ import style from './style';
 import {useNavigation, useIsFocused} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import LinearGradient from 'react-native-linear-gradient';
+import styleform from './styleform';
+import {useFocusEffect} from '@react-navigation/native';
 
 export default function Assessmentitem(props) {
   const route = useRoute();
@@ -27,6 +30,51 @@ export default function Assessmentitem(props) {
   const [userAgeInMonths, setUserAgeInMonths] = useState(0);
   const isFocused = useIsFocused();
   
+  useFocusEffect(
+    React.useCallback(() => {
+      // ซ่อน TabBar เมื่อเข้าหน้านี้
+      navigation.getParent()?.setOptions({
+        tabBarStyle: { display: 'none' },
+      });
+      // return () => {
+      //   // แสดง TabBar กลับมาเมื่อออกจากหน้านี้
+      //   navigation.getParent()?.setOptions({
+      //     tabBarStyle: { display: 'flex' }, // ปรับ 'flex' ให้ TabBar กลับมาแสดง
+      //   });
+      // };
+    }, [navigation])
+  );
+  
+  
+  useEffect(() => {
+    // ฟัง event ของการกดปุ่ม Header Back (Navigate Up)
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      if (e.data.action.type === 'POP') {
+        // แสดง TabBar เมื่อกดปุ่ม Navigate Up
+        navigation.getParent()?.setOptions({
+          tabBarStyle: {  position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            elevation: 0,
+            backgroundColor: '#fff',
+            borderTopColor: 'transparent',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 6,
+            height: 60,  },        });
+      } else {
+        // ซ่อน TabBar ถ้ากลับด้วยวิธีอื่นๆ เช่น navigation.goBack()
+        navigation.getParent()?.setOptions({
+          tabBarStyle: { display: 'none' },
+        });
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
   useEffect(() => {
     if (isFocused) {
       getData();
@@ -38,7 +86,7 @@ export default function Assessmentitem(props) {
     const token = await AsyncStorage.getItem('token');
     console.log(token);
     axios
-      .post('http://192.168.2.57:5000/userdata', {token: token})
+      .post('http://10.53.57.175:5000/userdata', {token: token})
       .then(res => {
         console.log(res.data);
         setUserData(res.data.data);
@@ -108,7 +156,7 @@ export default function Assessmentitem(props) {
     try {
       if (selectedItem) {
         const response = await axios.get(
-          `http://192.168.2.57:5000/getassessment/${selectedItem._id}`,
+          `http://10.53.57.175:5000/getassessment/${selectedItem._id}`,
         );
         const assessmentData = response.data.data;
         setAssessment(assessmentData);
@@ -132,7 +180,7 @@ export default function Assessmentitem(props) {
     try {
       if (assessment && assessment.MPersonnel) {
         const response = await axios.get(
-          `http://192.168.2.57:5000/getmpersonnel/${assessment.MPersonnel}`,
+          `http://10.53.57.175:5000/getmpersonnel/${assessment.MPersonnel}`,
         );
         setMPersonnel(response.data);
         console.log('แพทย์', response.data);
@@ -150,6 +198,8 @@ export default function Assessmentitem(props) {
         return styles.statusNormal;
       case 'ผิดปกติ':
         return styles.statusAbnormal;
+        case 'เคสฉุกเฉิน':
+          return styles.statusEmergency;
       case 'จบการรักษา':
         return styles.statusComplete;
       default:
@@ -163,18 +213,24 @@ export default function Assessmentitem(props) {
   
 
   return (
+    <LinearGradient
+    // colors={['#00A9E0', '#5AB9EA', '#E0FFFF', '#FFFFFF']}
+    colors={['#fff', '#fff']}
+
+    style={{flex: 1}} // ให้ครอบคลุมทั้งหน้าจอ
+  >
     <ScrollView
       keyboardShouldPersistTaps={'always'}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{paddingBottom: 40}}
-      style={{backgroundColor: '#F7F7F7'}}>
+      contentContainerStyle={{paddingBottom: 60}}
+      style={{backgroundColor: 'transparent'}}>
       <View style={styles.container}>
         <Text style={styles.dateText}>
           {formatDate(selectedItem.createdAt)}
         </Text>
-        <View style={styles.section}>
+        {/* <View style={styles.section}>
 
-          <Text style={styles.sectionHeader}>ข้อมูลผู้ป่วย</Text>
+          <Text style={styleform.sectionHeader}>ข้อมูลผู้ป่วย</Text>
           <View style={styles.row}>
           <Text style={styles.labelText}>ชื่อ-นามสกุล: </Text>
 
@@ -201,31 +257,33 @@ export default function Assessmentitem(props) {
          
             
           )}
-        </View>
-        <View style={styles.section}>
-        <View style={styles.rowhead}>
-          <Text style={styles.sectionHeader}>อาการและอาการที่แสดง</Text>
-          {!assessment && (
-            <TouchableOpacity 
-              style={styles.editButton} 
-              onPress={handleEditSymptoms}
-            >
-            <Icon
+        </View> */}
+        {!assessment && (
+        <View style={styles.buttonnext}>
+        <TouchableOpacity  style={styles.editButton} 
+              onPress={handleEditSymptoms}>
+           <Icon
             name="edit"
-            color="black"
+            color="white"
             style={styles.icon}
           />
-            </TouchableOpacity>
+            <Text style={styles.textnext}>แก้ไขการบันทึก</Text>
+        </TouchableOpacity>
+     
+       
+            
+            </View>
           )}
-          </View>
+        <View style={styles.section}>
+          <Text style={styleform.sectionHeader}>อาการและอาการที่แสดง</Text>
           {selectedItem.Symptoms && selectedItem.Symptoms.map((symptom, index) => (
             <View style={styles.row} key={index}>
               <Text style={styles.labelText}>{`อาการที่ ${index + 1}: `}</Text>
               <Text style={styles.infoText}>{symptom ? symptom : '-'}</Text>
             </View>
           ))}
-          <Text></Text>
-          <Text style={styles.sectionHeader}>สัญญาณชีพ</Text>
+          {/* <Text></Text> */}
+          <Text style={styleform.sectionHeader}>สัญญาณชีพ</Text>
           <View style={styles.row}>
             <Text style={styles.labelText}>ความดันตัวบน:</Text>
             <Text style={styles.infoText}>{selectedItem.SBP ? selectedItem.SBP : '-'}</Text>
@@ -279,7 +337,7 @@ export default function Assessmentitem(props) {
 
         {assessment && (
           <View style={styles.section}>
-            <Text style={styles.sectionHeader}>ผลการประเมิน</Text>
+            <Text style={styleform.sectionHeader}>ผลการประเมิน</Text>
             <TouchableOpacity
               style={getStatusButtonStyle(assessment.status_name)}>
               <Text style={styles.buttonText}>{assessment.status_name}</Text>
@@ -314,55 +372,63 @@ export default function Assessmentitem(props) {
         )}
       </View>
     </ScrollView>
+    </LinearGradient>
   );
 }
 
 
 const styles = StyleSheet.create({
   rowhead: {
-    flexDirection: 'row',
     alignItems: 'center',
   },
  icon:{
   fontSize: 20,
-  marginLeft:10,
-  paddingBottom: 5,
-  marginBottom: 10,
+  marginRight:5,
+  // marginLeft:10,
+  // paddingBottom: 5,
+  // marginBottom: 10,
  },
   container: {
-    padding: 16,
-    backgroundColor: '#F7F7F7',
+    // padding: 16,
+    // backgroundColor: '#F7F7F7',
   },
   dateText: {
     fontSize: 16,
     textAlign: 'center',
+    marginTop:15,
     marginVertical: 10,
-    color: '#333',
+    // color: '#333',
+    color: '#000',
+
     fontWeight: '500',
   },
   labelText: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#555',
     marginLeft: 7,
     fontWeight: '600',
   },
   infoTextFetched: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#555',
     marginLeft: 7,
   },
   section: {
-    backgroundColor: '#fff',
-    padding: 20,
-    marginVertical: 8,
-    borderRadius: 10,
+    padding: 15,
+    marginVertical: 10,
+    marginHorizontal: 10,
+    backgroundColor: 'white',
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: '#ddd',
     shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 3,
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
   },
   sectionHeader: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 10,
     borderBottomWidth: 1,
@@ -372,7 +438,7 @@ const styles = StyleSheet.create({
     marginRight:10
   },
   infoText: {
-    fontSize: 14,
+    fontSize: 16,
     marginVertical: 6,
     fontFamily: 'Arial',
     color: '#555',
@@ -392,7 +458,7 @@ const styles = StyleSheet.create({
     width: 150,
     marginLeft: 'auto',
     marginRight: 'auto',
-    backgroundColor: '#FF6A6A',
+    backgroundColor: '#e7639a',
     padding: 12,
     borderRadius: 10,
     alignItems: 'center',
@@ -403,6 +469,17 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
     marginRight: 'auto',
     backgroundColor: '#FFCC80',
+    padding: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+
+  statusEmergency: {
+    width: 150,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    backgroundColor: '#FF6A6A',
     padding: 12,
     borderRadius: 10,
     alignItems: 'center',
@@ -427,6 +504,32 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
+  },
+  buttonnext: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginHorizontal: 5,
+    marginTop: 5,
+  },
+  editButton: {
+    flexDirection: 'row',
+    backgroundColor: '#5AB9EA',
+    borderWidth: 1,
+    borderColor: '#5AB9EA',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginHorizontal: 5,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 3,
+  },
+  textnext: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
 

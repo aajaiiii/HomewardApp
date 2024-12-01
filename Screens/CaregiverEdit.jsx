@@ -5,13 +5,15 @@ import {
   ScrollView,
   TextInput,
 } from 'react-native';
-import {useEffect, useState} from 'react';
+import React, {useState, useEffect} from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import style from './style';
 import Toast from 'react-native-toast-message';
 import {Picker} from '@react-native-picker/picker';
+import LinearGradient from 'react-native-linear-gradient';
 
 export default function CaregiverEdit(props) {
   console.log(props);
@@ -24,6 +26,32 @@ export default function CaregiverEdit(props) {
   const [isCustomRelationship, setIsCustomRelationship] = useState(false);
   const navigation = useNavigation();
   const route = useRoute();
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // ซ่อน TabBar เมื่อเข้าหน้านี้
+      navigation.getParent()?.setOptions({
+        tabBarStyle: { display: 'none' },
+      });
+      return () => {
+        // แสดง TabBar กลับมาเมื่อออกจากหน้านี้
+        navigation.getParent()?.setOptions({
+          tabBarStyle: {  position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            elevation: 0,
+            backgroundColor: '#fff',
+            borderTopColor: 'transparent',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 6,
+            height: 60,  }, // ปรับ 'flex' ให้ TabBar กลับมาแสดง
+        });
+      };
+    }, [navigation])
+  );
 
   useEffect(() => {
     const caregiverData = route.params.data;
@@ -59,7 +87,7 @@ export default function CaregiverEdit(props) {
       console.log(formdata);
 
       const res = await axios.post(
-        'http://192.168.2.57:5000/updatecaregiver',
+        'http://10.53.57.175:5000/updatecaregiver',
         formdata,
       );
       console.log(res.data);
@@ -76,11 +104,16 @@ export default function CaregiverEdit(props) {
     }
   };
   return (
+    <LinearGradient
+    // colors={['#00A9E0', '#5AB9EA', '#E0FFFF', '#FFFFFF']}
+    colors={['#FFFFFF', '#FFFFFF']}
+    style={{flex: 1}} // ให้ครอบคลุมทั้งหน้าจอ
+  >
     <ScrollView
       keyboardShouldPersistTaps={'always'}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{paddingBottom: 40}}
-      style={{ backgroundColor: '#F7F7F7'}}>
+      style={{backgroundColor: 'transparent'}}>
       <View style={style.container}>
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <Text style={style.text}>ชื่อ</Text>
@@ -99,7 +132,7 @@ export default function CaregiverEdit(props) {
             defaultValue={surname}
           />
         </View>
-        <View>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <Text style={style.text}>เกี่ยวข้องเป็น</Text>
           <View style={style.pickerContainer}>
             <Picker
@@ -150,5 +183,6 @@ export default function CaregiverEdit(props) {
         </TouchableOpacity>
       </View>
     </ScrollView>
+    </LinearGradient>
   );
 }

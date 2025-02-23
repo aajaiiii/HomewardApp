@@ -74,7 +74,7 @@ export default function Assessment(props) {
     const token = await AsyncStorage.getItem('token');
     console.log(token);
     axios
-      .post('http://10.53.57.175:5000/userdata', {token: token})
+      .post('http://10.0.2.2:5000/userdata', {token: token})
       .then(res => {
         console.log(res.data);
         setUserData(res.data.data);
@@ -97,7 +97,7 @@ export default function Assessment(props) {
     try {
       if (userData) {
         const response = await axios.get(
-          `http://10.53.57.175:5000/getpatientforms/${userData._id}`,
+          `http://10.0.2.2:5000/getpatientforms/${userData._id}`,
         );
         const sortedForms = sortForms(response.data.data, sortOrder);
         setPatientForms(sortedForms);
@@ -110,7 +110,7 @@ export default function Assessment(props) {
   const fetchAssessments = async () => {
     try {
       const response = await axios.get(
-        `http://10.53.57.175:5000/allAssessment`,
+        `http://10.0.2.2:5000/allAssessment`,
       );
       setAssessments(response.data.data);
     } catch (error) {
@@ -213,12 +213,9 @@ export default function Assessment(props) {
   };
 
   return (
-    <LinearGradient
-    // colors={['#00A9E0', '#5AB9EA', '#E0FFFF', '#FFFFFF']}
-    colors={['#fff', '#fff']}
-   
-    style={{flex: 1}}  // ให้ครอบคลุมทั้งหน้าจอ
-  >
+      <View 
+            style={{flex: 1}}  // ให้ครอบคลุมทั้งหน้าจอ
+          >
     <View style={styles.container}>
       <View style={styles.sortOptions}>
         <TouchableOpacity onPress={() => toggleSortOrder('latest')}>
@@ -250,13 +247,14 @@ export default function Assessment(props) {
         <Text style={styles.noDataText}>ยังไม่มีการบันทึกอาการ</Text>
       )}
     </View>
-    </LinearGradient>
+    </View>
   );
 }
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    backgroundColor: '#F4F7FA', 
     // paddingBottom: 70
     // backgroundColor: '#F7F7F7',
   },
@@ -267,19 +265,21 @@ const styles = StyleSheet.create({
   },
   statusText:{
     fontSize: 16,
+    fontFamily: 'Kanit-Regular',
   },
   sortOption: {
     fontSize: 14,
-    color: '#000',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    fontFamily: 'Kanit-Medium',
+    color: '#42A5F5',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#5AB9EA',
+    borderWidth: 1.2,
+    borderColor: '#42A5F5',
     marginRight: 5,
   },
   activeSort: {
-    backgroundColor: '#5AB9EA',
+    backgroundColor: '#42A5F5',
     color: '#fff',
     borderWidth: 1,
     borderColor: '#fff',
@@ -291,29 +291,31 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     padding: 16,
     backgroundColor: '#fff',
-    borderColor: '#6c757d',
-    borderRadius: 8,
-    shadowColor: '#6c757d',
-    shadowOpacity: 2,
-    shadowOffset: {width: 0, height: 1},
-    shadowRadius: 3,
-    elevation: 1,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    shadowColor: '#bbb',
+    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    elevation: 4,
   },
   listItemText: {
     fontSize: 16,
     marginBottom: 8,
+    fontFamily: 'Kanit-Regular',
   },
   normalStatus: {
-    color: 'green',
+    color: '#72DA95',
+    
   },
   abnormalStatus: {
-    color: '#e7639a', 
+    color: '#fb8c00', 
   },
   EmergencyStatus:{
-    color: 'red', 
+    color: '#FF6A6A', 
   },
   completedStatus: {
-    color: 'blue',
+    color: '#9E9E9E',
   },
   defaultStatus: {
     color: '#808080',
@@ -321,13 +323,14 @@ const styles = StyleSheet.create({
   statusLabel: {
     color: 'black',
     fontSize: 16,
+    fontFamily: 'Kanit-Regular',
   },
 
   noDataText: {
     fontSize: 16,
     textAlign: 'center',
     // color: '#6c757d',
-    color: '#fff',
-
+    color: '#6c757d',
+    fontFamily: 'Kanit-Regular',
   },
 });

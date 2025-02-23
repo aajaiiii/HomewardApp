@@ -43,23 +43,24 @@ import {
     );
     
     useEffect(() => {
-      // ฟัง event ของการกดปุ่ม Header Back (Navigate Up)
       const unsubscribe = navigation.addListener('beforeRemove', (e) => {
         if (e.data.action.type === 'POP') {
-          // แสดง TabBar เมื่อกดปุ่ม Navigate Up
           navigation.getParent()?.setOptions({
-            tabBarStyle: {  position: 'absolute',
+            tabBarStyle: {
+              position: 'absolute',
               bottom: 0,
               left: 0,
               right: 0,
-              elevation: 0,
+              elevation: 10,
               backgroundColor: '#fff',
               borderTopColor: 'transparent',
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: -2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 6,
-              height: 60,  },          });
+              shadowColor: '#000', 
+              shadowOffset: { width: 0, height: -5 }, 
+              shadowOpacity: 0.15, 
+              shadowRadius: 10,
+              height: 65,
+            },         
+           });
         } else {
           // ซ่อน TabBar ถ้ากลับด้วยวิธีอื่นๆ เช่น navigation.goBack()
           navigation.getParent()?.setOptions({
@@ -75,7 +76,7 @@ import {
     //     const token = await AsyncStorage.getItem('token');
     //     console.log(token);
     //     axios
-    //       .post('http://10.53.57.175:5000/userdata', {token: token})
+    //       .post('http://10.0.2.2:5000/userdata', {token: token})
     //       .then(res => {
     //         console.log(res.data);
     //         setUserData(res.data.data);
@@ -90,7 +91,7 @@ import {
     useEffect(() => {
       const userData = route.params.data;
       setUsername(userData.username);
-      setEmail(userData.email);
+      // setEmail(userData.email);
       console.log('เมล:', email);
       console.log('usermname:', username);
     }, []);
@@ -109,7 +110,7 @@ import {
   
       // setLoading(true);
       axios
-        .post('http://10.53.57.175:5000/send-otp3', formData)
+        .post('http://10.0.2.2:5000/send-otp3', formData)
         .then(res => {
           //   setLoading(false);
           if (res.data.success) {
@@ -134,7 +135,7 @@ import {
         <View style={styles.innerContainer}>
           {/* <Text style={style.text}>อีเมล</Text> */}
           <View style={styles.textInputContainer}>
-            <Icon name="email" size={24} color="gray" style={styles.icon} />
+            <Icon name="email" size={24} color="#5AB9EA" style={styles.icon} />
             <TextInput
               style={styles.textInput}
               onChangeText={text => setEmail(text)}
@@ -145,11 +146,16 @@ import {
             <Text style={styles.errorText}>{errorMessage}</Text>
           ) : null}
   
-          <TouchableOpacity onPress={() => handleSubmit()} style={styles.button}>
-            <View>
-              <Text style={styles.buttonText}>ส่ง OTP</Text>
-            </View>
-          </TouchableOpacity>
+  <TouchableOpacity 
+  onPress={() => handleSubmit()} 
+  style={[styles.button, email.trim() === '' && styles.buttonDisabled]} 
+  disabled={email.trim() === ''}
+>
+  <View>
+    <Text style={styles.buttonText}>ส่ง OTP</Text>
+  </View>
+</TouchableOpacity>
+
         </View>
       </ScrollView>
     );
@@ -181,9 +187,10 @@ import {
     },
     textInput: {
       flex: 1,
-      height: 40,
+      height: 45,
       fontSize: 16,
       color: '#333',
+      fontFamily: 'Kanit-Regular',
     },
     button: {
       backgroundColor: '#5AB9EA',
@@ -196,6 +203,17 @@ import {
     buttonText: {
       color: '#FFF',
       fontSize: 16,
+      fontFamily: 'Kanit-Regular',
     },
+    buttonDisabled: {
+      backgroundColor: '#D3D3D3', // สีอ่อนลงเมื่อปิดใช้งาน
+    },
+    errorText:{
+      color: 'red', 
+      fontSize: 14,
+      fontFamily: 'Kanit-Regular',
+      paddingVertical:3,
+      paddingLeft:4,
+    }
   });
   

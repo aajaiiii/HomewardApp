@@ -13,7 +13,7 @@ export default function ForgotPassword({ navigation }) {
 
   const requestOtp = async () => {
     try {
-      const response = await axios.post('http://10.53.57.175:5000/forgot-passworduser', { email });
+      const response = await axios.post('http://10.0.2.2:5000/forgot-passworduser', { email });
       setMessage(response.data);
       navigation.navigate('VerifyOtp', { email });
     } catch (error) {
@@ -100,19 +100,22 @@ const stylei = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
   },
-  buttonText: {
+  buttonText: { 
     color: '#FFF',
     fontSize: 16,
+    fontFamily: 'Kanit-Regular',
   },
   text_header: {
     fontSize: 20,
     textAlign: 'center',
-    fontWeight: '700',
+    fontFamily: 'Kanit-SemiBold',
     marginBottom: 10,
+    color:'#000'
   },
   text: {
     textAlign: 'center',
     fontSize: 16,
+    fontFamily: 'Kanit-Regular',
   },
   textInputContainer: {
     flexDirection: 'row',
@@ -123,14 +126,16 @@ const stylei = StyleSheet.create({
     paddingHorizontal: 12,
     marginBottom: 2,
     height:45,
+    
   },
   innerContainer: {
     marginTop: 20,
   },
   textInput: {
     flex: 1,
-    height: 40,
+    height: 45,
     fontSize: 16,
     color: '#333',
+    fontFamily: 'Kanit-Regular',
   },
 });

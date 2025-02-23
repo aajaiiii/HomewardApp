@@ -8,20 +8,20 @@ import {
   StyleSheet,
 } from 'react-native';
 import styles from './style';
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import axios from 'axios';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 
 const VerifyOtp = ({route, navigation}) => {
   const {email} = route.params;
-  const [otp, setOtp] = useState('');
+  const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
   const [message, setMessage] = useState('');
   const [timer, setTimer] = useState(300);
   const [isOtpExpired, setIsOtpExpired] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-
+const inputRefs = useRef([]);
   useEffect(() => {
     let countdown;
     if (timer > 0) {
@@ -36,30 +36,65 @@ const VerifyOtp = ({route, navigation}) => {
     return () => clearInterval(countdown);
   }, [timer]);
 
+  const handleOtpChange = (index, value) => {
+    const newOtpDigits = [...otpDigits];
+
+    if (value === '') {
+      // หากลบค่าและไม่ใช่ช่องแรก ให้เลื่อนไปยังช่องก่อนหน้า
+      if (index > 0) {
+        inputRefs.current[index - 1].focus();
+      }
+      newOtpDigits[index] = '';
+    } else {
+      // กรอกค่าลงในช่องปัจจุบัน
+      newOtpDigits[index] = value;
+      // เลื่อนไปยังช่องถัดไปหากค่ามีความยาว 1 ตัว
+      if (value.length === 1 && index < 5) {
+        inputRefs.current[index + 1].focus();
+      }
+    }
+
+    setOtpDigits(newOtpDigits);
+    setErrorMessage('');
+    setSuccessMessage('');
+  };
   const formatTime = time => {
     const minutes = Math.floor(time / 60);
     const seconds = time % 60;
     return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
   };
   const verifyOtp = async () => {
+    if (isOtpExpired) {
+      setErrorMessage('OTP หมดอายุ');
+      return;
+    }
+    setErrorMessage('');
+    setSuccessMessage('');
+    const otp = otpDigits.join('');
     try {
-      const response = await axios.post('http://10.53.57.175:5000/verify-otp', {
+      const response = await axios.post('http://10.0.2.2:5000/verify-otp', {
         email,
         otp,
       });
       setMessage(response.data);
       navigation.navigate('ResetPassword', {email});
     } catch (error) {
+      setErrorMessage("OTP ไม่ถูกต้องหรือหมดอายุ");
+      setSuccessMessage("");
       setMessage(error.response.data);
     }
   };
 
   const requestOtp = async () => {
+    setIsOtpExpired(false);
+    setErrorMessage("");
+    setSuccessMessage("");
     try {
-      const response = await axios.post('http://10.53.57.175:5000/forgot-passworduser', { email });
+      const response = await axios.post('http://10.0.2.2:5000/forgot-passworduser', { email });
       setMessage(response.data);
       setTimer(300);
       setIsOtpExpired(false);
+      setErrorMessage("");
     } catch (error) {
       setMessage(error.response.data);
     }
@@ -87,22 +122,51 @@ const VerifyOtp = ({route, navigation}) => {
           <Text style={stylei.text_header}>ยืนยันรหัส OTP</Text>
           <Text style={stylei.text}>กรุณากรอกรหัส OTP ที่ได้รับทางอีเมล</Text>
           <View style={stylei.innerContainer}>
-            <View style={stylei.textInputContainer}>
-              <TextInput
-                placeholder="กรอกรหัสยืนยัน"
-                value={otp}
-                onChangeText={setOtp}
-                style={stylei.textInput}
-                // keyboardType="numeric"
-              />
-            </View>
+             <View style={stylei.otpContainer}>
+                     {otpDigits.map((digit, index) => (
+                       <TextInput
+                         key={index}
+                         ref={ref => (inputRefs.current[index] = ref)}
+                         style={stylei.otpBox}
+                         value={digit}
+                         onChangeText={value => handleOtpChange(index, value)}
+                         keyboardType="numeric"
+                         maxLength={1}
+                         returnKeyType="next"
+                         onKeyPress={({nativeEvent}) => {
+                           if (
+                             nativeEvent.key === 'Backspace' &&
+                             digit === '' &&
+                             index > 0
+                           ) {
+                             // ลบโฟกัสไปยังช่องก่อนหน้าเมื่อกด Backspace
+                             inputRefs.current[index - 1].focus();
+                           }
+                         }}
+                       />
+                     ))}
+                   </View>
           </View>
           {timer > 0 && (
             <Text style={stylei.timerText}>
               กรุณากรอก OTP ภายในเวลา {formatTime(timer)}
             </Text>
           )}
-          {isOtpExpired && (
+        {isOtpExpired ? (
+           <>
+           <Text style={stylei.errorText}>{errorMessage}</Text>
+           <TouchableOpacity
+             style={stylei.button}
+             onPress={requestOtp}>
+             <Text style={stylei.buttonText}>ขอ OTP ใหม่</Text>
+           </TouchableOpacity>
+         </>
+           ) : (
+            <>
+            {errorMessage && !isOtpExpired &&(<Text style={stylei.errorText}>{errorMessage}</Text>) }
+            </>
+           )}
+          {/* {isOtpExpired && (
             <>
               <Text style={stylei.errorText}>{errorMessage}</Text>
               <TouchableOpacity
@@ -112,7 +176,7 @@ const VerifyOtp = ({route, navigation}) => {
                 <Text style={stylei.buttonText}>ขอ OTP ใหม่</Text>
               </TouchableOpacity>
             </>
-          )}
+          )} */}
           {/* {message ? <Text style={{marginTop: 20}}>{message}</Text> : null} */}
 
           <TouchableOpacity style={[stylei.button, isOtpExpired && stylei.buttonDisabled]} onPress={verifyOtp} disabled={isOtpExpired}>
@@ -134,16 +198,18 @@ const stylei = StyleSheet.create({
     paddingTop: 16,
   },
   errorText:{
-    fontSize: 14,
-    color: '#666',
-    marginVertical:8,
-    marginLeft:1
+    fontSize: 16,
+    color: 'red',
+    textAlign:'center',
+    marginBottom: 10,
+    fontFamily: 'Kanit-Regular',
   },
   timerText: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#666',
     marginVertical:8,
-    marginLeft:1
+    textAlign:'center',
+    fontFamily: 'Kanit-Regular',
   },
   container: {
     backgroundColor: '#fff',
@@ -182,26 +248,35 @@ const stylei = StyleSheet.create({
   buttonText: {
     color: '#FFF',
     fontSize: 16,
+    fontFamily: 'Kanit-Regular',
   },
   text_header: {
     fontSize: 20,
     textAlign: 'center',
-    fontWeight: '700',
+    fontFamily: 'Kanit-SemiBold',
     marginBottom: 10,
+    color:'#000'
   },
   text: {
     textAlign: 'center',
     fontSize: 16,
+    fontFamily: 'Kanit-Regular',
   },
-  textInputContainer: {
+  otpContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 5,
+  },
+  otpBox: {
+    width: 45,
+    height: 55,
     borderWidth: 1,
     borderColor: '#DCDCDC',
     borderRadius: 10,
-    paddingHorizontal: 12,
-    marginBottom: 2,
-    height: 45,
+    textAlign: 'center',
+    fontSize: 20,
+    color: '#333',
+    fontFamily: 'Kanit-Regular',
   },
   innerContainer: {
     marginTop: 20,
@@ -211,5 +286,7 @@ const stylei = StyleSheet.create({
     height: 40,
     fontSize: 16,
     color: '#333',
+    fontFamily: 'Kanit-Regular',
   },
+
 });

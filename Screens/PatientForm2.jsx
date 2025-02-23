@@ -19,7 +19,10 @@ import RNPickerSelect from 'react-native-picker-select';
 import {useRoute} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import LinearGradient from 'react-native-linear-gradient';
-import { useFocusEffect } from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
+import PageIndicator from './PageIndicator';
+import DropDownPicker from 'react-native-dropdown-picker';
+import {Picker} from '@react-native-picker/picker';
 
 export default function PatientForm2(props) {
   console.log(props);
@@ -36,7 +39,7 @@ export default function PatientForm2(props) {
   const [request_detail, setRequest_detail] = useState('');
   const [Recorder, setRecorder] = useState('');
   const route = useRoute();
-  const { formData } = route.params;
+  const {formData} = route.params;
   const isFocused = useIsFocused();
   const [inputHeight, setInputHeight] = useState(40); // Initial height of TextInput
 
@@ -44,33 +47,35 @@ export default function PatientForm2(props) {
     React.useCallback(() => {
       // ซ่อน TabBar เมื่อเข้าหน้านี้
       navigation.getParent()?.setOptions({
-        tabBarStyle: { display: 'none' },
+        tabBarStyle: {display: 'none'},
       });
       return () => {
         // แสดง TabBar กลับมาเมื่อออกจากหน้านี้
         navigation.getParent()?.setOptions({
-          tabBarStyle: {  position: 'absolute',
+          tabBarStyle: {
+            position: 'absolute',
             bottom: 0,
             left: 0,
             right: 0,
-            elevation: 0,
+            elevation: 10,
             backgroundColor: '#fff',
             borderTopColor: 'transparent',
             shadowColor: '#000',
-            shadowOffset: { width: 0, height: -2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 6,
-            height: 60,  }, // ปรับ 'flex' ให้ TabBar กลับมาแสดง
+            shadowOffset: {width: 0, height: -5},
+            shadowOpacity: 0.15,
+            shadowRadius: 10,
+            height: 65,
+          },
         });
       };
-    }, [navigation])
+    }, [navigation]),
   );
 
   const handleContentSizeChange = event => {
     setInputHeight(event.nativeEvent.contentSize.height);
   };
 
-  const saveFormData = async (data) => {
+  const saveFormData = async data => {
     try {
       await AsyncStorage.setItem('patientForm', JSON.stringify(data));
     } catch (e) {
@@ -90,11 +95,9 @@ export default function PatientForm2(props) {
   useEffect(() => {
     const fetchData = async () => {
       const token = await AsyncStorage.getItem('token');
-      axios
-        .post('http://10.53.57.175:5000/userdata', { token: token })
-        .then(res => {
-          setUserData(res.data.data);
-        });
+      axios.post('http://10.0.2.2:5000/userdata', {token: token}).then(res => {
+        setUserData(res.data.data);
+      });
 
       const savedData = await loadFormData();
       if (savedData) {
@@ -115,14 +118,39 @@ export default function PatientForm2(props) {
   }, [formData]);
 
   const AddpatientForm = async () => {
-    // if (formData.symptoms.includes('') || formData.symptoms.includes('new_symptom')) {
-    //   Toast.show({
-    //     type: 'error',
-    //     text1: 'Error',
-    //     text2: 'กรุณาเลือกอาการให้ครบถ้วน',
-    //   });
-    //   return;
-    // }
+    console.log('Symptoms:', formData.symptoms);
+
+    if (
+      !Array.isArray(formData.symptoms) ||
+      formData.symptoms.length === 0 ||
+      formData.symptoms.every(symptom => symptom.trim() === '')
+    ) {
+      Toast.show({
+        type: 'error',
+        text1: 'กรุณาเลือกอาการ',
+        text2: 'กรุณาเลือกอาการอย่างน้อย 1 อย่าง',
+      });
+      return;
+    }
+
+    if (!formData.LevelSymptom || formData.LevelSymptom.trim() === '') {
+      Toast.show({
+        type: 'error',
+        text1: 'กรุณาเลือกความรุนแรง',
+        text2: 'กรุณาเลือกความรุนแรงของอาการ',
+      });
+      return;
+    }
+
+    if (!Recorder || Recorder.trim() === '') {
+      Toast.show({
+        type: 'error',
+        text1: 'กรุณาเลือกผู้บันทึก',
+        text2: 'กรุณาเลือกเลือกผู้บันทึกให้ครบถ้วน',
+      });
+      return;
+    }
+
     const formdata1 = {
       Symptoms: formData.symptoms,
       SBP,
@@ -131,47 +159,50 @@ export default function PatientForm2(props) {
       Temperature,
       DTX,
       Respiration,
-      LevelSymptom,
+      LevelSymptom: formData.LevelSymptom,
       Painscore,
       request_detail,
       Recorder,
-      user: formData.user
+      user: formData.user,
     };
 
     try {
       const response = await axios.post(
-        'http://10.53.57.175:5000/addpatientform',
+        'http://10.0.2.2:5000/addpatientform',
         formdata1,
       );
       if (response.data.status === 'ok') {
         Toast.show({
           type: 'success',
           text1: 'บันทึกสำเร็จ',
-          text2: 'บันทึกอาการแล้ว',
+          text2: 'บันทึกข้อมูลอาการแล้ว',
         });
         await AsyncStorage.removeItem('patientForm');
         navigation.getParent()?.setOptions({
-          tabBarStyle: {   position: 'absolute',
+          tabBarStyle: {
+            position: 'absolute',
             bottom: 0,
             left: 0,
             right: 0,
-            elevation: 0,
+            elevation: 10,
             backgroundColor: '#fff',
             borderTopColor: 'transparent',
             shadowColor: '#000',
-            shadowOffset: { width: 0, height: -2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 6,
-            height: 60,  },
+            shadowOffset: {width: 0, height: -5},
+            shadowOpacity: 0.15,
+            shadowRadius: 10,
+            height: 65,
+          },
         });
-        navigation.navigate('Home', { refresh: true });
+        navigation.navigate('Home', {refresh: true});
       }
     } catch (error) {
       console.error('Error adding patient form:', error);
       Toast.show({
         type: 'error',
         text1: 'Error',
-        text2: 'There was a problem updating the patient form. Please try again.',
+        text2:
+          'There was a problem updating the patient form. Please try again.',
       });
     }
   };
@@ -185,164 +216,167 @@ export default function PatientForm2(props) {
       Temperature,
       DTX,
       Respiration,
-      LevelSymptom,
+      LevelSymptom: formData.LevelSymptom,
       Painscore,
       request_detail,
       Recorder,
-      user: formData.user
+      user: formData.user,
     };
     await saveFormData(formdata1);
     navigation.goBack();
   };
 
   return (
-    <LinearGradient
-    // colors={['#5AB9EA', '#87CEFA']}
-    colors={['#fff', '#fff']}
-
-    style={{flex: 1}} // ให้ครอบคลุมทั้งหน้าจอ
-  >
-    <ScrollView
-      keyboardShouldPersistTaps={'always'}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 40 }}
-      style={{backgroundColor: 'transparent'}}>
-      <View style={[style.container, { flex: 1 }]}>
-        <Text style={styleform.sectionHeader}>สัญญาณชีพ</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-          <View style={stylep.texttitle}>
-            <Text style={stylep.text}>ความดันบน(mmHg)</Text>
-            {/* <Text style={stylep.text}>(mmHg)</Text> */}
-
-            <TextInput
-              style={[style.textInputRead, style.text]}
-              onChangeText={text => setSBP(text)}
-              value={SBP}
-              keyboardType="numeric"
-            />
+    <View
+      style={{flex: 1}} // ให้ครอบคลุมทั้งหน้าจอ
+    >
+      <ScrollView
+        keyboardShouldPersistTaps={'always'}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{paddingBottom: 50}}
+        style={{backgroundColor: '#F5F5F5'}}>
+        <PageIndicator currentPage={2} />
+        <View style={[stylep.container, {flex: 1}]}>
+          <Text style={styleform.sectionHeader}>สัญญาณชีพ</Text>
+          <View style={style.inputContainer}>
+            <View style={stylep.texttitle}>
+              <Text style={stylep.symptomTitle}>อุณหภูมิ(°C)</Text>
+              <TextInput
+                style={[style.textInputRead, style.text]}
+                onChange={e => setTemperature(e.nativeEvent.text)}
+                value={Temperature}
+                keyboardType="numeric"
+              />
+            </View>
           </View>
-          <View style={stylep.texttitle}>
-            <Text style={stylep.text}>ความดันล่าง(mmHg)</Text>
-            <TextInput
-              style={[style.textInputRead, style.text]}
-              onChangeText={text => setDBP(text)}
-              value={DBP}
-              keyboardType="numeric"
-            />
+          <View style={style.inputContainer}>
+            <View style={stylep.texttitle}>
+              <Text style={stylep.symptomTitle}>ความดันบน(mmHg)</Text>
+              {/* <Text style={stylep.text}>(mmHg)</Text> */}
+              <TextInput
+                style={[style.textInputRead, style.text]}
+                onChangeText={text => setSBP(text)}
+                value={SBP}
+                keyboardType="numeric"
+              />
+            </View>
+          </View>
+          <View style={style.inputContainer}>
+            <View style={stylep.texttitle}>
+              <Text style={stylep.symptomTitle}>ความดันล่าง(mmHg)</Text>
+              <TextInput
+                style={[style.textInputRead, style.text]}
+                onChangeText={text => setDBP(text)}
+                value={DBP}
+                keyboardType="numeric"
+              />
+            </View>
+          </View>
+          <View style={style.inputContainer}>
+            <View style={stylep.texttitle}>
+              <Text style={stylep.symptomTitle}>ชีพจร(ครั้ง/นาที)</Text>
+              <TextInput
+                style={[style.textInputRead, style.text]}
+                onChange={e => setPulseRate(e.nativeEvent.text)}
+                value={PulseRate}
+                keyboardType="numeric"
+              />
+            </View>
+          </View>
+          <View style={style.inputContainer}>
+            <View style={stylep.texttitle}>
+              <Text style={stylep.symptomTitle}>การหายใจ(ครั้ง/นาที)</Text>
+              <TextInput
+                style={[style.textInputRead, style.text]}
+                onChange={e => setRespiration(e.nativeEvent.text)}
+                value={Respiration}
+                keyboardType="numeric"
+              />
+            </View>
+          </View>
+          <View style={style.inputContainer}>
+            <View style={stylep.texttitle}>
+              <Text style={stylep.symptomTitle}>ระดับความเจ็บปวด</Text>
+              <RNPickerSelect
+                onValueChange={value => setPainscore(value)}
+                items={[
+                  {label: '0', value: '0'},
+                  {label: '1', value: '1'},
+                  {label: '2', value: '2'},
+                  {label: '3', value: '3'},
+                  {label: '4', value: '4'},
+                  {label: '5', value: '5'},
+                  {label: '6', value: '6'},
+                  {label: '7', value: '7'},
+                  {label: '8', value: '8'},
+                  {label: '9', value: '9'},
+                  {label: '10', value: '10'},
+                ]}
+                style={pickerSelectStyles}
+                placeholder={{label: 'เลือกระดับ', value: null}}
+                useNativeAndroidPickerStyle={false}
+                value={Painscore}
+                Icon={() => {
+                  return <Icon name="chevron-down" size={20} color="gray" />;
+                }}
+              />
+            </View>
+          </View>
+          <View style={style.inputContainer}>
+            <View style={stylep.texttitle}>
+              <Text style={stylep.symptomTitle}>ระดับน้ำตาลในเลือด(mg/dL)</Text>
+              <TextInput
+                style={[
+                  style.textInputRead,
+                  style.text,
+                  {height: Math.max(40, inputHeight)},
+                ]}
+                onChange={e => setDTX(e.nativeEvent.text)}
+                value={DTX}
+                keyboardType="numeric"
+              />
+            </View>
+          </View>
+          <View style={style.inputContainer}>
+            <View style={stylep.texttitle}>
+              <Text style={stylep.symptomTitle}>
+                สิ่งที่อยากให้ทีมแพทย์ช่วยเหลือเพิ่มเติม
+              </Text>
+              <TextInput
+                style={[
+                  style.textInputRead,
+                  style.text,
+                  {height: Math.max(40, inputHeight)},
+                ]}
+                value={request_detail}
+                onChangeText={setRequest_detail}
+                multiline={true}
+                textAlignVertical="top"
+                onContentSizeChange={handleContentSizeChange}
+              />
+            </View>
+          </View>
+          <View style={style.inputContainer}>
+            <View style={stylep.texttitle}>
+              <Text style={stylep.symptomTitle}>ผู้บันทึก</Text>
+              <RNPickerSelect
+                onValueChange={value => setRecorder(value)}
+                items={[
+                  {label: 'ผู้ป่วย', value: 'ผู้ป่วย'},
+                  {label: 'ผู้ดูแล', value: 'ผู้ดูแล'},
+                ]}
+                style={pickerSelectStyles}
+                placeholder={{label: 'เลือกผู้บันทึก', value: null}}
+                useNativeAndroidPickerStyle={false}
+                value={Recorder}
+                Icon={() => {
+                  return <Icon name="chevron-down" size={20} color="gray" />;
+                }}
+              />
+            </View>
           </View>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-          <View style={stylep.texttitle}>
-            <Text style={stylep.text}>ชีพจร(ครั้ง/นาที)</Text>
-            <TextInput
-              style={[style.textInputRead, style.text]}
-              onChange={e => setPulseRate(e.nativeEvent.text)}
-              value={PulseRate}
-              keyboardType="numeric"
-            />
-          </View>
-          <View style={stylep.texttitle}>
-            <Text style={stylep.text}>การหายใจ(ครั้ง/นาที)</Text>
-            <TextInput
-              style={[style.textInputRead, style.text]}
-              onChange={e => setRespiration(e.nativeEvent.text)}
-              value={Respiration}
-              keyboardType="numeric"
-            />
-          </View>
-        </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-          <View style={stylep.texttitle}>
-            <Text style={stylep.text}>อุณหภูมิ(°C)</Text>
-            <TextInput
-              style={[style.textInputRead, style.text]}
-              onChange={e => setTemperature(e.nativeEvent.text)}
-              value={Temperature}
-              keyboardType="numeric"
-            />
-          </View>
-          <View style={stylep.texttitle}>
-            <Text style={stylep.text}>ระดับความเจ็บปวด</Text>
-            <RNPickerSelect
-              onValueChange={value => setPainscore(value)}
-              items={[
-                { label: '0', value: '0' },
-                { label: '1', value: '1' },
-                { label: '2', value: '2' },
-                { label: '3', value: '3' },
-                { label: '4', value: '4' },
-                { label: '5', value: '5' },
-                { label: '6', value: '6' },
-                { label: '7', value: '7' },
-                { label: '8', value: '8' },
-                { label: '9', value: '9' },
-                { label: '10', value: '10' },
-              ]}
-              style={pickerSelectStyles}
-              placeholder={{ label: 'เลือกระดับ', value: null }}
-              useNativeAndroidPickerStyle={false}
-              value={Painscore}
-            />
-          </View>
-        </View>
-        <View style={{ alignItems: 'Left' }}>
-          <View style={stylep.texttitle}>
-            <Text style={stylep.text}>ความรุนแรงของอาการ</Text>
-            <RNPickerSelect
-              onValueChange={value => setLevelSymptom(value)}
-              items={[
-                { label: 'ดีขึ้น', value: 'ดีขึ้น' },
-                { label: 'แย่ลง', value: 'แย่ลง' },
-                { label: 'พอ ๆ เดิม', value: 'พอ ๆ เดิม' },
-              ]}
-              style={pickerSelectStyles}
-              placeholder={{ label: 'เลือกความรุนแรง', value: null }}
-              useNativeAndroidPickerStyle={false}
-              value={LevelSymptom}
-            />
-          </View>
-          <View style={[stylep.texttitle]}>
-            <Text style={stylep.text}>ระดับน้ำตาลในเลือด(mg/dL)</Text>
-            <TextInput
-              style={[style.textInputRead, style.text, { width: 175 }]}
-              onChange={e => setDTX(e.nativeEvent.text)}
-              value={DTX}
-              keyboardType="numeric"
-            />
-          </View>
-        </View>
-        <View>
-          <Text style={stylep.text}>สิ่งที่อยากให้ทีมแพทย์ช่วยเหลือเพิ่มเติม</Text>
-          <TextInput
-            style={[
-              style.textInputRead,
-              style.text,
-              { height: Math.max(40, inputHeight) },
-            ]}
-            value={request_detail}
-            onChangeText={setRequest_detail}
-            multiline={true}
-            textAlignVertical="top"
-            onContentSizeChange={handleContentSizeChange}
-          />
-        </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <View style={stylep.texttitle}>
-            <Text style={stylep.text}>ผู้บันทึก</Text>
-            <RNPickerSelect
-              onValueChange={value => setRecorder(value)}
-              items={[
-                { label: 'ผู้ป่วย', value: 'ผู้ป่วย' },
-                { label: 'ผู้ดูแล', value: 'ผู้ดูแล' },
-              ]}
-              style={pickerSelectStyles}
-              placeholder={{ label: 'เลือกผู้บันทึก', value: null }}
-              useNativeAndroidPickerStyle={false}
-              value={Recorder}
-            />
-          </View>
-        </View>
-      </View>
+      </ScrollView>
       <View style={stylep.buttonContainer}>
         <TouchableOpacity onPress={goBack} style={stylep.textCC}>
           <Text style={stylep.cancelButtonText}>ย้อนกลับ</Text>
@@ -351,25 +385,26 @@ export default function PatientForm2(props) {
           <Text style={stylep.buttonText}>บันทึก</Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
-    </LinearGradient>
+    </View>
   );
 }
 
 const stylep = StyleSheet.create({
   container: {
     padding: 15,
+    marginTop: 105,
     marginVertical: 10,
-    marginHorizontal: 10,
+    marginHorizontal: 15,
     backgroundColor: 'white',
     borderRadius: 15,
     borderWidth: 1,
-    borderColor: '#ddd',
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.3,
+    borderColor: '#eee', // เปลี่ยนเป็นสีเทาอ่อน
+    marginBottom: 40,
+    shadowColor: '#bbb',
+    shadowOffset: {width: 0, height: 3},
+    shadowOpacity: 0.15,
     shadowRadius: 6,
-    elevation: 5,
+    elevation: 3,
   },
   text: {
     color: 'black',
@@ -394,70 +429,97 @@ const stylep = StyleSheet.create({
     paddingRight: 30,
   },
   buttonContainer: {
+    width: '100%',
+    backgroundColor: '#fafafa',
+    paddingVertical: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginHorizontal: 10,
-    marginTop: 10,
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 20,
   },
   textOk: {
-    backgroundColor: '#5AB9EA',
+    backgroundColor: '#42A5F5',
     alignItems: 'center',
-    paddingVertical: 10,
-    borderRadius: 10,
+    justifyContent: 'center',
     flex: 1,
-    marginHorizontal: 5,
+    paddingVertical: 12,
+    borderRadius: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.8,
     shadowRadius: 2,
     elevation: 3,
+    marginLeft: 10,
   },
   textCC: {
     backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#5AB9EA',
+    borderWidth: 1.5,
+    borderColor: '#42A5F5',
     alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1, // ทำให้ปุ่มกว้างเท่ากัน
     paddingVertical: 10,
     borderRadius: 10,
-    flex: 1,
-    marginHorizontal: 5,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.8,
     shadowRadius: 2,
     elevation: 3,
+    marginRight: 10,
   },
   buttonText: {
     color: '#fff',
-    fontWeight: 'bold',
+    fontFamily: 'Kanit-Medium',
+    fontSize: 16,
   },
   cancelButtonText: {
-    color: '#5AB9EA',
-    fontWeight: 'bold',
+    color: '#42A5F5',
+    fontFamily: 'Kanit-Medium',
+    fontSize: 16,
+  },
+  symptomTitle: {
+    fontSize: 16,
+    color: '#2D3748',
+    fontFamily: 'Kanit-Medium',
+    marginBottom: 4,
   },
 });
-
 const pickerSelectStyles = StyleSheet.create({
   inputIOS: {
     borderWidth: 1,
-    borderColor: '#DCDCDC',
-    borderRadius: 10,
-    paddingHorizontal: 8,
-    marginTop: 1,
-    height: 45,
-    marginVertical: 4,
+    borderColor: '#ddd',
+    borderRadius: 12, // ✅ ทำให้ dropdown มีขอบมน
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    fontSize: 16,
+    marginTop: 5,
+    marginBottom: 10,
+    backgroundColor: '#fff',
+    color: '#333',
   },
   inputAndroid: {
     borderWidth: 1,
-    borderColor: '#DCDCDC',
-    borderRadius: 10,
-    paddingHorizontal: 8,
-    marginTop: 1,
-    height: 45,
-    marginVertical: 4,
+    borderColor: '#ddd',
+    borderRadius: 12, // ✅ ทำให้ dropdown มีขอบมน
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    fontSize: 16,
+    marginTop: 5,
+    marginBottom: 10,
+    backgroundColor: '#fff',
+    color: '#333',
   },
   placeholder: {
-    color: 'gray',
-    fontSize: 14, // Adjust placeholder font size
+    color: '#888',
+    fontSize: 16,
+    fontFamily: 'Kanit-Regular',
+  },
+  iconContainer: {
+    top: 21,
+    right: 12,
   },
 });

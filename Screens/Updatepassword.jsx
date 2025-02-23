@@ -32,28 +32,31 @@ export default function UpdatePassword(props) {
     const route = useRoute();
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
 
     useFocusEffect(
       React.useCallback(() => {
-        // ซ่อน TabBar เมื่อเข้าหน้านี้
         navigation.getParent()?.setOptions({
           tabBarStyle: { display: 'none' },
         });
         return () => {
-          // แสดง TabBar กลับมาเมื่อออกจากหน้านี้
           navigation.getParent()?.setOptions({
-            tabBarStyle: {  position: 'absolute',
+            tabBarStyle: {
+              position: 'absolute',
               bottom: 0,
               left: 0,
               right: 0,
-              elevation: 0,
+              elevation: 10, 
               backgroundColor: '#fff',
               borderTopColor: 'transparent',
               shadowColor: '#000',
-              shadowOffset: { width: 0, height: -2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 6,
-              height: 60,  }, // ปรับ 'flex' ให้ TabBar กลับมาแสดง
+              shadowOffset: { width: 0, height: -5 }, 
+              shadowOpacity: 0.15,
+              shadowRadius: 10, 
+              height: 65,
+            },
           });
         };
       }, [navigation])
@@ -89,7 +92,7 @@ export default function UpdatePassword(props) {
       };
   
       setLoading(true);
-      axios.post('http://10.53.57.175:5000/updatepassuser', formData).then(res => {
+      axios.post('http://10.0.2.2:5000/updatepassuser', formData).then(res => {
         setLoading(false);
         if (res.data.status === 'Ok') {
           Toast.show({
@@ -118,15 +121,11 @@ export default function UpdatePassword(props) {
   
 
       return (
-        <LinearGradient
-        // colors={['#00A9E0', '#5AB9EA', '#E0FFFF', '#FFFFFF']}
-        colors={['#fff', '#fff']}
-
-        style={{flex: 1}} // ให้ครอบคลุมทั้งหน้าจอ
-      >
       <ScrollView
+      
       keyboardShouldPersistTaps={'always'}
       showsVerticalScrollIndicator={false}
+
       // contentContainerStyle={stylespass.container}
       style={stylespass.background}>
       <View style={style.container}>
@@ -137,8 +136,15 @@ export default function UpdatePassword(props) {
             <TextInput   style={stylespass.textInput}
 
               onChangeText={text => setPassword(text)}
-              secureTextEntry
+              secureTextEntry={!showPassword}
             />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              <Ionicons 
+                name={showPassword ? 'eye' : 'eye-off'} 
+                size={20} 
+                color="#5AB9EA" 
+              />
+            </TouchableOpacity>
             </View>
 
           </View>
@@ -149,10 +155,16 @@ export default function UpdatePassword(props) {
             <TextInput
             style={stylespass.textInput}
             onChangeText={text => setNewPassword(text)}
-              secureTextEntry
+            secureTextEntry={!showNewPassword}
             />
+            <TouchableOpacity onPress={() => setShowNewPassword(!showNewPassword)}>
+              <Ionicons 
+                name={showNewPassword ? 'eye' : 'eye-off'} 
+                size={20} 
+                color="#5AB9EA"
+              />
+            </TouchableOpacity>
             </View>
-
           </View>
           
           <View>
@@ -161,10 +173,16 @@ export default function UpdatePassword(props) {
             <TextInput
             style={stylespass.textInput}
               onChangeText={text => setConfirmNewPassword(text)}
-              secureTextEntry
+              secureTextEntry={!showConfirmNewPassword}
             />
+            <TouchableOpacity onPress={() => setShowConfirmNewPassword(!showConfirmNewPassword)}>
+              <Ionicons 
+                name={showConfirmNewPassword ? 'eye' : 'eye-off'} 
+                size={20} 
+                color="#5AB9EA" 
+              />
+            </TouchableOpacity>
             </View>
-
           </View>
           {error ? <Text style={stylespass.errorText}>{error}</Text> : null}
 
@@ -179,13 +197,14 @@ export default function UpdatePassword(props) {
         </View>
       </View>
     </ScrollView>
-    </LinearGradient>
   );
-}const stylespass = StyleSheet.create({
+}
+
+const stylespass = StyleSheet.create({
   container: {
     paddingBottom: 40,
     paddingHorizontal: 20,
-    backgroundColor: '#F7F7F7',
+    backgroundColor: '#F5F5F5',
   },
   background: {
     backgroundColor: 'transparent',
@@ -205,13 +224,14 @@ export default function UpdatePassword(props) {
   },
   textInput: {
     flex: 1,
-    height: 40,
     fontSize: 16,
     color: '#333',
   },
-  errorText: {
-    color: 'red',
-    marginTop: 5,
-    marginLeft: 5,
+  errorText:{
+    color: 'red', 
+    fontSize: 14,
+    fontFamily: 'Kanit-Regular',
+    marginBottom:2,
+    marginLeft:5,
   },
 });

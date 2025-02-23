@@ -9,7 +9,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import ProfileScreen from './Screens/ProfileScreen';
 import LoginPage from './Screens/Login/Login';
 import UserScreen from './Screens/UserScreen';
-import ChatScreen from './Screens/ChatScreen';
+import ChatScreen from './Screens/โค้ดเก่า/ChatScreen1';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useEffect, useState} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -29,7 +29,7 @@ import Assessmentitem from './Screens/Assessmentitem';
 import ForgotPassword from './Screens/Login/ForgotPassword';
 import VerifyOtp from './Screens/Login/VerifyOtp';
 import ResetPassword from './Screens/Login/ResetPassword';
-import ChatSendScreen from './Screens/ChatSendScreen';
+import ChatSendScreen from './Screens/โค้ดเก่า/ChatSendScreen';
 
 const toastConfig = {
   success: props => (

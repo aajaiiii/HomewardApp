@@ -1,0 +1,654 @@
+import React, {useState, useEffect, useRef} from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  Button,
+  ScrollView,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  Image,
+  Modal,
+  Linking,
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import {useRoute} from '@react-navigation/native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import Feather from 'react-native-vector-icons/Feather';
+import {launchImageLibrary, launchCamera} from 'react-native-image-picker';
+import { useFocusEffect } from '@react-navigation/native';
+import {useNavigation, useIsFocused} from '@react-navigation/native';
+
+function ChatSendScreen() {
+  const route = useRoute();
+  const navigation = useNavigation();
+  const {userName, recipientId, recipientModel, currentRecipient} = route.params;
+  const [message, setMessage] = useState('');
+  const [recipientChats, setRecipientChats] = useState([]);
+  const [data, setData] = useState({});
+  const [sender, setSender] = useState('');
+  const [senderModel, setSenderModel] = useState('User');
+  const scrollViewRef = useRef(null);
+  const [inputHeight, setInputHeight] = useState(40); // ความสูงเริ่มต้นของ TextInput
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedImageUri, setSelectedImageUri] = useState('');
+  const [modalImageUri, setModalImageUri] = useState('');
+  const [autoScroll, setAutoScroll] = useState(true);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // ซ่อน TabBar เมื่อเข้าหน้านี้
+      navigation.getParent()?.setOptions({
+        tabBarStyle: { display: 'none' },
+      });
+      return () => {
+        // แสดง TabBar กลับมาเมื่อออกจากหน้านี้
+        navigation.getParent()?.setOptions({
+          tabBarStyle: {  position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            elevation: 0,
+            backgroundColor: '#fff',
+            borderTopColor: 'transparent',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 6,
+            height: 60,  }, // ปรับ 'flex' ให้ TabBar กลับมาแสดง
+        });
+      };
+    }, [navigation])
+  );
+
+  const isImageFile = (url) => {
+    return (
+      url.endsWith(".jpg?alt=media") ||
+      url.endsWith(".png?alt=media") ||
+      url.endsWith(".jpeg?alt=media") ||
+      url.endsWith(".gif?alt=media")
+    );
+  };
+  function shortenFileName(fileName, maxLength = 15) {
+    if (fileName.length <= maxLength) {
+      return fileName; // หากความยาวน้อยกว่าหรือเท่ากับ maxLength ให้คืนค่าชื่อไฟล์เดิม
+    }
+
+    const extensionIndex = fileName.lastIndexOf(".");
+    const extension = fileName.slice(extensionIndex); // รับส่วนต่อท้าย (เช่น .pdf)
+
+    const nameWithoutExtension = fileName.slice(0, extensionIndex); // ชื่อไฟล์โดยไม่มีนามสกุล
+    const shortenedName = nameWithoutExtension.slice(0, maxLength - 3) + "..."; // ตัดชื่อไฟล์และเพิ่ม ...
+
+    return shortenedName + extension; // คืนค่าชื่อไฟล์ที่ตัดพร้อมนามสกุล
+  }
+
+  
+  const formatFileSize = (sizeInBytes) => {
+    const sizeInKB = sizeInBytes / 1024;
+    return sizeInKB > 1024
+      ? (sizeInKB / 1024).toFixed(2) + " MB"
+      : sizeInKB.toFixed(2) + " KB";
+  };
+  
+  const selectImage = () => {
+    const options = {
+      mediaType: 'photo',
+    };
+
+    launchImageLibrary(options, response => {
+      if (response.didCancel) {
+        // console.log('User cancelled image picker');
+      } else if (response.errorCode) {
+        // console.log('ImagePicker Error: ', response.errorCode);
+      } else {
+        const uri = response.assets[0]?.uri;
+        setSelectedImageUri(uri);
+        // setModalVisible(true);
+      }
+    });
+  };
+
+  const takePhoto = () => {
+    const options = {
+      mediaType: 'photo',
+    };
+
+    launchCamera(options, response => {
+      if (response.didCancel) {
+        console.log('User cancelled camera');
+      } else if (response.errorCode) {
+        console.log('Camera Error: ', response.errorCode);
+      } else {
+        const uri = response.assets[0]?.uri;
+        setSelectedImageUri(uri);
+      }
+    });
+  };
+
+  
+
+  const ImageModal = () => (
+    <Modal
+      visible={modalVisible}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={() => setModalVisible(false)}>
+      {/* <View style={styles.modalBackground}> */}
+      <View style={styles.modalContainer}>
+        <TouchableOpacity
+          onPress={() => setModalVisible(false)}
+          style={styles.closeButton}>
+          <Ionicons name="close-circle" size={30} color="white" />
+        </TouchableOpacity>
+        <Image
+         source={{uri: modalImageUri}} 
+          style={styles.modalImage}
+          resizeMode="contain"
+        />
+      </View>
+      {/* </View> */}
+    </Modal>
+  );
+
+  const handleContentSizeChange = event => {
+    setInputHeight(event.nativeEvent.contentSize.height);
+  };
+
+  useEffect(() => {
+    if (autoScroll && scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  }, [recipientChats]);
+
+  const handleScroll = event => {
+    const contentHeight = event.nativeEvent.contentSize.height;
+    const scrollOffsetY = event.nativeEvent.contentOffset.y;
+    const visibleHeight = event.nativeEvent.layoutMeasurement.height;
+    if (scrollOffsetY + visibleHeight >= contentHeight - 50) {
+      setAutoScroll(true);
+    } else {
+      setAutoScroll(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        const response = await axios.post('http://192.168.0.45:5000/userdata', {
+          token: token,
+        });
+        const userData = response.data.data;
+        setData(userData);
+        setSender(userData._id);
+        setSenderModel(userData.role === 'mpersonnel' ? 'MPersonnel' : 'User');
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  
+  useEffect(() => {
+    if (sender) {
+      fetchRecipientChats(recipientId, recipientModel);
+    }
+  }, [recipientId, recipientModel, sender]);
+
+  const fetchRecipientChats = async (recipientId, recipientModel) => {
+    try {
+      console.log(
+        `แชท12: ${recipientId}, recipientModel: ${recipientModel}, sender: ${sender}, senderModel: ${senderModel}`,
+      );
+      const response = await axios.get(
+        `http://192.168.0.45:5000/chat/${recipientId}/${recipientModel}/${sender}/${senderModel}`,
+      );
+      // console.log('Response Data:', response.data);
+
+      setRecipientChats(response.data.chats || []);
+      // console.log('Chats:', response.data.chats);
+      
+    } catch (error) {
+      console.error('Error fetching recipient chats:', error);
+    }
+  };
+
+  
+  const handleChangeMessage = text => {
+    setMessage(text);
+  };
+
+  const handleSubmit = async () => {
+    if (!message.trim() && !selectedImageUri) {
+      return;
+    }
+    try {
+      const formData = new FormData();
+      formData.append('message', message);
+      formData.append('recipientId', recipientId);
+      formData.append('senderId', sender);
+      formData.append('recipientModel', recipientModel);
+      formData.append('senderModel', senderModel);
+      if (selectedImageUri) {
+        formData.append('image', {
+          uri: selectedImageUri,
+          type: 'image/jpeg', // or 'image/png' depending on the image type
+          name: 'photo.jpg', // or any other name with the correct extension
+        });
+      }
+
+      const response = await axios.post(
+        'http://192.168.0.45:5000/sendchat',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+
+      if (response.data.success) {
+        setMessage('');
+        setSelectedImageUri('');
+        fetchRecipientChats(recipientId, recipientModel);
+      } else {
+        console.error('Error sending message:', response.data.message);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (sender && !modalVisible) {  // refresh เฉพาะเมื่อ modal ปิดอยู่
+        fetchRecipientChats(recipientId, recipientModel);
+      }
+    }, 5000);
+  
+    return () => clearInterval(interval);
+  }, [recipientId, recipientModel, sender, modalVisible]);  
+
+  
+  const formatDate = dateTimeString => {
+    const dateTime = new Date(dateTimeString);
+    const day = dateTime.getDate();
+    const month = dateTime.getMonth() + 1;
+    const year = dateTime.getFullYear();
+
+    const thaiMonths = [
+      'มกราคม',
+      'กุมภาพันธ์',
+      'มีนาคม',
+      'เมษายน',
+      'พฤษภาคม',
+      'มิถุนายน',
+      'กรกฎาคม',
+      'สิงหาคม',
+      'กันยายน',
+      'ตุลาคม',
+      'พฤศจิกายน',
+      'ธันวาคม',
+    ];
+
+    return `${day < 10 ? '0' + day : day} ${thaiMonths[month - 1]} ${
+      year + 543
+    }`;
+  };
+
+  const formatTime = dateTimeString => {
+    const dateTime = new Date(dateTimeString);
+    const hours = dateTime.getHours();
+    const minutes = dateTime.getMinutes();
+    return `${hours < 10 ? '0' + hours : hours}:${
+      minutes < 10 ? '0' + minutes : minutes
+    }`;
+  };
+
+  const isValidUrl = message => {
+    try {
+      const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$/i;
+      return urlPattern.test(message);
+    } catch (e) {
+      console.error('Error in URL validation regex:', e);
+      return false;
+    }
+  };
+
+  return (
+    <View style={[styles.viewStyle]}>
+      <ScrollView  style={styles.chatMessages}
+        ref={scrollViewRef}
+        onScroll={handleScroll}
+        scrollEventThrottle={16} 
+        keyboardShouldPersistTaps="handled" >
+        {recipientChats.map((chat, index) => (
+         <View key={index}>
+         {(index === 0 ||
+           new Date(chat.createdAt).getDate() !==
+             new Date(recipientChats[index - 1].createdAt).getDate()) && (
+           <Text style={styles.dateText}>{formatDate(chat.createdAt)}</Text>
+         )}
+         <View
+           style={[
+             styles.messageContainer,
+             chat.sender._id === data._id
+               ? styles.sentContainer
+               : styles.receivedContainer,
+           ]}>
+          
+           {chat.sender._id === data._id ? (
+             <>
+               <View style={styles.statustime}>
+                 {chat.isRead && (
+                   <Text style={[styles.date, styles.Read]}>อ่านแล้ว</Text>
+                 )}
+                 <Text style={[styles.date, styles.sentDate]}>
+                   {formatTime(chat.createdAt)}
+                 </Text>
+               </View>
+               {chat.image ? (
+                 isImageFile(chat.image) ? (
+                   <TouchableOpacity
+                     onPress={() => {
+                       setModalImageUri(chat.image); 
+                       setModalVisible(true);
+                     }}>
+                     <View style={[styles.received]}>
+                       <Image
+                         source={{uri: chat.image}}
+                         style={{width: 200, height: 200}}
+                       />
+                     </View>
+                   </TouchableOpacity>
+                 ) : (
+                   <TouchableOpacity
+                     onPress={() => Linking.openURL(chat.image)}
+                     style={styles.fileContainer}>
+                     <Ionicons name="document-text" size={24} color="black" />
+                     <View style={styles.fileInfo}>
+                       <Text style={styles.fileName}>
+                         {shortenFileName(chat.imageName)} {/* Adjust name logic as needed */}
+                       </Text>
+                       <Text style={styles.fileSize}>
+                         {formatFileSize(chat.fileSize)} {/* Size formatting */}
+                       </Text>
+                     </View>
+                   </TouchableOpacity>
+                 )
+               ) : (
+                 <View style={[styles.chatMessage, styles.sent]}>
+                   {isValidUrl(chat.message) ? (
+                     <TouchableOpacity onPress={() => Linking.openURL(chat.message)}>
+                       <Text style={[styles.messageContent, styles.sentText, {textDecorationLine: 'underline'}]}>
+                         {chat.message}
+                       </Text>
+                     </TouchableOpacity>
+                   ) : (
+                     <Text style={[styles.messageContent, styles.sentText]}>
+                       {chat.message}
+                     </Text>
+                   )}
+                 </View>
+               )}
+             </>
+           ) : (
+             <>
+               {chat.image ? (
+                 isImageFile(chat.image) ? (
+                   <TouchableOpacity
+                     onPress={() => {
+                       setModalImageUri(chat.image); 
+                       setModalVisible(true);
+                     }}>
+                     <View style={[styles.received]}>
+                       <Image
+                         source={{uri: chat.image}}
+                         style={{width: 200, height: 200}}
+                       />
+                     </View>
+                   </TouchableOpacity>
+                 ) : (
+                   <TouchableOpacity
+                     onPress={() => Linking.openURL(chat.image)}
+                     style={styles.fileContainer}>
+                     <Ionicons name="document-text" size={24} color="black" />
+                     <View style={styles.fileInfo}>
+                       <Text style={styles.fileName}>
+                         {shortenFileName(chat.imageName)} {/* Adjust name logic as needed */}
+                       </Text>
+                       <Text style={styles.fileSize}>
+                         {formatFileSize(chat.fileSize)} {/* Size formatting */}
+                       </Text>
+                     </View>
+                   </TouchableOpacity>
+                 )
+               ) : (
+                 <View style={[styles.chatMessage, styles.received]}>
+                   {isValidUrl(chat.message) ? (
+                     <TouchableOpacity onPress={() => Linking.openURL(chat.message)}>
+                       <Text style={[styles.messageContent, styles.receivedText, {textDecorationLine: 'underline'}]}>
+                         {chat.message}
+                       </Text>
+                     </TouchableOpacity>
+                   ) : (
+                     <Text style={[styles.messageContent, styles.receivedText]}>
+                       {chat.message}
+                     </Text>
+                   )}
+                 </View>
+               )}
+       
+               <Text style={[styles.date, styles.receivedDate]}>
+                 {formatTime(chat.createdAt)}
+               </Text>
+             </>
+           )}
+         </View>
+       </View>
+       
+       
+        ))}
+      </ScrollView>
+
+      <ImageModal />
+
+      {selectedImageUri ? (
+        <View style={styles.selectedImageContainer}>
+          <Image
+            source={{uri: selectedImageUri}}
+            style={styles.selectedImage}
+          />
+          <TouchableOpacity
+            style={styles.removeImageButton}
+            onPress={() => setSelectedImageUri('')}>
+            <Ionicons name="close-circle" size={24} color="black" />
+          </TouchableOpacity>
+        </View>
+      ) : null}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.chatForm}>
+        <View style={{flexDirection: 'row', alignItems: 'center', flex: 1, padding:5}}>
+          <TouchableOpacity onPress={selectImage} style={{margin:3}}>
+            <Ionicons name="image" size={24} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={takePhoto} style={{margin:3}}>
+            <Ionicons name="camera" size={28} color="white" />
+          </TouchableOpacity>
+          <TextInput
+            style={[styles.input, , {height: Math.max(40, inputHeight)}]}
+            value={message}
+            textAlignVertical="top"
+            multiline={true}
+            onChangeText={handleChangeMessage}
+            onContentSizeChange={handleContentSizeChange}
+            placeholder="พิมพ์ข้อความ..."
+          />
+
+          {(message.trim()|| selectedImageUri) && (
+            <TouchableOpacity onPress={handleSubmit}>
+              <Feather name="send" size={24} color="white" />
+            </TouchableOpacity>
+          )}
+        </View>
+      </KeyboardAvoidingView>
+    </View>
+  );
+}
+const styles = StyleSheet.create({
+  viewStyle: {
+    flex: 1,
+    backgroundColor: '#F7F7F7',
+  },
+  chatMessages: {
+    flex: 1,
+    padding: 10,
+    marginBottom: 10,
+  },
+  messageContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 5,
+    marginBottom: 10,
+  },
+  sentContainer: {
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+  },
+  receivedContainer: {
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+  },
+  chatMessage: {
+    padding: 10,
+    borderRadius: 20,
+    maxWidth: '75%',
+  },
+  sent: {
+    backgroundColor: '#5AB9EA',
+    alignSelf: 'flex-end',
+    borderBottomRightRadius: 0,
+  },
+  received: {
+    backgroundColor: '#e4e6eb',
+    alignSelf: 'flex-start',
+    borderBottomLeftRadius: 0,
+  },
+  dateText: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'center',
+    marginVertical: 10,
+  },
+  date: {
+    fontSize: 12,
+    color: '#666',
+  },
+  sentDate: {
+    // marginRight: 10,
+  },
+  statustime: {
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+    marginRight: 7,
+  },
+  receivedDate: {
+    justifyContent: 'flex-end',
+    marginLeft: 7,
+  },
+  messageContent: {
+    fontSize: 16,
+  },
+  sentText: {
+    color: '#fff',
+  },
+  receivedText: {
+    color: '#000',
+  },
+  chatForm: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#5AB9EA',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    // marginBottom: 10,
+  },
+  input: {
+    flex: 1,
+    height: 40,
+    borderColor: '#CCC',
+    borderWidth: 1,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    marginRight: 10,
+    backgroundColor: '#FFF',
+  },
+  sendButton: {
+    backgroundColor: '#5AB9EA',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sendButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  },
+  modalImage: {
+    width: '90%',
+    height: '90%',
+    resizeMode: 'contain',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+  },
+  selectedImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    marginLeft: 20,
+  },
+  removeImageButton: {
+    top: -50,
+    marginLeft: 45,
+    marginRight: 10,
+  },
+  fileContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: '#e4e6eb',
+  },
+  fileInfo: {
+    marginLeft: 10,
+  },
+  fileName: {
+    fontSize: 16,
+    color: '#000',
+  },
+  fileSize: {
+    fontSize: 12,
+    color: '#666',
+  },
+  
+});
+
+export default ChatSendScreen;

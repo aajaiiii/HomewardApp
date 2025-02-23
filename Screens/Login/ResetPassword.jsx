@@ -11,20 +11,59 @@ import {
 import axios from 'axios';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import styles from './style';
+import Toast from 'react-native-toast-message';
 
 const ResetPasswordScreen = ({route, navigation}) => {
   const {email} = route.params;
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  const handleNewPasswordChange = (text) => {
+    setNewPassword(text);
+    if (text.length < 8) {
+      setMessage('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร');
+    } else {
+      setMessage('');
+    }
+  };
+
+  const handleConfirmPasswordChange = (text) => {
+    setConfirmPassword(text);
+    if (newPassword && text !== newPassword) {
+      setMessage('รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน');
+    } else {
+      setMessage('');
+    }
+  };
 
   const resetPassword = async () => {
+    if (newPassword === '' || confirmPassword === '') {
+      setMessage('กรุณากรอกข้อมูลให้ครบทั้งสองช่อง');
+      return;
+    }
+    if (newPassword.length < 8) {
+      setMessage('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setMessage('รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน');
+      return;
+    }
     try {
       const response = await axios.post(
-        'http://10.53.57.175:5000/reset-password',
+        'http://10.0.2.2:5000/reset-password',
         {email, newPassword, confirmpassword: confirmPassword},
       );
       if (response.data === 'เปลี่ยนรหัสสำเร็จ') {
+          Toast.show({
+          type: 'success',
+          text1: 'แก้ไขสำเร็จ',
+          text2: 'เปลี่ยนรหัสผ่านแล้ว',
+       });
         navigation.navigate('Login');
       } else {
         setMessage(response.data);
@@ -37,6 +76,7 @@ const ResetPasswordScreen = ({route, navigation}) => {
   const goBack = () => {
     navigation.goBack();
   };
+  const isButtonDisabled = newPassword === '' || confirmPassword === '';
 
   return (
     <ScrollView
@@ -60,10 +100,17 @@ const ResetPasswordScreen = ({route, navigation}) => {
               <TextInput
                 placeholder="รหัสผ่านใหม่"
                 value={newPassword}
-                onChangeText={setNewPassword}
-                secureTextEntry
+                onChangeText={handleNewPasswordChange}
+                secureTextEntry={!showNewPassword}
                 style={stylei.textInput}
               />
+               <TouchableOpacity onPress={() => setShowNewPassword(!showNewPassword)}>
+                <Ionicons
+                  name={showNewPassword ? 'eye-outline' : 'eye-off-outline'}
+                  size={20}
+                  color="#5AB9EA"
+                />
+              </TouchableOpacity>
             </View>
           </View>
           <View style={stylei.innerContainer}>
@@ -71,20 +118,31 @@ const ResetPasswordScreen = ({route, navigation}) => {
               <TextInput
                 placeholder="ยืนยันรหัสผ่าน"
                 value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry
+                onChangeText={handleConfirmPasswordChange}
+                secureTextEntry={!showConfirmPassword}
                 style={stylei.textInput}
               />
+                  <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                <Ionicons
+                  name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'}
+                  size={20}
+                  color="#000"
+                />
+              </TouchableOpacity>
             </View>
           </View>
-          <TouchableOpacity style={stylei.button} onPress={resetPassword}>
-            <View>
-              <Text style={stylei.buttonText}>เปลี่ยนรหัสผ่าน</Text>
-            </View>
-          </TouchableOpacity>
           {message ? (
-            <Text style={{marginTop: 20, color: 'red'}}>{message}</Text>
+            <Text style={{marginTop: 8,marginLeft:5, color: 'red',fontFamily: 'Kanit-Regular'}}>{message}</Text>
           ) : null}
+        <TouchableOpacity
+          style={[stylei.button, { backgroundColor: isButtonDisabled ? '#D3D3D3' : '#5AB9EA' }]} 
+          onPress={resetPassword}
+          disabled={isButtonDisabled}
+        >
+          <View>
+            <Text style={stylei.buttonText}>เปลี่ยนรหัสผ่าน</Text>
+          </View>
+        </TouchableOpacity>
         </View>
       </View>
     </ScrollView>
@@ -124,16 +182,19 @@ const stylei = StyleSheet.create({
   buttonText: {
     color: '#FFF',
     fontSize: 16,
+    fontFamily: 'Kanit-Regular',
   },
   text_header: {
     fontSize: 20,
     textAlign: 'center',
-    fontWeight: '700',
+    fontFamily: 'Kanit-SemiBold',
     marginBottom: 10,
+    color:'#000'
   },
   text: {
     textAlign: 'center',
     fontSize: 16,
+    fontFamily: 'Kanit-Regular',
   },
   textInputContainer: {
     flexDirection: 'row',
@@ -150,8 +211,9 @@ const stylei = StyleSheet.create({
   },
   textInput: {
     flex: 1,
-    height: 40,
+    height: 45,
     fontSize: 16,
     color: '#333',
+    fontFamily: 'Kanit-Regular',
   },
 });

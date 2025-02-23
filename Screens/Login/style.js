@@ -6,8 +6,9 @@ const styles = StyleSheet.create({
   },
   textSign: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontFamily: 'Kanit-Medium',
     color: 'white',
+    
   },
   smallIcon: {
     marginRight: 10,
@@ -32,6 +33,7 @@ const styles = StyleSheet.create({
   text_footer: {
     color: '#05375a',
     fontSize: 18,
+    fontFamily: 'Kanit-Regular',
   },
   action: {
     flexDirection: 'row',
@@ -47,6 +49,8 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: -12,
     color: '#05375a',
+    fontFamily: 'Kanit-Regular',
+    fontSize: 16,
   },
   loginContainer: {
     backgroundColor: '#fff',
@@ -62,18 +66,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   text_header: {
-    fontSize: 30,
+    fontSize: 25,
     textAlign: 'center',
     marginBottom: 30,
+    fontFamily: 'Kanit-Regular',
+    color: '#5AB9EA',
   },
   button: {
     marginTop: 20,
     alignItems: 'center',
     textAlign: 'center',
-    margin: 20,
+    flex:1
   },
   inBut: {
-    width: '70%',
+    width: '100%',
     backgroundColor: '#5AB9EA',
     alignItems: 'center',
     paddingHorizontal: 15,
@@ -83,7 +89,6 @@ const styles = StyleSheet.create({
   inBut2: {
     // backgroundColor: '#5AB9EA',
     backgroundColor: '#5AB9EA',
-
     height: 65,
     width: 65,
     borderRadius: 15,
@@ -102,7 +107,7 @@ const styles = StyleSheet.create({
   bottomText: {
     color: 'black',
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: 'Kanit-Medium',
     marginTop: 5,
   },
   radioButton_div: {
@@ -120,10 +125,14 @@ const styles = StyleSheet.create({
   radioButton_title: {
     fontSize: 20,
     color: '#5AB9EA',
+    fontFamily: 'Kanit-Regular',
+
   },
   radioButton_text: {
     fontSize: 16,
     color: 'black',
+    fontFamily: 'Kanit-Regular',
   },
+  
 });
 export default styles;

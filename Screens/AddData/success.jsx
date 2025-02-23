@@ -49,17 +49,20 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginVertical: 20,
     color:'#000',
+    fontFamily: 'Kanit-Regular',
+
   },
   button: {
     backgroundColor: '#5AB9EA',
     padding: 10,
-    width:150,
+    width:160,
     borderRadius: 5,
     marginTop: 10,
   },
   buttonText: {
     fontSize: 16,
     color:'#fff',
-    textAlign:'center'
+    textAlign:'center',
+    fontFamily: 'Kanit-Regular',
   },
 });

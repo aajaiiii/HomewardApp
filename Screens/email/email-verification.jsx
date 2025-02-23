@@ -16,7 +16,7 @@ import axios from 'axios';
 import Icon from 'react-native-vector-icons/Fontisto';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useRoute} from '@react-navigation/native';
-import { useFocusEffect } from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
 
 export default function EmailVerification() {
   // const location = useLocation();
@@ -31,7 +31,7 @@ export default function EmailVerification() {
     React.useCallback(() => {
       // ซ่อน TabBar เมื่อเข้าหน้านี้
       navigation.getParent()?.setOptions({
-        tabBarStyle: { display: 'none' },
+        tabBarStyle: {display: 'none'},
       });
       // return () => {
       //   // แสดง TabBar กลับมาเมื่อออกจากหน้านี้
@@ -39,44 +39,46 @@ export default function EmailVerification() {
       //     tabBarStyle: { display: 'flex' }, // ปรับ 'flex' ให้ TabBar กลับมาแสดง
       //   });
       // };
-    }, [navigation])
+    }, [navigation]),
   );
 
   useEffect(() => {
     // ฟัง event ของการกดปุ่ม Header Back (Navigate Up)
-    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+    const unsubscribe = navigation.addListener('beforeRemove', e => {
       if (e.data.action.type === 'POP') {
         // แสดง TabBar เมื่อกดปุ่ม Navigate Up
         navigation.getParent()?.setOptions({
-          tabBarStyle: {  position: 'absolute',
+          tabBarStyle: {
+            position: 'absolute',
             bottom: 0,
             left: 0,
             right: 0,
-            elevation: 0,
+            elevation: 10, // สำหรับ Android
             backgroundColor: '#fff',
             borderTopColor: 'transparent',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: -2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 6,
-            height: 60,  },        });
+            shadowColor: '#000', // สีเงา
+            shadowOffset: {width: 0, height: -5}, // ทิศทางเงา
+            shadowOpacity: 0.15, // ความเข้มเงา
+            shadowRadius: 10, // ความกระจายของเงา
+            height: 65,
+          },
+        });
       } else {
         // ซ่อน TabBar ถ้ากลับด้วยวิธีอื่นๆ เช่น navigation.goBack()
         navigation.getParent()?.setOptions({
-          tabBarStyle: { display: 'none' },
+          tabBarStyle: {display: 'none'},
         });
       }
     });
 
     return unsubscribe;
   }, [navigation]);
-  
-  
+
   //   async function getData() {
   //     const token = await AsyncStorage.getItem('token');
   //     console.log(token);
   //     axios
-  //       .post('http://10.53.57.175:5000/userdata', {token: token})
+  //       .post('http://10.0.2.2:5000/userdata', {token: token})
   //       .then(res => {
   //         console.log(res.data);
   //         setUserData(res.data.data);
@@ -91,7 +93,7 @@ export default function EmailVerification() {
   useEffect(() => {
     const userData = route.params.data;
     setUsername(userData.username);
-    setEmail(userData.email);
+    setEmail(userData.email || ""); 
     console.log('เมล:', email);
     console.log('usermname:', username);
   }, []);
@@ -110,7 +112,7 @@ export default function EmailVerification() {
 
     // setLoading(true);
     axios
-      .post('http://10.53.57.175:5000/send-otp3', formData)
+      .post('http://10.0.2.2:5000/send-otp3', formData)
       .then(res => {
         //   setLoading(false);
         if (res.data.success) {
@@ -139,18 +141,18 @@ export default function EmailVerification() {
           <TextInput
             style={styles.textInput}
             onChangeText={text => setEmail(text)}
-            defaultValue={email}
+            value={email} 
             placeholder="อีเมล"
           />
         </View>
         {errorMessage ? (
           <Text style={styles.errorText}>{errorMessage}</Text>
         ) : null}
-
-        <TouchableOpacity onPress={() => handleSubmit()} style={styles.button}>
-          <View>
-            <Text style={styles.buttonText}>ส่ง OTP</Text>
-          </View>
+        <TouchableOpacity
+          onPress={handleSubmit}
+          style={[styles.button, email.trim() === '' && styles.buttonDisabled]}
+          disabled={email.trim() === ''}>
+          <Text style={styles.buttonText}>ส่ง OTP</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -173,7 +175,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 12,
     marginBottom: 2,
-    height:45,
+    height: 45,
   },
   innerContainer: {
     marginTop: 20,
@@ -183,9 +185,10 @@ const styles = StyleSheet.create({
   },
   textInput: {
     flex: 1,
-    height: 40,
+    height: 45,
     fontSize: 16,
     color: '#333',
+    fontFamily: 'Kanit-Regular',
   },
   button: {
     backgroundColor: '#5AB9EA',
@@ -198,5 +201,16 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#FFF',
     fontSize: 16,
+    fontFamily: 'Kanit-Regular',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 14,
+    fontFamily: 'Kanit-Regular',
+    paddingVertical: 3,
+    paddingLeft: 4,
+  },
+  buttonDisabled: {
+    backgroundColor: '#D3D3D3', // สีจางลงเมื่อปิดการใช้งาน
   },
 });

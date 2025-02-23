@@ -36,6 +36,7 @@ const styleform = StyleSheet.create({
         paddingHorizontal: 8,
         marginVertical: 10,
         height: 40,
+        fontFamily: 'Kanit-Regular',
       },
       textOk: {
         backgroundColor: '#87CEFA',
@@ -47,6 +48,7 @@ const styleform = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#87CEFA',
         flex: 1,
+        fontFamily: 'Kanit-Medium',
       },
       textCC: {
         // backgroundColor: 'red',
@@ -57,6 +59,7 @@ const styleform = StyleSheet.create({
         borderRadius: 10,
         // width: 100,
         flex: 1,
+        fontFamily: 'Kanit-Medium',
       },
       buttonContent: {
         flexDirection: 'row',
@@ -66,9 +69,8 @@ const styleform = StyleSheet.create({
       },
       text: {
         color: 'black',
-        fontFamily: 'Arial',
         fontSize: 16,
-        fontWeight: 'normal',
+        fontFamily: 'Kanit-Regular',
         padding: 5,
         paddingLeft:8,
       },
@@ -81,9 +83,9 @@ const styleform = StyleSheet.create({
       //   textAlign:'center'
       // },
       sectionHeader: {
-        fontSize: 16,
+        fontSize: 18,
         textAlign:'center',
-        fontWeight: 'bold',
+        fontFamily: 'Kanit-SemiBold',
         marginBottom: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#ddd',

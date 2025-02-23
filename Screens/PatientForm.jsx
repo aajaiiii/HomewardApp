@@ -17,14 +17,17 @@ import Icon from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import styleform from './styleform';
 import LinearGradient from 'react-native-linear-gradient';
-import { useFocusEffect } from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
+import RNPickerSelect from 'react-native-picker-select';
+import PageIndicator from './PageIndicator'; // ✅ Import ตัวบ่งชี้หน้า
+import style from './style';
+import Toast from 'react-native-toast-message';
 
 const CustomPicker = ({items, onValueChange, placeholder, selectedValue}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredItems, setFilteredItems] = useState(items);
 
-  
   useEffect(() => {
     setFilteredItems(
       items.filter(item =>
@@ -38,7 +41,11 @@ const CustomPicker = ({items, onValueChange, placeholder, selectedValue}) => {
       <TouchableOpacity
         onPress={() => setModalVisible(true)}
         style={styles.input}>
-        <Text style={styles.inputText}>
+        <Text
+          style={[
+            styles.inputText,
+            !selectedValue && styles.placeholderText, // Apply placeholder styling when no value is selected
+          ]}>
           {selectedValue ? selectedValue : placeholder}
         </Text>
       </TouchableOpacity>
@@ -72,10 +79,10 @@ const CustomPicker = ({items, onValueChange, placeholder, selectedValue}) => {
           ) : (
             <Text style={styles.noResultsText}>ไม่มีอาการ</Text>
           )}
-          <TouchableOpacity onPress={() => setModalVisible(false)}>
-            <Text style={styles.cancelButton}>ยกเลิก</Text>
-          </TouchableOpacity>
         </View>
+        <TouchableOpacity onPress={() => setModalVisible(false)}>
+          <Text style={styles.cancelButton}>ยกเลิก</Text>
+        </TouchableOpacity>
       </Modal>
     </View>
   );
@@ -91,12 +98,27 @@ export default function PatientForm({route}) {
   const [userAge, setUserAge] = useState(0);
   const [userAgeInMonths, setUserAgeInMonths] = useState(0);
   const [selectedSymptoms, setSelectedSymptoms] = useState(['']);
+  const [LevelSymptom, setLevelSymptom] = useState('');
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', async () => {
+      try {
+        // ลบข้อมูลจาก AsyncStorage
+        await AsyncStorage.removeItem('patientForm');
+        console.log('Form data cleared');
+      } catch (e) {
+        console.error('Failed to clear form data.', e);
+      }
+    });
+    // ทำความสะอาดการฟังเหตุการณ์เมื่อออกจากหน้านี้
+    return unsubscribe;
+  }, [navigation]);
 
   useFocusEffect(
     React.useCallback(() => {
       // ซ่อน TabBar เมื่อเข้าหน้านี้
       navigation.getParent()?.setOptions({
-        tabBarStyle: { display: 'none' },
+        tabBarStyle: {display: 'none'},
       });
       // return () => {
       //   // แสดง TabBar กลับมาเมื่อออกจากหน้านี้
@@ -104,32 +126,31 @@ export default function PatientForm({route}) {
       //     tabBarStyle: { display: 'flex' }, // ปรับ 'flex' ให้ TabBar กลับมาแสดง
       //   });
       // };
-    }, [navigation])
+    }, [navigation]),
   );
-  
 
   useEffect(() => {
-    // ฟัง event ของการกดปุ่ม Header Back (Navigate Up)
-    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+    const unsubscribe = navigation.addListener('beforeRemove', e => {
       if (e.data.action.type === 'POP') {
-        // แสดง TabBar เมื่อกดปุ่ม Navigate Up
         navigation.getParent()?.setOptions({
-          tabBarStyle: {  position: 'absolute',
+          tabBarStyle: {
+            position: 'absolute',
             bottom: 0,
             left: 0,
             right: 0,
-            elevation: 0,
+            elevation: 10,
             backgroundColor: '#fff',
             borderTopColor: 'transparent',
             shadowColor: '#000',
-            shadowOffset: { width: 0, height: -2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 6,
-            height: 60,  },        });
+            shadowOffset: {width: 0, height: -5},
+            shadowOpacity: 0.15,
+            shadowRadius: 10,
+            height: 65,
+          },
+        });
       } else {
-        // ซ่อน TabBar ถ้ากลับด้วยวิธีอื่นๆ เช่น navigation.goBack()
         navigation.getParent()?.setOptions({
-          tabBarStyle: { display: 'none' },
+          tabBarStyle: {display: 'none'},
         });
       }
     });
@@ -139,14 +160,9 @@ export default function PatientForm({route}) {
 
   async function getData() {
     const token = await AsyncStorage.getItem('token');
-    axios
-      .post(
-        'http://10.53.57.175:5000/userdata',
-        {token: token},
-      )
-      .then(res => {
-        setUserData(res.data.data);
-      });
+    axios.post('http://10.0.2.2:5000/userdata', {token: token}).then(res => {
+      setUserData(res.data.data);
+    });
   }
 
   useEffect(() => {
@@ -157,12 +173,9 @@ export default function PatientForm({route}) {
     const getSymptoms = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
-        const response = await axios.get(
-          'http://10.53.57.175:5000/allSymptom',
-          {
-            headers: {Authorization: `Bearer ${token}`},
-          },
-        );
+        const response = await axios.get('http://10.0.2.2:5000/allSymptom', {
+          headers: {Authorization: `Bearer ${token}`},
+        });
         const data = response.data;
         setSymptoms(data.data);
       } catch (error) {
@@ -190,7 +203,7 @@ export default function PatientForm({route}) {
 
     try {
       const response = await axios.post(
-        'http://10.53.57.175:5000/addsymptom',
+        'http://10.0.2.2:5000/addsymptom',
         formdata,
       );
       console.log(response.data);
@@ -212,14 +225,84 @@ export default function PatientForm({route}) {
     }
   };
 
+  // const Nextpage = () => {
+  //   const formdata = {
+  //     symptoms: symptomsArray.map(symptom => symptom.name),
+  //     LevelSymptom,
+  //     user: userData._id,
+  //   };
+  //     if (
+  //         !Array.isArray(formdata.symptoms) ||
+  //         formdata.symptoms.length === 0 ||
+  //         formdata.symptoms.every(symptom => symptom.trim() === '')
+  //       ) {
+  //         Toast.show({
+  //           type: 'error',
+  //           text1: 'กรุณาเลือกอาการ',
+  //           text2: 'กรุณาเลือกอาการอย่างน้อย 1 อย่าง',
+  //         });
+  //         return;
+  //       }
+    
+  //       if (!formdata.LevelSymptom || formdata.LevelSymptom.trim() === '') {
+  //         Toast.show({
+  //           type: 'error',
+  //           text1: 'กรุณาเลือกความรุนแรง',
+  //           text2: 'กรุณาเลือกความรุนแรงของอาการ',
+  //         });
+  //         return;
+  //       }
+  //   navigation.navigate('PatientForm2', {formData: formdata});
+  // };
   const Nextpage = () => {
+    // ลบช่องว่างออกจากอาการทั้งหมด
+    const filteredSymptoms = symptomsArray.map(symptom => symptom.name.trim());
+  
+    // ค้นหาช่องที่ยังว่าง
+    const emptySymptomIndexes = filteredSymptoms
+      .map((symptom, index) => (symptom === "" ? index + 1 : null)) // หา index ที่เป็นค่าว่าง
+      .filter(index => index !== null);
+  
+    // ถ้ามีช่องอาการที่ว่าง ให้แจ้งเตือน
+    if (emptySymptomIndexes.length > 0) {
+      Toast.show({
+        type: 'error',
+        text1: 'กรุณากรอกอาการให้ครบถ้วน',
+        text2: `อาการที่ ${emptySymptomIndexes.join(", ")} ยังไม่ได้เลือก`,
+      });
+      return;
+    }
+  
+    // ตรวจสอบว่ามีอาการที่ถูกเลือกอย่างน้อย 1 รายการ
+    if (filteredSymptoms.length === 0 || filteredSymptoms.every(symptom => symptom === "")) {
+      Toast.show({
+        type: 'error',
+        text1: 'กรุณาเลือกอาการ',
+        text2: 'กรุณาเลือกอาการอย่างน้อย 1 อย่าง',
+      });
+      return;
+    }
+  
+    if (!LevelSymptom || LevelSymptom.trim() === '') {
+      Toast.show({
+        type: 'error',
+        text1: 'กรุณาเลือกความรุนแรง',
+        text2: 'กรุณาเลือกความรุนแรงของอาการ',
+      });
+      return;
+    }
+  
+    // สร้างข้อมูลก่อนส่ง
     const formdata = {
-      symptoms: symptomsArray.map(symptom => symptom.name),
+      symptoms: filteredSymptoms, // ใช้ค่าที่ถูกตรวจสอบแล้ว
+      LevelSymptom,
       user: userData._id,
     };
-    navigation.navigate('PatientForm2', {formData: formdata});
+  
+    console.log("ค่า formdata ก่อนส่ง:", formdata);
+    navigation.navigate('PatientForm2', { formData: formdata });
   };
-
+  
   const removeSymptom = indexToRemove => {
     const updatedSymptomsArray = symptomsArray.filter(
       (_, index) => index !== indexToRemove,
@@ -265,18 +348,13 @@ export default function PatientForm({route}) {
     }
   };
   return (
-    <LinearGradient
-      // colors={['#00A9E0', '#5AB9EA', '#E0FFFF', '#FFFFFF']}
-      // colors={['#5AB9EA', '#87CEFA']}
-      colors={['#fff', '#fff']}
-      style={{flex: 1}} // ให้ครอบคลุมทั้งหน้าจอ
-    >
+    <View style={{flex: 1}}>
       <ScrollView
         keyboardShouldPersistTaps={'always'}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{paddingBottom: 40}}
-        style={{backgroundColor: 'transparent'}}>
-        <View style={[styles.container, {flex: 1, textAlign: 'center'}]}>
+        style={{backgroundColor: '#fafafa'}}>
+        {/* <View style={[styles.container, {flex: 1, textAlign: 'center'}]}>
           <Text style={styleform.sectionHeader}>ข้อมูลผู้ป่วย</Text>
           <Text style={[styles.text]}>
             ชื่อ-นามสกุล: {userData.name} {userData.surname}
@@ -290,28 +368,27 @@ export default function PatientForm({route}) {
               0 ปี 0 เดือน เพศ {userData.gender}
             </Text>
           )}
-        </View>
-
+        </View> */}
+        <PageIndicator currentPage={1} />
         <View style={[styles.container, {flex: 1}]}>
           <Text style={styleform.sectionHeader}>อาการและอาการแสดง</Text>
 
           {symptomsArray.map((symptom, index) => (
-            
             <View key={index}>
               <View style={styles.symptomHeader}>
-              <Text style={styles.symptomTitle}>อาการที่ {index + 1}</Text>
-              {index > 0 && (
-                <TouchableOpacity
-                  onPress={() => removeSymptom(index)}
-                  style={styles.removeButton}>
-                  <Ionicons
-                    name="close"
-                    color="white" // White for contrast on a colored background
-                    size={12} 
-                  />
-                  {/* <Text style={{ color: 'black', fontSize: 16 }}>x</Text> */}
-                </TouchableOpacity>
-              )}
+                <Text style={styles.symptomTitle}>อาการที่ {index + 1}</Text>
+                {index > 0 && (
+                  <TouchableOpacity
+                    onPress={() => removeSymptom(index)}
+                    style={styles.removeButton}>
+                    <Ionicons
+                      name="close"
+                      color="white" // White for contrast on a colored background
+                      size={12}
+                    />
+                    {/* <Text style={{ color: 'black', fontSize: 16 }}>x</Text> */}
+                  </TouchableOpacity>
+                )}
               </View>
               <CustomPicker
                 items={[
@@ -333,20 +410,21 @@ export default function PatientForm({route}) {
                 selectedValue={selectedSymptoms[index]}
                 index={index}
               />
-             
             </View>
           ))}
-
-          <TouchableOpacity
-            onPress={() => setSymptomsArray([...symptomsArray, {name: ''}])}
-            style={styles.addButton}>
-            <Text style={styles.addButtonText}>+ เพิ่มอาการ</Text>
-          </TouchableOpacity>
-
+          <View style={styles.buttonaddsym}>
+            <TouchableOpacity
+              onPress={() => setSymptomsArray([...symptomsArray, {name: ''}])}
+              style={styles.addButton}>
+              <Text style={styles.addButtonText}>+ เพิ่มอาการ</Text>
+            </TouchableOpacity>
+          </View>
           {showNewSymptomInput && (
-            <Modal>
+            <Modal transparent animationType="fade">
               <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
+                  <Text style={styles.modalTitle}>เพิ่มอาการใหม่</Text>
+
                   <TextInput
                     style={styles.textInput}
                     placeholder="กรอกอาการใหม่"
@@ -373,56 +451,78 @@ export default function PatientForm({route}) {
               </View>
             </Modal>
           )}
-        </View>
-        <View style={styles.buttonnext}>
-          <TouchableOpacity onPress={Nextpage} style={styles.next}>
-            <View>
-              <Text style={styles.textnext}>ถัดไป</Text>
+          <View style={style.inputContainer}>
+            <View style={styles.texttitle}>
+              <Text style={styles.symptomTitle}>ความรุนแรงของอาการ</Text>
+              <RNPickerSelect
+                onValueChange={value => setLevelSymptom(value)}
+                items={[
+                  {label: 'ดีขึ้น', value: 'ดีขึ้น'},
+                  {label: 'แย่ลง', value: 'แย่ลง'},
+                  {label: 'พอ ๆ เดิม', value: 'พอ ๆ เดิม'},
+                ]}
+                style={pickerSelectStyles}
+                placeholder={{label: 'เลือกความรุนแรง', value: null}}
+                useNativeAndroidPickerStyle={false}
+                Icon={() => {
+                  return <Icon name="chevron-down" size={20} color="gray" />;
+                }}
+              />
             </View>
-          </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
-    </LinearGradient>
+      <View style={styles.buttonnext}>
+        <TouchableOpacity onPress={Nextpage} style={styles.next}>
+          <View>
+            <Text style={styles.textnext}>ถัดไป</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     padding: 15,
+    marginTop: 105,
     marginVertical: 10,
-    marginHorizontal: 10,
+    marginHorizontal: 15,
     backgroundColor: 'white',
     borderRadius: 15,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.3,
+    borderWidth: 1.2,
+    borderColor: '#eee',
+    marginBottom: 40,
+    shadowColor: '#bbb',
+    shadowOffset: {width: 0, height: 3},
+    shadowOpacity: 0.15,
     shadowRadius: 6,
-    elevation: 5,
+    elevation: 3,
   },
   text: {
     fontSize: 16,
     color: '#333',
+    fontFamily: 'Kanit-Regular',
     marginBottom: 5,
     lineHeight: 22,
   },
-  searchInput: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingLeft: 10,
-    marginBottom: 10,
-    fontSize: 16,
-  },
+  // searchInput: {
+  //   height: 50,
+  //   borderColor: '#ccc',
+  //   borderWidth: 1.2,
+  //   borderRadius: 5,
+  //   paddingLeft: 10,
+  //   marginBottom: 10,
+  //   fontSize: 16,
+  //   fontFamily: 'Kanit-Regular',
+  // },
   input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
+    borderWidth: 1.2,
+    borderColor: '#e0e0e0',
     borderRadius: 10,
     paddingVertical: 12,
-    paddingHorizontal: 20,
-    fontSize: 16,
+    paddingHorizontal: 7,
     marginTop: 5,
     marginBottom: 10,
     backgroundColor: '#fff',
@@ -435,6 +535,7 @@ const styles = StyleSheet.create({
   inputText: {
     fontSize: 16,
     color: '#2D3748',
+    fontFamily: 'Kanit-Regular',
   },
   modalContainer: {
     flex: 1,
@@ -449,10 +550,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 15,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
-    elevation: 10,
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: 'Kanit-Medium',
+    marginBottom: 10,
+    color: '#333',
+    textAlign: 'center',
   },
   item: {
     fontSize: 16,
@@ -464,6 +572,7 @@ const styles = StyleSheet.create({
   labelitem: {
     color: '#000',
     fontSize: 16,
+    fontFamily: 'Kanit-Regular',
   },
   cancelButton: {
     color: '#fff',
@@ -472,6 +581,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     backgroundColor: '#d9534f',
+    fontFamily: 'Kanit-Regular',
   },
   buttonText: {
     color: '#fff',
@@ -479,22 +589,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   textInput: {
-    height: 45,
+    height: 50,
     borderColor: '#ddd',
-    borderWidth: 1,
+    borderWidth: 1.2,
     borderRadius: 10,
     paddingLeft: 15,
     paddingLeft: 10,
     marginBottom: 20,
     backgroundColor: '#f9f9f9',
     fontSize: 16,
+    fontFamily: 'Kanit-Regular',
   },
   buttonContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   textOk: {
-    backgroundColor: '#5AB9EA',
+    backgroundColor: '#00A9E0',
     alignItems: 'center',
     paddingVertical: 12,
     borderRadius: 10,
@@ -507,9 +618,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   textCC: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#5AB9EA',
+    backgroundColor: '#ddd',
     alignItems: 'center',
     paddingVertical: 12,
     borderRadius: 10,
@@ -522,26 +631,55 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   cancelButtonText: {
-    color: 'black',
+    color: '#555',
+    fontFamily: 'Kanit-Medium',
   },
   confirmButtonText: {
     color: 'white',
+    fontFamily: 'Kanit-Medium',
   },
+  // buttonnext: {
+  //   flexDirection: 'row',
+  //   justifyContent: 'flex-end',
+  //   marginHorizontal: 10,
+  //   marginTop: 10,
+  // },
+
   buttonnext: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginHorizontal: 10,
-    marginTop: 10,
+    width: '100%', // ปรับให้เต็มจอ
+    backgroundColor: '#fafafa', // สีพื้นหลังเป็นสีขาว
+    paddingVertical: 16, // เพิ่ม padding ด้านบนและล่าง
+    flexDirection: 'row', // ใช้ flex เพื่อจัดตำแหน่งปุ่ม
+    justifyContent: 'flex-end', // จัดปุ่มไปชิดขวา
+    position: 'absolute',
+    bottom: 0, // ติดขอบล่างของหน้าจอ
+    left: 0,
+    right: 0,
+    paddingHorizontal: 20, // เพิ่มระยะห่างด้านข้าง
   },
+  // next: {
+  //   backgroundColor: '#fff',
+  //   borderWidth: 1.2,
+  //   borderColor: '#5AB9EA',
+  //   alignItems: 'center',
+  //   paddingVertical: 10,
+  //   paddingHorizontal: 70,
+  //   borderRadius: 10,
+  //   marginHorizontal: 5,
+  //   shadowColor: '#000',
+  //   shadowOffset: {width: 0, height: 2},
+  //   shadowOpacity: 0.8,
+  //   shadowRadius: 2,
+  //   elevation: 3,
+  // },
   next: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#5AB9EA',
+    backgroundColor: '#42A5F5',
+    // backgroundColor: '#5AB9EA',
     alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 70,
+    justifyContent: 'center',
+    width: '45%', // ปรับให้เท่ากับปุ่มย้อนกลับ
+    paddingVertical: 12,
     borderRadius: 10,
-    marginHorizontal: 5,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.8,
@@ -549,8 +687,9 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   textnext: {
-    color: '#5AB9EA',
-    fontWeight: 'bold',
+    color: '#fff',
+    fontFamily: 'Kanit-Medium',
+    fontSize: 16,
   },
   modalContainersearch: {
     color: 'black',
@@ -559,12 +698,13 @@ const styles = StyleSheet.create({
   searchBar: {
     width: '100%',
     padding: 10,
-    backgroundColor: '#fff',
+    backgroundColor: '#fafafa',
   },
   searchInput: {
-    height: 40,
+    marginVertical: 3,
+    height: 50,
     borderColor: '#ddd',
-    borderWidth: 1,
+    borderWidth: 1.2,
     paddingHorizontal: 8,
     borderRadius: 10,
     backgroundColor: '#fff',
@@ -573,60 +713,110 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 5,
     elevation: 3,
+    fontFamily: 'Kanit-Regular',
+    fontSize: 16,
   },
 
   noResultsText: {
+    fontFamily: 'Kanit-Regular',
     textAlign: 'center',
     fontSize: 16,
     marginTop: 15,
   },
+  buttonaddsym: {
+    width: '100%',
+    // paddingHorizontal: 1,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
   addButton: {
-    backgroundColor: '#5AB9EA',
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    marginTop: 5,
-    marginLeft: 5,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 3, 
+    backgroundColor: '#f1f8e9',
+    borderWidth: 1.2,
+    borderColor: '#4CAF50',
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    alignSelf: 'center',
   },
   addButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: '#4CAF50',
+    fontSize: 14,
+    fontFamily: 'Kanit-Medium',
     textAlign: 'center',
   },
   symptomCard: {
-    backgroundColor: '#fff', 
-    borderRadius: 12, 
-    padding: 15, 
-    marginVertical: 10, 
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 15,
+    marginVertical: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.3,
     shadowRadius: 6,
-    elevation: 5, 
+    elevation: 5,
     position: 'relative',
   },
   symptomHeader: {
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
   symptomTitle: {
     fontSize: 16,
     color: '#2D3748',
-    fontWeight: 'bold', 
+    fontFamily: 'Kanit-Medium',
+    marginBottom: 4,
   },
   removeButton: {
-    backgroundColor: '#FF6F61', 
-    borderRadius: 50, 
-    padding: 5, 
-    margin:5,
-  
+    backgroundColor: '#FF6F61',
+    borderRadius: 50,
+    padding: 5,
+    margin: 5,
   },
-
+  placeholderText: {
+    color: '#888',
+    fontSize: 16,
+    fontFamily: 'Kanit-Regular',
+  },
+  symptomTitle1: {
+    fontSize: 16,
+    color: '#2D3748',
+    fontFamily: 'Kanit-Medium',
+    marginVertical: 10,
+  },
+});
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    borderWidth: 1.2,
+    borderColor: '#ddd',
+    borderRadius: 12, // ✅ ทำให้ dropdown มีขอบมน
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    fontSize: 16,
+    marginTop: 5,
+    marginBottom: 10,
+    backgroundColor: '#fff',
+    color: '#333',
+  },
+  inputAndroid: {
+    borderWidth: 1.2,
+    borderColor: '#ddd',
+    borderRadius: 12, // ✅ ทำให้ dropdown มีขอบมน
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    fontSize: 16,
+    marginTop: 5,
+    marginBottom: 10,
+    backgroundColor: '#fff',
+    color: '#333',
+  },
+  placeholder: {
+    color: '#888',
+    fontSize: 16,
+    fontFamily: 'Kanit-Regular',
+  },
+  iconContainer: {
+    top: 21,
+    right: 12,
+  },
 });

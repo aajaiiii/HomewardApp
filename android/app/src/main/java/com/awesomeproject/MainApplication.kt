@@ -1,5 +1,5 @@
 package com.awesomeproject
-
+import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage 
 import android.app.Application
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
@@ -21,6 +21,7 @@ class MainApplication : Application(), ReactApplication {
               // Packages that cannot be autolinked yet can be added manually here, for example:
               // add(MyReactNativePackage())
               //มาเอาอันนี้ออกถ้าขึ้น
+              //add(ReactNativePushNotificationPackage())
               //add(SplashScreenReactPackage())
             }
 

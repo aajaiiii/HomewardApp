@@ -17,6 +17,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import LinearGradient from 'react-native-linear-gradient';
 import styleform from './styleform';
 import {useFocusEffect} from '@react-navigation/native';
+import Material from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export default function Assessmentitem(props) {
   const route = useRoute();
@@ -29,12 +30,12 @@ export default function Assessmentitem(props) {
   const [userAge, setUserAge] = useState(0);
   const [userAgeInMonths, setUserAgeInMonths] = useState(0);
   const isFocused = useIsFocused();
-  
+
   useFocusEffect(
     React.useCallback(() => {
       // ซ่อน TabBar เมื่อเข้าหน้านี้
       navigation.getParent()?.setOptions({
-        tabBarStyle: { display: 'none' },
+        tabBarStyle: {display: 'none'},
       });
       // return () => {
       //   // แสดง TabBar กลับมาเมื่อออกจากหน้านี้
@@ -42,38 +43,34 @@ export default function Assessmentitem(props) {
       //     tabBarStyle: { display: 'flex' }, // ปรับ 'flex' ให้ TabBar กลับมาแสดง
       //   });
       // };
-    }, [navigation])
+    }, [navigation]),
   );
-  
-  
-  useEffect(() => {
-    // ฟัง event ของการกดปุ่ม Header Back (Navigate Up)
-    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-      if (e.data.action.type === 'POP') {
-        // แสดง TabBar เมื่อกดปุ่ม Navigate Up
-        navigation.getParent()?.setOptions({
-          tabBarStyle: {  position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            elevation: 0,
-            backgroundColor: '#fff',
-            borderTopColor: 'transparent',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: -2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 6,
-            height: 60,  },        });
-      } else {
-        // ซ่อน TabBar ถ้ากลับด้วยวิธีอื่นๆ เช่น navigation.goBack()
-        navigation.getParent()?.setOptions({
-          tabBarStyle: { display: 'none' },
-        });
-      }
-    });
 
-    return unsubscribe;
-  }, [navigation]);
+  // useEffect(() => {
+  //   const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+  //     if (e.data.action.type === 'POP') {
+  //       navigation.getParent()?.setOptions({
+  //         tabBarStyle: {  position: 'absolute',
+  //           bottom: 0,
+  //           left: 0,
+  //           right: 0,
+  //           elevation: 0,
+  //           backgroundColor: '#fff',
+  //           borderTopColor: 'transparent',
+  //           shadowColor: '#000',
+  //           shadowOffset: { width: 0, height: -2 },
+  //           shadowOpacity: 0.1,
+  //           shadowRadius: 6,
+  //           height: 60,  },        });
+  //     } else {
+  //       navigation.getParent()?.setOptions({
+  //         tabBarStyle: { display: 'none' },
+  //       });
+  //     }
+  //   });
+
+  //   return unsubscribe;
+  // }, [navigation]);
 
   useEffect(() => {
     if (isFocused) {
@@ -85,13 +82,11 @@ export default function Assessmentitem(props) {
   async function getData() {
     const token = await AsyncStorage.getItem('token');
     console.log(token);
-    axios
-      .post('http://10.53.57.175:5000/userdata', {token: token})
-      .then(res => {
-        console.log(res.data);
-        setUserData(res.data.data);
-        console.log(userData);
-      });
+    axios.post('http://10.0.2.2:5000/userdata', {token: token}).then(res => {
+      console.log(res.data);
+      setUserData(res.data.data);
+      console.log(userData);
+    });
   }
 
   useEffect(() => {
@@ -127,11 +122,19 @@ export default function Assessmentitem(props) {
 
     return `${day < 10 ? '0' + day : day} ${thaiMonths[month - 1]} ${
       year + 543
-    } เวลา ${hours < 10 ? '0' + hours : hours}:${
+    }`;
+  };
+  const formatTime= dateTimeString => {
+    const dateTime = new Date(dateTimeString);
+    const hours = dateTime.getHours();
+    const minutes = dateTime.getMinutes();
+
+ 
+
+    return `เวลา ${hours < 10 ? '0' + hours : hours}:${
       minutes < 10 ? '0' + minutes : minutes
     } น.`;
   };
-
   const currentDate = new Date();
 
   useEffect(() => {
@@ -156,7 +159,7 @@ export default function Assessmentitem(props) {
     try {
       if (selectedItem) {
         const response = await axios.get(
-          `http://10.53.57.175:5000/getassessment/${selectedItem._id}`,
+          `http://10.0.2.2:5000/getassessment/${selectedItem._id}`,
         );
         const assessmentData = response.data.data;
         setAssessment(assessmentData);
@@ -180,7 +183,7 @@ export default function Assessmentitem(props) {
     try {
       if (assessment && assessment.MPersonnel) {
         const response = await axios.get(
-          `http://10.53.57.175:5000/getmpersonnel/${assessment.MPersonnel}`,
+          `http://10.0.2.2:5000/getmpersonnel/${assessment.MPersonnel}`,
         );
         setMPersonnel(response.data);
         console.log('แพทย์', response.data);
@@ -198,8 +201,8 @@ export default function Assessmentitem(props) {
         return styles.statusNormal;
       case 'ผิดปกติ':
         return styles.statusAbnormal;
-        case 'เคสฉุกเฉิน':
-          return styles.statusEmergency;
+      case 'เคสฉุกเฉิน':
+        return styles.statusEmergency;
       case 'จบการรักษา':
         return styles.statusComplete;
       default:
@@ -207,27 +210,19 @@ export default function Assessmentitem(props) {
     }
   };
   const handleEditSymptoms = () => {
-    navigation.navigate('PatientFormEdit',{ id: selectedItem._id });
+    navigation.navigate('PatientFormEdit', {id: selectedItem._id});
   };
 
-  
-
   return (
-    <LinearGradient
-    // colors={['#00A9E0', '#5AB9EA', '#E0FFFF', '#FFFFFF']}
-    colors={['#fff', '#fff']}
-
-    style={{flex: 1}} // ให้ครอบคลุมทั้งหน้าจอ
-  >
-    <ScrollView
-      keyboardShouldPersistTaps={'always'}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{paddingBottom: 60}}
-      style={{backgroundColor: 'transparent'}}>
-      <View style={styles.container}>
-        <Text style={styles.dateText}>
+    <View style={{flex: 1}}>
+      <ScrollView
+        keyboardShouldPersistTaps={'always'}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{paddingBottom: 25}}
+        style={{backgroundColor: 'transparent'}}>
+        {/* <Text style={styles.dateText}>
           {formatDate(selectedItem.createdAt)}
-        </Text>
+        </Text> */}
         {/* <View style={styles.section}>
 
           <Text style={styleform.sectionHeader}>ข้อมูลผู้ป่วย</Text>
@@ -258,7 +253,7 @@ export default function Assessmentitem(props) {
             
           )}
         </View> */}
-        {!assessment && (
+        {/* {!assessment && (
         <View style={styles.buttonnext}>
         <TouchableOpacity  style={styles.editButton} 
               onPress={handleEditSymptoms}>
@@ -268,227 +263,341 @@ export default function Assessmentitem(props) {
             style={styles.icon}
           />
             <Text style={styles.textnext}>แก้ไขการบันทึก</Text>
-        </TouchableOpacity>
-     
-       
-            
+        </TouchableOpacity> 
             </View>
-          )}
+          )} */}
+
         <View style={styles.section}>
-          <Text style={styleform.sectionHeader}>อาการและอาการที่แสดง</Text>
-          {selectedItem.Symptoms && selectedItem.Symptoms.map((symptom, index) => (
-            <View style={styles.row} key={index}>
-              <Text style={styles.labelText}>{`อาการที่ ${index + 1}: `}</Text>
-              <Text style={styles.infoText}>{symptom ? symptom : '-'}</Text>
+          <View style={styles.containeredit}>
+            <Text style={styles.sectionHeaders}>ข้อมูลบันทึกอาการ</Text>
+            {!assessment && (
+              <View style={styles.buttonnext}>
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={handleEditSymptoms}>
+                  <Icon name="edit" color="white" style={styles.icon} />
+                  {/* <Text style={styles.textnext}>แก้ไขการบันทึก</Text> */}
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+          <View style={styles.container}>
+            <View style={styles.dateContainer}>
+              <Material
+                name="calendar-month-outline"
+                size={30}
+                color="#42A5F5"
+                style={styles.dateIcon}
+              />
+              <Text style={styles.textDate}>
+                {formatDate(selectedItem.createdAt)}
+              </Text>
             </View>
-          ))}
-          {/* <Text></Text> */}
-          <Text style={styleform.sectionHeader}>สัญญาณชีพ</Text>
+            <Text style={styles.sectionHeader}>อาการและอาการที่แสดง</Text>
+            {selectedItem.Symptoms &&
+              selectedItem.Symptoms.map((symptom, index) => (
+                <View style={styles.row} key={index}>
+                  <Text style={styles.labelText}>{`อาการที่ ${
+                    index + 1
+                  }: `}</Text>
+                  <Text style={styles.infoText}>{symptom ? symptom : '-'}</Text>
+                  <Text style={styles.unitText}></Text>
+                </View>
+              ))}
+            {/* <Text></Text> */}
+            <Text style={styles.sectionHeader}>สัญญาณชีพ</Text>
+            <View style={styles.row}>
+              <Text style={styles.labelText}>อุณหภูมิ: </Text>
+              <Text style={styles.infoText}>
+                {selectedItem.Temperature ? selectedItem.Temperature : '-'}
+              </Text>
+              <Text style={styles.unitText}>°C</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.labelText}>ความดันตัวบน:</Text>
+              <Text style={styles.infoText}>
+                {selectedItem.SBP ? selectedItem.SBP : '-'}
+              </Text>
+              <Text style={styles.unitText}>mmHg</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.labelText}>ความดันตัวล่าง:</Text>
+              <Text style={styles.infoText}>
+                {selectedItem.DBP ? selectedItem.DBP : '-'}
+              </Text>
+              <Text style={styles.unitText}>mmHg</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.labelText}>ชีพจร: </Text>
+              <Text style={styles.infoText}>
+                {selectedItem.PulseRate ? selectedItem.PulseRate : '-'}
+              </Text>
+              <Text style={styles.unitText}>ครั้ง/นาที</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.labelText}>ระดับน้ำตาลในเลือด:</Text>
+              <Text style={styles.infoText}>
+                {selectedItem.DTX ? selectedItem.DTX : '-'}
+              </Text>
+              <Text style={styles.unitText}>mg/dL</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.labelText}>การหายใจ:</Text>
+              <Text style={styles.infoText}>
+                {selectedItem.Respiration ? selectedItem.Respiration : '-'}
+              </Text>
+              <Text style={styles.unitText}>ครั้ง/นาที</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.labelText}>ความรุนแรงของอาการ:</Text>
+              <Text style={styles.infoText}>
+                {selectedItem.LevelSymptom ? selectedItem.LevelSymptom : '-'}
+              </Text>
+              <Text style={styles.unitText}></Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.labelText}>ระดับความเจ็บปวด:</Text>
+              <Text style={styles.infoText}>
+                {selectedItem.Painscore ? selectedItem.Painscore : '-'}
+              </Text>
+              <Text style={styles.unitText}></Text>
+            </View>
+            <View>
+              <Text style={styles.labelText}>
+                สิ่งที่อยากให้ทีมแพทย์ช่วยเหลือเพิ่มเติม:
+              </Text>
+              <View style={styles.requestContainer}>
+              <Text style={styles.requestText}>
+                {selectedItem.request_detail
+                  ? selectedItem.request_detail
+                  : '-'}
+              </Text>
+              </View>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.labelText}>ผู้บันทึก:</Text>
+              
+              <Text style={styles.infoText}>
+                {selectedItem.Recorder ? selectedItem.Recorder : '-'}
+              </Text>
+              <Text style={styles.unitText}></Text>
+            </View>
+          </View>
+          </View>
+          {assessment && (
+            <View style={styles.section}>
+               <View style={styles.containeredit}>
+            <Text style={styles.sectionHeaders}>ผลการประเมิน</Text>
+            {!assessment && (
+              <View style={styles.buttonnext}>
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={handleEditSymptoms}>
+                  <Icon name="edit" color="white" style={styles.icon} />
+                  {/* <Text style={styles.textnext}>แก้ไขการบันทึก</Text> */}
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+          <View style={styles.container}>
           <View style={styles.row}>
-            <Text style={styles.labelText}>ความดันตัวบน:</Text>
-            <Text style={styles.infoText}>{selectedItem.SBP ? selectedItem.SBP : '-'}</Text>
-            <Text style={styles.infoText}>mmHg</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.labelText}>ความดันตัวล่าง:</Text>
-            <Text style={styles.infoText}>{selectedItem.DBP ? selectedItem.DBP : '-'}</Text>
-            <Text style={styles.infoText}>mmHg</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.labelText}>ชีพจร: </Text>
-            <Text style={styles.infoText}>{selectedItem.PulseRate ? selectedItem.PulseRate : '-'}</Text>
-            <Text style={styles.infoText}>ครั้ง/นาที</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.labelText}>อุณหภูมิ: </Text>
-            <Text style={styles.infoText}>{selectedItem.Temperature ? selectedItem.Temperature : '-'}</Text>
-            <Text style={styles.infoText}>°C</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.labelText}>ระดับน้ำตาลในเลือด:</Text>
-            <Text style={styles.infoText}>{selectedItem.DTX ? selectedItem.DTX : '-'}</Text>
-            <Text style={styles.infoText}>mg/dL</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.labelText}>การหายใจ:</Text>
-            <Text style={styles.infoText}>{selectedItem.Respiration ? selectedItem.Respiration : '-'}</Text>
-            <Text style={styles.infoText}>ครั้ง/นาที</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.labelText}>ความรุนแรงของอาการ:</Text>
-            <Text style={styles.infoText}>{selectedItem.LevelSymptom ? selectedItem.LevelSymptom : '-'}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.labelText}>ระดับความเจ็บปวด:</Text>
-            <Text style={styles.infoText}>{selectedItem.Painscore ? selectedItem.Painscore : '-'}</Text>
-          </View>
-          <View >
-            <Text style={styles.labelText}>
-              สิ่งที่อยากให้ทีมแพทย์ช่วยเหลือเพิ่มเติม:
-            </Text>
-            <Text style={styles.infoText}>{selectedItem.request_detail ? selectedItem.request_detail : '-'}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.labelText}>ผู้บันทึก:</Text>
-            <Text style={styles.infoText}>{selectedItem.Recorder ? selectedItem.Recorder : '-'}</Text>
-          </View>
-
-        </View>
-
-        {assessment && (
-          <View style={styles.section}>
-            <Text style={styleform.sectionHeader}>ผลการประเมิน</Text>
-            <TouchableOpacity
-              style={getStatusButtonStyle(assessment.status_name)}>
-              <Text style={styles.buttonText}>{assessment.status_name}</Text>
-            </TouchableOpacity>
-            <View style={{flexDirection: 'row', alignItems: 'center',marginBottom: 5,}}>
+          <Text style={styles.labelText}>ผลการประเมิน:</Text>
+              <TouchableOpacity
+                style={getStatusButtonStyle(assessment.status_name)}>
+                <Text style={styles.buttonText}>{assessment.status_name}</Text>
+              </TouchableOpacity>
+              </View>
+              {/* <View style={{flexDirection: 'row', alignItems: 'center',marginBottom: 5,}}>
               <Text style={styles.labelText}>PPS:</Text>
               <Text style={styles.infoTextFetched}>{assessment.PPS ? assessment.PPS : '-'}</Text>
-            </View>
-            {/* <View style={{flexDirection: 'row', alignItems: 'center',marginBottom: 5,}}>
+            </View> */}
+              {/* <View style={{flexDirection: 'row', alignItems: 'center',marginBottom: 5,}}>
             <Text style={styles.labelText}>รายละเอียด:</Text>
             <Text style={styles.infoTextFetched}>{assessment.detail}</Text>
             </View> */}
-            <View style={{flexDirection: 'row', alignItems: 'center',marginBottom: 5,}}>
-            <Text style={styles.labelText}>คำแนะนำจากแพทย์:</Text>
-            <Text style={styles.infoTextFetched}>{assessment.suggestion ? assessment.suggestion : '-'}</Text>
-            </View>
-            {mpersonnel && (
-            <View style={{flexDirection: 'row', alignItems: 'center',marginBottom: 5,}}>
-            <Text style={styles.labelText}>ผู้ประเมิน:</Text>
-              <Text style={styles.infoTextFetched}>
-                {mpersonnel.nametitle ? mpersonnel.nametitle : '-'} {mpersonnel.name ? mpersonnel.name : '-'}{' '}
-                {mpersonnel.surname ? mpersonnel.surname : '-'}
-              </Text>
+             <View>
+                <Text style={styles.labelTextFetched}>คำแนะนำจากแพทย์:</Text>
+                <View style={styles.requestContainer}>
+                <Text style={styles.requestText}>
+                  {assessment.suggestion ? assessment.suggestion : '-'}
+                </Text>
+                </View>
+                </View>
+              {mpersonnel && (
+              <View style={styles.row}>
+                  <Text style={styles.labelTextFetched}>ผู้ประเมิน:</Text>
+                  <Text style={styles.infoTextFetched}>
+                    {mpersonnel.nametitle ? mpersonnel.nametitle : '-'}{' '}
+                    {mpersonnel.name ? mpersonnel.name : '-'}{' '}
+                    {mpersonnel.surname ? mpersonnel.surname : '-'}
+                  </Text>
+                </View>
+              )}
+              <View style={styles.rowDate}>
+                <Text style={styles.labelTextDate}>วันที่ประเมิน:</Text>
+                <View style={styles.rowDateIn}>
+                <Text style={styles.infoTextDate}>
+                  {assessment.createdAt
+                    ? formatDate(assessment.createdAt)
+                    : '-'}
+                </Text>
+                <Text style={styles.infoTextDate}>
+                     {assessment.createdAt
+                    ? formatTime(assessment.createdAt)
+                    : '-'}
+                </Text>
+                </View>
               </View>
-           
-            )}
-              <View style={{flexDirection: 'row', alignItems: 'center',marginBottom: 5,}}>
-            <Text style={styles.labelText}>วันที่ประเมิน:</Text>
-            <Text style={styles.infoTextFetched}>{assessment.createdAt ? formatDate(assessment.createdAt) : '-'}</Text>
             </View>
-          </View>
-        )}
-      </View>
-    </ScrollView>
-    </LinearGradient>
+            </View>
+          )}
+        
+      </ScrollView>
+    </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   rowhead: {
     alignItems: 'center',
   },
- icon:{
-  fontSize: 20,
-  marginRight:5,
-  // marginLeft:10,
-  // paddingBottom: 5,
-  // marginBottom: 10,
- },
   container: {
+    paddingHorizontal:15,
+    paddingVertical:5,
     // padding: 16,
     // backgroundColor: '#F7F7F7',
   },
   dateText: {
     fontSize: 16,
     textAlign: 'center',
-    marginTop:15,
-    marginVertical: 10,
     // color: '#333',
     color: '#000',
+    fontFamily: 'Kanit-Medium',
+  },
 
-    fontWeight: '500',
-  },
-  labelText: {
-    fontSize: 16,
-    color: '#555',
-    marginLeft: 7,
-    fontWeight: '600',
-  },
-  infoTextFetched: {
-    fontSize: 16,
-    color: '#555',
-    marginLeft: 7,
-  },
   section: {
-    padding: 15,
+    // padding: 15,
+    // marginTop: 105,
     marginVertical: 10,
-    marginHorizontal: 10,
+    marginHorizontal: 15,
     backgroundColor: 'white',
     borderRadius: 15,
     borderWidth: 1,
-    borderColor: '#ddd',
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.3,
+    borderColor: '#eee', // เปลี่ยนเป็นสีเทาอ่อน
+    // marginBottom: 40,
+    shadowColor: '#bbb',
+    shadowOffset: {width: 0, height: 3},
+    shadowOpacity: 0.15,
     shadowRadius: 6,
-    elevation: 5,
+    elevation: 3,
+  },
+  sectionHeaders: {
+    fontSize: 18,
+    fontFamily: 'Kanit-Medium',
+    color: '#fff',
   },
   sectionHeader: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 18,
+    color: '#42A5F5',
+    fontFamily: 'Kanit-Medium',
     marginBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
     paddingBottom: 5,
+    borderBottomWidth: 1.6,
+    borderBottomColor: '#42A5F5',
+    shadowColor: '#bbb',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
+
+  containeredit: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#42A5F5',
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+  },
+  labelTextFetched: {
+    fontSize: 16,
     color: '#333',
-    marginRight:10
+    fontFamily: 'Kanit-Regular',
+    flex: 2,
+  },
+  infoTextFetched: {
+    fontSize: 16,
+    color: '#000',
+    fontFamily: 'Kanit-Medium',
+    flex: 4 ,
+  },
+  labelText: {
+    fontSize: 16,
+    color: '#333',
+    fontFamily: 'Kanit-Regular',
+    flex: 4,
   },
   infoText: {
     fontSize: 16,
-    marginVertical: 6,
-    fontFamily: 'Arial',
+    fontFamily: 'Kanit-Medium',
+    color: '#000',
+    flex: 2,
+  },
+  unitText: {
+    fontSize: 16,
     color: '#555',
-    marginLeft: 10,
+    flex: 2,
+
+    textAlign: 'right',
+    fontFamily: 'Kanit-Regular',
   },
   statusNormal: {
-    width: 150,
-    marginLeft: 'auto',
-    marginRight: 'auto',
+    width: 100,
+    marginRight:100,
+    flex: 4,
     backgroundColor: '#72DA95',
-    padding: 12,
+    padding: 10,
     borderRadius: 10,
     alignItems: 'center',
     marginVertical: 10,
+   
   },
   statusAbnormal: {
-    width: 150,
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    backgroundColor: '#e7639a',
-    padding: 12,
+    width: 100,
+    marginRight:100,
+    flex: 4,
+    backgroundColor: '#fb8c00',
+    padding: 10,
     borderRadius: 10,
     alignItems: 'center',
     marginVertical: 10,
   },
   statusComplete: {
-    width: 150,
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    backgroundColor: '#FFCC80',
-    padding: 12,
+    width: 100,
+    marginRight:100,
+    flex: 4,
+    backgroundColor: '#757575',
+    padding: 10,
     borderRadius: 10,
     alignItems: 'center',
     marginVertical: 10,
   },
 
   statusEmergency: {
-    width: 150,
-    marginLeft: 'auto',
-    marginRight: 'auto',
+    width: 100,
+    marginRight:100,
+    flex: 4,
     backgroundColor: '#FF6A6A',
-    padding: 12,
+    padding: 10,
     borderRadius: 10,
     alignItems: 'center',
     marginVertical: 10,
   },
   statusDefault: {
-    width: 150,
-    marginLeft: 'auto',
-    marginRight: 'auto',
+    width: 120,
+    marginRight:80,
+    flex: 4,
     backgroundColor: '#9E9E9E',
     padding: 12,
     borderRadius: 10,
@@ -502,34 +611,90 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 3,
+    // borderBottomWidth: 1,
+    // borderBottomColor: '#ddd',
   },
   buttonnext: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginHorizontal: 5,
-    marginTop: 5,
+    marginLeft: 10,
   },
   editButton: {
     flexDirection: 'row',
-    backgroundColor: '#5AB9EA',
-    borderWidth: 1,
-    borderColor: '#5AB9EA',
     alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
     borderRadius: 10,
     marginHorizontal: 5,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
-    elevation: 3,
+    // paddingVertical: 10,
+    // paddingHorizontal: 20,
+    // shadowColor: '#000',
+    // shadowOffset: {width: 0, height: 2},
+    // shadowOpacity: 0.8,
+    // shadowRadius: 2,
+    // elevation: 3,
+    // backgroundColor: '#42A5F5',
+    // borderWidth: 1,
+    // borderColor: '#42A5F5',
   },
   textnext: {
     color: '#fff',
     fontWeight: 'bold',
   },
+  dateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    // justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 3,
+    // marginTop: 10,
+    marginRight: 8,
+  },
+  dateIcon: {
+    marginRight: 8,
+  },
+  textDate: {
+    fontSize: 16,
+    fontFamily: 'Kanit-Regular',
+    color: '#000',
+  },
+  icon:{
+    fontSize: 22,
+  },
+  requestContainer: {
+    marginVertical: 12, // เพิ่มระยะห่างระหว่างส่วนต่างๆ
+    padding: 15,
+    backgroundColor: '#F7F7F7', // ใช้พื้นหลังอ่อนๆ
+    borderRadius: 10, // ขอบโค้งมนเพื่อความทันสมัย
+  },
+  requestText:{
+    fontSize: 16,
+    color: '#000',
+    fontFamily: 'Kanit-Medium',
+    lineHeight: 22, 
+  },
+  rowDate: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 3,
+    // borderBottomWidth: 1,
+    // borderBottomColor: '#ddd',
+  },
+  labelTextDate: {
+    fontSize: 16,
+    color: '#333',
+    fontFamily: 'Kanit-Regular',
+    flex: 2,
+  },
+  rowDateIn:{
+    flex: 4,
+  },
+  infoTextDate: {
+    fontSize: 16,
+    color: '#000',
+    fontFamily: 'Kanit-Medium', 
+  },
 });
-
